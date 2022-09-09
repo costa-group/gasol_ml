@@ -55,9 +55,9 @@ class GraphBuilder_1:
                 node_features_list.append(features)
 
         # add the instructions nodes
-        features = self.__empty_featrues_vector()
-        features[3] = 1
         for instr in block_sfs["user_instrs"]:
+            features = self.__empty_featrues_vector()
+            features[3] = 1
             instr_id = instr["id"]
             if not instr_id in nodes_map:  # this check is becuase the data might have some duplicates
                 nodes_map[instr_id] = number_of_nodes
@@ -88,7 +88,7 @@ class GraphBuilder_1:
         # - 5 means >= 5
 
         c = int(float(block_info["optimized_n_instrs"]))-len(block_sfs["user_instrs"])
-        c = min(5,c)
+        c = min(20,c)
         
         x = torch.tensor(node_features_list, dtype=torch.long).to(torch.float)
         edge_index = torch.tensor(edges_list, dtype=torch.long).t()
