@@ -15,7 +15,7 @@ def features_generator_1(type,v=None,instr=None):
     elif type == "instr":
         if instr["commutative"]:
             v[ 2 ] = 1
-            v[ int(instr["opcode"],base=16)+3 ] = 1
+        v[ int(instr["opcode"],base=16)+3 ] = 1
     else:
         raise Exception('Unknown type in features_1')
 
