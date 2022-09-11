@@ -5,12 +5,19 @@ import torch
 from torch_geometric.data import InMemoryDataset, download_url, extract_zip, Data
 from .graph_builders import GraphBuilder_1
 
+
+# Questions to alejandor/pablo:
+#
+# - Is it possible that values appear in tgt_ws, inpt_sk, and outpt_sk?
+# - there are some graphs with no edges, I 
+
 class GasolBasicBlocks(InMemoryDataset):
 
     url = 'https://samir.fdi.ucm.es/download/costa_ml'
     
-    def __init__(self, root, name, graph_builder=GraphBuilder_1(), transform=None, pre_transform=None, pre_filter=None):
+    def __init__(self, root, name, tag=0, graph_builder=GraphBuilder_1(), transform=None, pre_transform=None, pre_filter=None):
         self.name = name
+        self.tag = tag
         self.graph_builder = graph_builder
         super().__init__(root, transform, pre_transform, pre_filter)
         self.data, self.slices = torch.load(self.processed_paths[0])
@@ -29,7 +36,7 @@ class GasolBasicBlocks(InMemoryDataset):
 
     @property
     def processed_file_names(self):
-        return ['data.pt']
+        return [f'data_{self.tag}.pt']
 
     def download(self):
         path = download_url(f'{self.url}/{self.name}.zip', self.raw_dir)
@@ -52,7 +59,7 @@ class GasolBasicBlocks(InMemoryDataset):
                         block_sfs = json.load(f)
                         data = self.graph_builder.build_graph(block_info,block_sfs)
                         # remove empty graphs as well -- check with Alejandro why we have empty graphs?
-                        if (data and len(data.edge_index)>0): 
+                        if (data != None and len(data.edge_index)>0): 
                             data_list.append(data)
                         
             
