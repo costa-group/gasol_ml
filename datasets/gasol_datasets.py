@@ -2,6 +2,7 @@ import os
 import csv
 import json
 import torch
+from typing import Dict
 from torch_geometric.data import InMemoryDataset, download_url, extract_zip, Data
 from .graph_builders import GraphBuilder_1
 
@@ -9,7 +10,11 @@ from .graph_builders import GraphBuilder_1
 # Questions to alejandor/pablo:
 #
 # - Is it possible that values appear in tgt_ws, inpt_sk, and outpt_sk?
-# - there are some graphs with no edges, I 
+# - there are some graphs with no edges, I
+
+def select_sample(block_info: Dict, block_sfs: Dict, data: Data) -> bool:
+    return data is not None and len(data.edge_index) > 0
+
 
 class GasolBasicBlocks(InMemoryDataset):
 
@@ -59,7 +64,7 @@ class GasolBasicBlocks(InMemoryDataset):
                         block_sfs = json.load(f)
                         data = self.graph_builder.build_graph(block_info,block_sfs)
                         # remove empty graphs as well -- check with Alejandro why we have empty graphs?
-                        if (data != None and len(data.edge_index)>0): 
+                        if select_sample(block_info, block_sfs, data):
                             data_list.append(data)
                         
             
