@@ -10,7 +10,7 @@ def print_dataset_stats(dataset):
     print('===================')
     
     x = [0]*dataset.num_classes
-    t = 0;
+    t = 0
     for d in dataset:
         x[d.y] = x[d.y]+1
         t = t + 1
