@@ -193,22 +193,22 @@ def get_opcode(opcode):
         return [0x60, 0, 1]
 
     elif opcode.startswith("tag"):
-        return [hex(0x00), 0, 0]
+        return [int(hex(0x00),16), 0, 0]
     
     # check PUSHi
     for i in range(32):
         if opcode == 'PUSH' + str(i + 1):
-            return [hex(0x60 + i), 0, 1]
+            return [int(hex(0x60 + i),16), 0, 1]
 
     # check DUPi
     for i in range(16):
         if opcode == 'DUP' + str(i + 1):
-            return [hex(0x80 + i), i + 1, i + 2]
+            return [int(hex(0x80 + i),16), i + 1, i + 2]
 
     # check SWAPi
     for i in range(16):
         if opcode == 'SWAP' + str(i + 1):
-            return [hex(0x90 + i), i + 2, i + 2]
+            return [int(hex(0x90 + i),16), i + 2, i + 2]
     raise ValueError('Bad Opcode ' + opcode)
 
 def get_ins_cost(opcode,params=None):

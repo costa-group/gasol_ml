@@ -67,7 +67,6 @@ class GasolBasicBlocks(InMemoryDataset):
                         if select_sample(block_info, block_sfs, data):
                             data_list.append(data)
                         
-            
         if self.pre_filter is not None:
             data_list = [data for data in data_list if self.pre_filter(data)]
 

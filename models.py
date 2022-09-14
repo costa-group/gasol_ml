@@ -13,9 +13,11 @@ class Model_1(torch.nn.Module):
         self.conv1 = GraphConv(num_node_features, hidden_channels)
         self.conv2 = GraphConv(hidden_channels, hidden_channels)
         self.conv3 = GraphConv(hidden_channels, hidden_channels)
-        self.lin = Linear(hidden_channels, num_classes)
+        self.lin = Linear(hidden_channels, hidden_channels)
+
 
     def forward(self, x, edge_index, batch):
+
         # 1. Obtain node embeddings 
         x = self.conv1(x, edge_index)
         x = x.relu()
@@ -29,6 +31,7 @@ class Model_1(torch.nn.Module):
         # 3. Apply a final classifier
         x = F.dropout(x, p=0.5, training=self.training)
         x = self.lin(x)
+
 
         return x
 

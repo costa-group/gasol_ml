@@ -2,7 +2,7 @@
 import torch
 from torch_geometric.data import Data
 from .opcodes import *
-
+from .gasol_utils import split_bytecode
 
 # [in_var, out_var, commutative, opcode_0, opcode_2, ..., opcode_255] -- do we really need 255?
 def features_generator_1(type,v=None,instr=None):
@@ -48,10 +48,31 @@ def class_generator_1(block_info, block_sfs):
         c = min(20,c)
         return c
 
-def class_generator_2(block_info, sfs_info):    
+def class_generator_2(block_info, block_sfs):    
         c = int(float(block_info["optimized_n_instrs"]))-len(block_sfs["user_instrs"])
-        c = min(5,c)
+        c = min(1,c)
         return c
+
+def class_generator_3(block_info, block_sfs):    
+        f = float(block_info["optimized_n_instrs"])/float(block_info["initial_n_instrs"])
+        c = int(max(f,0.6)*10)-6
+        return c
+
+def class_generator_4(block_info, block_sfs):
+    if int(block_info["saved_gas"]) > 0:
+        c = 0
+    else:
+        c = 1
+    return c
+
+
+def class_generator_5(block_info, block_sfs):    
+    if float(block_info["optimized_n_instrs"]) < float(block_info["initial_n_instrs"]):
+        c = 0
+    else:
+        c = 1
+    return c
+
 
 class GraphBuilder_1:
     
@@ -70,6 +91,10 @@ class GraphBuilder_1:
 
         # we only handle benchamrks for which a model was found
         if not block_info["model_found"]=="True":
+            return None
+
+        # ignore those with empty sfs
+        if len(block_sfs["user_instrs"])==0:
             return None
 
         number_of_nodes = 0           # nodes identifiers should start from zero and be consecutive
@@ -161,5 +186,39 @@ class GraphBuilder_1:
         x = torch.tensor(node_features_list, dtype=torch.long).to(torch.float)
         edge_index = torch.tensor(edges_list, dtype=torch.long).t()
         y = torch.tensor(c,dtype=torch.long)
+        d = Data(x=x, edge_index=edge_index, y=y)
+        return d
 
-        return Data(x=x, edge_index=edge_index, y=y)
+
+
+    # [in_var, out_var, commutative, opcode_0, opcode_2, ..., opcode_255] -- do we really need 255?
+    
+class GraphBuilder_2:
+    def __init__(self,
+                 class_gen=class_generator_1):
+        self.class_gen = class_gen
+        
+
+    def __build_features_vec(self,bytecode):
+        features = [0]*259
+        features[ int(get_opcode(bytecode)[0]) ] = 1
+        return features
+
+    def build_graph(self, block_info, block_sfs):
+
+        # we only handle benchamrks for which a model was found
+        if not block_info["model_found"]=="True":
+            return None
+
+        bytecode_sequence =  split_bytecode(block_sfs["original_instrs"])
+        node_features_list = [ self.__build_features_vec(b) for b in bytecode_sequence ]
+        edges_list = [ [i,i+1] for i in range(len(bytecode_sequence)-1) ]
+
+        # compute class
+        c = self.class_gen(block_info,block_sfs)
+
+        x = torch.tensor(node_features_list, dtype=torch.long).to(torch.float)
+        edge_index = torch.tensor(edges_list, dtype=torch.long).t()
+        y = torch.tensor(c,dtype=torch.long)
+        d = Data(x=x, edge_index=edge_index, y=y)
+        return d
