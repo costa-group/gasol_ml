@@ -9,7 +9,6 @@ from torch_geometric.nn import global_mean_pool
 class Model_1(torch.nn.Module):
     def __init__(self, hidden_channels, num_node_features, num_classes):
         super(Model_1, self).__init__()
-        torch.manual_seed(12345)
         self.conv1 = GraphConv(num_node_features, hidden_channels)
         self.conv2 = GraphConv(hidden_channels, hidden_channels)
         self.conv3 = GraphConv(hidden_channels, hidden_channels)

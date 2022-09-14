@@ -37,7 +37,6 @@ def f(a,c):
     
 def training(model, criterion, optimizer, dataset, epochs=171, balance_train_set=True, balance_test_set=True):
 
-    torch.manual_seed(56783)
     dataset = dataset.shuffle()
 
     train_set_size = int(len(dataset)*0.8)
