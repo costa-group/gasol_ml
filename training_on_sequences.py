@@ -3,6 +3,7 @@ import torch
 from torch.utils.data import WeightedRandomSampler
 
 import numpy as np
+import time
 
 def train(model, criterion, optimizer, loader):
     model.train()
@@ -18,13 +19,12 @@ def train(model, criterion, optimizer, loader):
          seq_lengths = data[2]
          seq_tensor = data[0]
          labels = data[1]
-         
+
          seq_lengths, perm_idx = seq_lengths.sort(0, descending=True)
          seq_tensor = seq_tensor[perm_idx]
          labels = labels[perm_idx]
 
-         d = torch.nn.utils.rnn.pack_padded_sequence(seq_tensor, lengths=seq_lengths, batch_first=True)
-         out = model(d)  # Perform a single forward pass.
+         out = model(seq_tensor, seq_lengths)  # Perform a single forward pass.
          loss = criterion(out, labels)  # Compute the loss.
          loss.backward()  # Derive gradients.
          optimizer.step()  # Update parameters based on gradients.
@@ -39,13 +39,12 @@ def test(model,loader):
          seq_lengths = data[2]
          seq_tensor = data[0]
          labels = data[1]
-         
+
          seq_lengths, perm_idx = seq_lengths.sort(0, descending=True)
          seq_tensor = seq_tensor[perm_idx]
          labels = labels[perm_idx]
 
-         d = torch.nn.utils.rnn.pack_padded_sequence(seq_tensor, lengths=seq_lengths, batch_first=True)
-         out = model(d)  # Perform a single forward pass.
+         out = model(seq_tensor, seq_lengths)  # Perform a single forward pass.
          pred = out.argmax(dim=1)  # Use the class with highest probability.
          correct += int((pred == labels).sum())  # Check against ground-truth labels.
      return correct / len(loader.dataset) # Derive ratio of correct predictions.

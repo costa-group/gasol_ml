@@ -1,5 +1,5 @@
 from datasets import *
-from models import Model_1, Model_2
+from models import Model_1, Model_2, Model_3
 from training_on_graphs import training as training_g
 from training_on_sequences import training as training_s
 from misc import print_dataset_stats_g, print_dataset_stats_s
@@ -27,13 +27,24 @@ def test_1():
 
 def test_2():
     dataset = GasolBytecodeSeq(root='data', name='oms_gas', tag=3, sequence_builder=SequenceBuilder_1(class_gen=class_generator_4))
-    model = Model_2(hidden_channels=64,input_size=dataset.input_size, num_classes=dataset.num_classes)
+    model = Model_2(hidden_channels=64,vocab_size=dataset.vocab_size, num_classes=dataset.num_classes)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
     criterion = torch.nn.CrossEntropyLoss()
 
     print_dataset_stats_s(dataset)
     training_s(model,criterion,optimizer,dataset,balance_train_set=True,balance_test_set=True)
+    torch.save(model.state_dict(), "model_2.pytorch")
 
+def test_3():
+    dataset = GasolBytecodeSeq(root='data', name='oms_gas', tag=3, sequence_builder=SequenceBuilder_1(class_gen=class_generator_4))
+    model = Model_3(hidden_channels=64,vocab_size=dataset.vocab_size, num_classes=dataset.num_classes, embed_dim=16)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+    criterion = torch.nn.CrossEntropyLoss()
+
+    print_dataset_stats_s(dataset)
+    training_s(model,criterion,optimizer,dataset,balance_train_set=True,balance_test_set=True)
+    torch.save(model.state_dict(), "model_2.pytorch")
+    
 if __name__ == "__main__":
     torch.manual_seed(56783)
-    test_2()
+    test_3()

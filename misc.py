@@ -25,7 +25,7 @@ def print_dataset_stats_s(dataset):
     print(f'Dataset: {dataset}:')
     print('====================')
     print(f'Number of sequences: {len(dataset)}')
-    print(f'Input sizes: {dataset.input_size}')
+    print(f'Input sizes: {dataset.vocab_size}')
     print(f'Number of classes: {dataset.num_classes}')
     print()
     print("Class distribution:")

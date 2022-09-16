@@ -233,10 +233,13 @@ class SequenceBuilder_1:
         self.class_gen = class_gen
         
 
-    def __build_features_vec(self,bytecode):
-        features = [0]*len(vocab)
-        features[ vocab.index(bytecode) ] = 1
-        return features
+#    def __build_features_vec(self,bytecode):
+#        features = [0]*len(vocab)
+#        features[ vocab.index(bytecode) ] = 1
+#        return features
+
+    def vocab_size(self):
+        return len(vocab)
 
     def build_seq(self, block_info, block_sfs):
 
@@ -247,11 +250,11 @@ class SequenceBuilder_1:
         # sequence of bytecodes to sequence of feature vectors (each vector represents a bytecode)
         bytecode_sequence = split_bytecode(block_sfs["original_instrs"])
         #print(bytecode_sequence)
-        features_sequence = [ self.__build_features_vec(b) for b in bytecode_sequence ]
+        features_sequence = [ vocab.index(b) for b in bytecode_sequence ]
 
         # compute class
         c = self.class_gen(block_info,block_sfs)
 
-        x = torch.tensor(features_sequence, dtype=torch.long).to(torch.float)
+        x = torch.tensor(features_sequence, dtype=torch.long).to(torch.long)
         y = torch.tensor(c,dtype=torch.long)
         return {"data": x, "label": y}

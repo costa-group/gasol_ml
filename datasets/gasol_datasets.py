@@ -156,5 +156,4 @@ class GasolBytecodeSeq(SeqDataSet):
                             data_list.append(out["data"])
                             labels_list.append(out["label"])
 
-        torch.save((data_list, labels_list), self.processed_paths[0])
-
+        torch.save((data_list, labels_list, self.sequence_builder.vocab_size()), self.processed_paths[0])

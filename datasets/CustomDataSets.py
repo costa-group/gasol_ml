@@ -18,20 +18,27 @@ def files_exist(files):
     return len(files) != 0 and all([osp.exists(f) for f in files])
 
 class SeqDataSet(torch.utils.data.Dataset):
-
+    
+    # all should get values ... 
+    _data = []
+    _labels = []
+    _lengths = []
+    vocab_size = 0   # gets value in subclass
+    num_classes = 0
+    
     def __init__(self):
+
         super().__init__()
 
         self._download()
         self._process()
 
-        self._data, self._labels = torch.load(self.processed_paths[0])
+        self._data, self._labels, self.vocab_size = torch.load(self.processed_paths[0])
         self._indices =  [ idx for idx in range(len(self._data)) ]
 
         # pad sequences
         self._lengths = [ len(l) for l in self._data ]
         self._data = torch.nn.utils.rnn.pad_sequence(self._data, batch_first=True)
-        self.input_size = len(self._data[0][0])
         self.num_classes = max(self._labels)+1
 
     def to_list(self):
