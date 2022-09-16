@@ -17,30 +17,29 @@ from torch_geometric.data.makedirs import makedirs
 def files_exist(files):
     return len(files) != 0 and all([osp.exists(f) for f in files])
 
-class CustomDataSet(torch.utils.data.Dataset):
+class SeqDataSet(torch.utils.data.Dataset):
 
     def __init__(self):
         super().__init__()
 
-        self.data = []
-        self.labels = []
         self._download()
         self._process()
 
-        self.data, self.labels = torch.load(self.processed_paths[0])
+        self._data, self._labels = torch.load(self.processed_paths[0])
+        self._indices =  [ idx for idx in range(len(self._data)) ]
 
         # pad sequences
-        self.lengths = [ len(l) for l in self.data ]
-        self.data = torch.nn.utils.rnn.pad_sequence(self.data, batch_first=True)
-        self.input_size = len(self.data[0][0])
-        self.num_classes = max(self.labels)+1
+        self._lengths = [ len(l) for l in self._data ]
+        self._data = torch.nn.utils.rnn.pad_sequence(self._data, batch_first=True)
+        self.input_size = len(self._data[0][0])
+        self.num_classes = max(self._labels)+1
 
     def to_list(self):
          l = []
-         for i in range(len(self.data)):
-             l.append( (self.data[i],self.labels[i],self.lengths[i]) )
+         for i in range(len(self._data)):
+             l.append( (self._data[i],self._labels[i],self._lengths[i]) )
          return l
-#        return [ (data,label,length) for (data,label,length) in (self.data,self.labels,self.lengths) ]
+#        return [ (data,label,length) for (data,label,length) in (self._data,self.labels,self.lengths) ]
         
     def _download(self):
         if files_exist(self.raw_paths):  
@@ -62,13 +61,30 @@ class CustomDataSet(torch.utils.data.Dataset):
         print('Done!', file=sys.stderr)
         
     def __len__(self):
-        return len(self.data)
+        return len(self._indices)
 
     def __getitem__(self, idx):
-        if torch.is_tensor(idx):
-            idx = idx.tolist()
+        if (isinstance(idx, (int, np.integer))
+                or (isinstance(idx, Tensor) and idx.dim() == 0)
+                or (isinstance(idx, np.ndarray) and np.isscalar(idx))):
+            i = self._indices[idx]
+            return self._data[i], self._labels[i], self._lengths[i]
+        elif isinstance(idx, slice):
+            indices = self._indices[idx]
+            dataset = copy.copy(self)
+            dataset._indices = indices
+            return dataset
+        else:
+            raise Exception('unknown idx')
 
-        return self.data[idx], self.labels[idx], self.lengths[idx]
+    def __repr__(self) -> str:
+        arg_repr = str(len(self)) if len(self) > 1 else ''
+        return f'{self.__class__.__name__}({arg_repr})'
+
+    def shuffle(self):
+        dataset = copy.copy(self)
+        dataset._indices = [ self._indices[idx] for idx in torch.randperm(len(self._indices)) ]
+        return dataset
 
     @property
     def raw_paths(self) -> List[str]:

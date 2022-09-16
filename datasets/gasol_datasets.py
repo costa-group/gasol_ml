@@ -5,7 +5,7 @@ import torch
 from typing import Dict
 from torch_geometric.data import InMemoryDataset, download_url, extract_zip, Data
 from .graph_builders import GraphBuilder_1, SequenceBuilder_1
-from .CustomDataSet import CustomDataSet
+from .CustomDataSets import SeqDataSet
 
 # Questions to alejandor/pablo:
 #
@@ -89,7 +89,7 @@ class GasolBasicBlocks(InMemoryDataset):
 
 # dataset that is based on pytorch geometring InMemoryDataset, it stores graphs
 # and their classes
-class GasolBytecodeSeq(CustomDataSet):
+class GasolBytecodeSeq(SeqDataSet):
     
     url = 'https://samir.fdi.ucm.es/download/costa_ml'
     

@@ -1,4 +1,4 @@
-from torch_geometric.loader import DataLoader
+from torch.utils.data import DataLoader
 import torch
 from torch.utils.data import WeightedRandomSampler
 
@@ -60,12 +60,11 @@ def f(a,c):
 # model is expected to receive an RNN as input    
 def training(model, criterion, optimizer, dataset, epochs=171, balance_train_set=True, balance_test_set=True):
 
-    #dataset = dataset.shuffle()
+    dataset = dataset.shuffle()
 
-    a = dataset.to_list()
-    train_set_size = int(len(a)*0.8)
-    train_set = a[:train_set_size]
-    test_set = a[train_set_size:]
+    train_set_size = int(len(dataset)*0.8)
+    train_set = dataset[:train_set_size]
+    test_set = dataset[train_set_size:]
 
 
     if balance_train_set:
