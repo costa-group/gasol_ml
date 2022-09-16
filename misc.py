@@ -1,4 +1,6 @@
-def print_dataset_stats(dataset):
+import numpy as np
+
+def print_dataset_stats_g(dataset):
     print()
     print(f'Dataset: {dataset}:')
     print('====================')
@@ -9,16 +11,31 @@ def print_dataset_stats(dataset):
     print("Class distribution:")
     print('===================')
     
-    x = [0]*dataset.num_classes
-    t = 0
-    for d in dataset:
-        x[d.y] = x[d.y]+1
-        t = t + 1
-        
-    for i in range(len(x)):
-        z = (x[i]/t)*100
-        print(f'{z:0.2f}% ',end='')
-
+    all_labels = [d.y.tolist()[0] for d in dataset]    
+    labels_unique, counts = np.unique(all_labels,return_counts=True)
+    class_weights = { i : 0 for i in range(dataset.num_classes) }
+    total = sum(counts)
+    class_weights = { labels_unique[i] : f'{counts[i]/total:0.2f}% ' for i in range(len(counts)) }
+    print(class_weights)
     print()
+
+
+def print_dataset_stats_s(dataset):
+    print()
+    print(f'Dataset: {dataset}:')
+    print('====================')
+    print(f'Number of sequences: {len(dataset)}')
+    print(f'Input sizes: {dataset.input_size}')
+    print(f'Number of classes: {dataset.num_classes}')
+    print()
+    print("Class distribution:")
+    print('===================')
+
+    all_labels = [label for (data,label,length) in dataset]
+    labels_unique, counts = np.unique(all_labels,return_counts=True)
+    class_weights = { i : 0 for i in range(dataset.num_classes) }
+    total = sum(counts)
+    class_weights = { labels_unique[i] : f'{counts[i]/total:0.2f}% ' for i in range(len(counts)) }
+    print(class_weights)
     print()
 

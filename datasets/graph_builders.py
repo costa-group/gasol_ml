@@ -7,7 +7,7 @@ from .gasol_utils import split_bytecode
 # [in_var, out_var, commutative, opcode_0, opcode_2, ..., opcode_255] -- do we really need 255?
 def features_generator_1(type,v=None,instr=None):
     if type == "empty":
-        return [0]*259
+        return [0]*(len(vocab)+1)
     elif type == "in_var":
         v[0] = 1
     elif type == "out_var":
@@ -15,7 +15,8 @@ def features_generator_1(type,v=None,instr=None):
     elif type == "instr":
         if instr["commutative"]:
             v[ 2 ] = 1
-        v[ int(instr["opcode"],base=16)+3 ] = 1
+        #v[ int(instr["opcode"],base=16)+3 ] = 1
+        v[ vocab.index(instr["disasm"])+3 ] = 1
     else:
         raise Exception('Unknown type in features_1')
 
@@ -200,8 +201,8 @@ class GraphBuilder_2:
         
 
     def __build_features_vec(self,bytecode):
-        features = [0]*259
-        features[ int(get_opcode(bytecode)[0]) ] = 1
+        features = [0]*len(vocab)
+        features[ vocab.index(bytecode) ] = 1
         return features
 
     def build_graph(self, block_info, block_sfs):
@@ -222,3 +223,35 @@ class GraphBuilder_2:
         y = torch.tensor(c,dtype=torch.long)
         d = Data(x=x, edge_index=edge_index, y=y)
         return d
+
+
+
+
+class SequenceBuilder_1:
+    def __init__(self,
+                 class_gen=class_generator_1):
+        self.class_gen = class_gen
+        
+
+    def __build_features_vec(self,bytecode):
+        features = [0]*len(vocab)
+        features[ vocab.index(bytecode) ] = 1
+        return features
+
+    def build_seq(self, block_info, block_sfs):
+
+        # we only handle benchamrks for which a model was found
+        if not block_info["model_found"]=="True":
+            return None
+
+        # sequence of bytecodes to sequence of feature vectors (each vector represents a bytecode)
+        bytecode_sequence = split_bytecode(block_sfs["original_instrs"])
+        #print(bytecode_sequence)
+        features_sequence = [ self.__build_features_vec(b) for b in bytecode_sequence ]
+
+        # compute class
+        c = self.class_gen(block_info,block_sfs)
+
+        x = torch.tensor(features_sequence, dtype=torch.long).to(torch.float)
+        y = torch.tensor(c,dtype=torch.long)
+        return {"data": x, "label": y}
