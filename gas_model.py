@@ -49,5 +49,5 @@ def test_query():
 
 if __name__ == "__main__":
     set_torch_rand_seed()
-    #train(epochs=2) # 2 just to save time, should be changed to the epoch we want
-    test_query()
+    train(epochs=2) # 2 just to save time, should be changed to the epoch we want
+    #test_query()
