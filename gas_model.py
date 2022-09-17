@@ -15,19 +15,25 @@ def model_path():
 
 def train(epochs=171):
     dataset = GasolBasicBlocks(root='data', name='oms_gas', tag=2, graph_builder=GraphBuilder_2(class_gen=class_generator_5))
-    model = Model_1(hidden_channels=64,num_node_features=dataset.num_node_features, num_classes=dataset.num_classes)
+    model_args = {
+        "hidden_channels": 64,
+        "num_node_features": dataset.num_node_features,
+        "num_classes": dataset.num_classes
+    }
+    model = Model_1(**model_args)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
     criterion = torch.nn.CrossEntropyLoss()
 
     print_dataset_stats_g(dataset)
     training_g(model,criterion,optimizer,dataset,balance_train_set=True,balance_test_set=True, epochs=epochs)
-    torch.save(model.state_dict(), model_path())
+    torch.save( (model_args,model.state_dict()), model_path())
 
 class ModelQuery:
     def __init__(self):
         set_torch_rand_seed()
-        self.model = Model_1(hidden_channels=64,num_node_features=137, num_classes=2)
-        self.model.load_state_dict(torch.load(model_path()))
+        model_args, model_state_dic = torch.load(model_path())
+        self.model = Model_1(**model_args)
+        self.model.load_state_dict(model_state_dic)
         self.model.eval()
         self.graph_builder = GraphBuilder_2()
 
@@ -49,5 +55,9 @@ def test_query():
 
 if __name__ == "__main__":
     set_torch_rand_seed()
-    train(epochs=2) # 2 just to save time, should be changed to the epoch we want
+
+    # using 2 epocs just to save time for demo, should be changed to the epochs we need to get an optimal model
+    train(epochs=2)
+
+    # uncomment for a query test example
     #test_query()
