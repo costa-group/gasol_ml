@@ -23,21 +23,18 @@ def train(epochs=171):
     training_g(model,criterion,optimizer,dataset,balance_train_set=True,balance_test_set=True, epochs=epochs)
     torch.save(model.state_dict(), model_path())
 
-    
-def select_sample(block_info, block_sfs, data):
-    return data is not None and len(data.edge_index) == 2 and len(data.edge_index[0]) > 0 # recall that edges list is transposed
-
 class ModelQuery:
     def __init__(self):
         set_torch_rand_seed()
         self.model = Model_1(hidden_channels=64,num_node_features=137, num_classes=2)
         self.model.load_state_dict(torch.load(model_path()))
         self.model.eval()
-        self.graph_builder = GraphBuilder_2(class_gen=class_generator_5)
+        self.graph_builder = GraphBuilder_2()
 
-    def eval(self, block_info, block_sfs):
-        data = self.graph_builder.build_graph(block_info,block_sfs)
-        if select_sample(block_info, block_sfs, data):
+    def eval(self, bytecode: str): # as a string
+        
+        data = self.graph_builder.build_graph_for_evaluation(bytecode)
+        if data is not None and len(data.edge_index) == 2 and len(data.edge_index[0]) > 0: # recall that edges list is transposed
             out = self.model(data.x, data.edge_index, data.batch)  
             pred = out.argmax(dim=1)  # Use the class with highest probability.
             return pred[0].item()
@@ -46,16 +43,11 @@ class ModelQuery:
 
 def test_query():
     m = ModelQuery()
-
-    with open("data/oms_gas/raw/csv/0x08B02C0B0D5Bc97ceae343c88A90342b5e4d3C0C.csv", newline='') as csvfile:
-        csv_reader = csv.DictReader(csvfile)
-        block_info = next(csv_reader)
-        block_id = block_info['block_id']
-        with open(f'data/oms_gas/raw/jsons/0x08B02C0B0D5Bc97ceae343c88A90342b5e4d3C0C/{block_id}_input.json', 'r') as f:
-            block_sfs = json.load(f)
-            return m.eval(block_info,block_sfs)
+    bytecode = "PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF DUP6 AND DUP2 MSTORE PUSH 1 PUSH 20 MSTORE DUP2 DUP2 KECCAK256 CALLER DUP3 MSTORE PUSH 20 MSTORE KECCAK256 SLOAD SWAP1 DUP3 DUP3 LT PUSH [tag] 94"
+    c = m.eval(bytecode)
+    print(f"classified as: {c}") 
 
 if __name__ == "__main__":
     set_torch_rand_seed()
-    train(epochs=2) # 2 just to save time, should be changed to the epoch we want
-    #test_query()
+    #train(epochs=2) # 2 just to save time, should be changed to the epoch we want
+    test_query()

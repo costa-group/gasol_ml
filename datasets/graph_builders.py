@@ -87,7 +87,6 @@ class GraphBuilder_1:
         self.features_gen = features_gen
         self.class_gen = class_gen
         
-
     def build_graph(self, block_info, block_sfs):
 
         # we only handle benchamrks for which a model was found
@@ -204,6 +203,16 @@ class GraphBuilder_2:
         features = [0]*len(vocab)
         features[ vocab.index(bytecode) ] = 1
         return features
+
+    def build_graph_for_evaluation(self, bytecode):
+        bytecode_sequence =  split_bytecode(bytecode)
+        node_features_list = [ self.__build_features_vec(b) for b in bytecode_sequence ]
+        edges_list = [ [i,i+1] for i in range(len(bytecode_sequence)-1) ]
+
+        x = torch.tensor(node_features_list, dtype=torch.long).to(torch.float)
+        edge_index = torch.tensor(edges_list, dtype=torch.long).t()
+        d = Data(x=x, edge_index=edge_index)
+        return d
 
     def build_graph(self, block_info, block_sfs):
 

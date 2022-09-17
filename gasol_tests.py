@@ -37,7 +37,7 @@ def test_2():
 
 def test_3():
     dataset = GasolBytecodeSeq(root='data', name='oms_gas', tag=3, sequence_builder=SequenceBuilder_1(class_gen=class_generator_4))
-    model = Model_3(hidden_channels=64,vocab_size=dataset.vocab_size, num_classes=dataset.num_classes, embed_dim=16)
+    model = Model_3(hidden_channels=64,vocab_size=dataset.vocab_size, num_classes=dataset.num_classes, embed_dim=3)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
     criterion = torch.nn.CrossEntropyLoss()
 
