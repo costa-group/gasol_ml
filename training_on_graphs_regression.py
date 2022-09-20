@@ -1,7 +1,7 @@
 from torch_geometric.loader import DataLoader
 import torch
 from torch.utils.data import WeightedRandomSampler
-
+from misc import print_dataset_stats_g
 import numpy as np
 
 def train(model, criterion, optimizer, loader):
@@ -26,14 +26,10 @@ def test(model,criterion,loader):
      return loss
 
 
-def f(a,c):
-    if c==0:
-        return 0
-    else:
-        return a/c
-
 # model is expected to receive a graph as input    
 def training(model, criterion, optimizer, dataset, epochs=171, balance_train_set=True, balance_test_set=True):
+
+    print_dataset_stats_g(dataset,show_dist=False)
 
     dataset = dataset.shuffle()
 
@@ -49,21 +45,3 @@ def training(model, criterion, optimizer, dataset, epochs=171, balance_train_set
         train_acc = test(model,criterion,train_loader)
         test_acc = test(model,criterion,test_loader)
         print(f'Epoch: {epoch:03d}, Train Acc: {train_acc:.4f}, Test Acc: {test_acc:.4f}')
-        # i=0
-        # j=0
-        # k=0
-        # l=0
-        # model.eval()
-        # for d in dataset:
-        #     out = model(d.x, d.edge_index, d.batch)
-        #     pred = out.argmax(dim=1)  # Use the class with highest probability.
-        #     if d.y[0].item() == 0:
-        #         i=i+1
-        #         if pred[0].item() == 0:
-        #             j=j+1
-        #     if d.y[0].item() == 1:
-        #         k=k+1
-        #         if pred[0].item() == 1:
-        #             l=l+1
-
-        # print(f'{j}/{i} ({j/i}%) {l}/{k} ({l/k}%)   ')

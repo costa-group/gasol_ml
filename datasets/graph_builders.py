@@ -198,9 +198,10 @@ class GraphBuilder_1:
     
 class GraphBuilder_2:
     def __init__(self,
-                 class_gen=class_generator_1):
+                 class_gen=class_generator_1,
+                 regression=False):
         self.class_gen = class_gen
-        
+        self.regression = regression
 
     def __build_features_vec(self,bytecode):
         features = [0]*len(vocab)
@@ -232,7 +233,12 @@ class GraphBuilder_2:
 
         x = torch.tensor(node_features_list, dtype=torch.long).to(torch.float)
         edge_index = torch.tensor(edges_list, dtype=torch.long).t()
-        y = torch.tensor(c,dtype=torch.long)
+
+        if self.regression:
+            y = torch.tensor([[c]]).to(torch.float)
+        else:
+            y = torch.tensor(c).to(torch.long)            
+
         d = Data(x=x, edge_index=edge_index, y=y)
         return d
 
@@ -241,9 +247,11 @@ class GraphBuilder_2:
 
 class SequenceBuilder_1:
     def __init__(self,
-                 class_gen=class_generator_1):
+                 class_gen=class_generator_1,
+                 regression=False):
         self.class_gen = class_gen
-        
+        self.regression = regression
+
 
 #    def __build_features_vec(self,bytecode):
 #        features = [0]*len(vocab)
@@ -268,5 +276,8 @@ class SequenceBuilder_1:
         c = self.class_gen(block_info,block_sfs)
 
         x = torch.tensor(features_sequence, dtype=torch.long).to(torch.long)
-        y = torch.tensor(c,dtype=torch.long)
+        if self.regression:
+            y = torch.tensor([c]).to(torch.float)
+        else:
+            y = torch.tensor(c).to(torch.long)            
         return {"data": x, "label": y}

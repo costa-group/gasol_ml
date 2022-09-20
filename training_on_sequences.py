@@ -1,6 +1,7 @@
 from torch.utils.data import DataLoader
 import torch
 from torch.utils.data import WeightedRandomSampler
+from misc import print_dataset_stats_s
 
 import numpy as np
 import time
@@ -58,6 +59,8 @@ def f(a,c):
     
 # model is expected to receive an RNN as input    
 def training(model, criterion, optimizer, dataset, epochs=171, balance_train_set=True, balance_test_set=True):
+
+    print_dataset_stats_s(dataset)
 
     dataset = dataset.shuffle()
 

@@ -1,7 +1,7 @@
 from torch_geometric.loader import DataLoader
 import torch
 from torch.utils.data import WeightedRandomSampler
-
+from misc import print_dataset_stats_g
 import numpy as np
 
 def train(model, criterion, optimizer, loader):
@@ -36,6 +36,8 @@ def f(a,c):
 
 # model is expected to receive a graph as input    
 def training(model, criterion, optimizer, dataset, epochs=171, balance_train_set=True, balance_test_set=True):
+
+    print_dataset_stats_g(dataset)
 
     dataset = dataset.shuffle()
 

@@ -1,6 +1,6 @@
 import torch
 from torch_geometric.nn import GCNConv, ChebConv, GraphConv, SGConv
-from torch.nn import Linear, RNN, ReLU, LSTM, Embedding
+from torch.nn import Linear, RNN, ReLU, LSTM, Embedding, LayerNorm
 import torch.nn.functional as F
 from torch_geometric.nn import global_mean_pool
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
@@ -8,15 +8,17 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 #
 class Model_1(torch.nn.Module):
-    def __init__(self, hidden_channels, num_node_features, out_channels):
+    def __init__(self, hidden_channels, in_channels, out_channels):
         super(Model_1, self).__init__()
-        self.conv1 = GraphConv(num_node_features, hidden_channels)
+        self.conv1 = GraphConv(in_channels, hidden_channels)
         self.conv2 = GraphConv(hidden_channels, hidden_channels)
         self.conv3 = GraphConv(hidden_channels, hidden_channels)
         self.lin = Linear(hidden_channels, out_channels)
+        self.nl = LayerNorm(in_channels)
 
     def forward(self, x, edge_index, batch):
 
+        x = self.nl(x)
         
         # 1. Obtain node embeddings 
         x = self.conv1(x, edge_index)
@@ -24,6 +26,7 @@ class Model_1(torch.nn.Module):
         x = self.conv2(x, edge_index)
         x = x.relu()
         x = self.conv3(x, edge_index)
+
 
         # 2. Readout layer
         x = global_mean_pool(x, batch)  # [batch_size, hidden_channels]
