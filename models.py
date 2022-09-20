@@ -8,15 +8,16 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 #
 class Model_1(torch.nn.Module):
-    def __init__(self, hidden_channels, num_node_features, num_classes):
+    def __init__(self, hidden_channels, num_node_features, out_channels):
         super(Model_1, self).__init__()
         self.conv1 = GraphConv(num_node_features, hidden_channels)
         self.conv2 = GraphConv(hidden_channels, hidden_channels)
         self.conv3 = GraphConv(hidden_channels, hidden_channels)
-        self.lin = Linear(hidden_channels, num_classes)
+        self.lin = Linear(hidden_channels, out_channels)
 
     def forward(self, x, edge_index, batch):
 
+        
         # 1. Obtain node embeddings 
         x = self.conv1(x, edge_index)
         x = x.relu()
@@ -34,13 +35,14 @@ class Model_1(torch.nn.Module):
         return x
 
 
+
+
 class Model_2(torch.nn.Module):
-    def __init__(self, hidden_channels, num_classes, vocab_size):
+    def __init__(self, hidden_channels, out_channels, vocab_size):
         super(Model_2, self).__init__()
         self.vocab_size = vocab_size
         self.rnn = LSTM(vocab_size, hidden_channels, 1)
-        self.lin = Linear(hidden_channels, num_classes)
-        self.m = ReLU()
+        self.lin = Linear(hidden_channels, out_channels)
 
     def __build_features_vec(self,token):
         features = [0]*self.vocab_size
@@ -55,24 +57,29 @@ class Model_2(torch.nn.Module):
         # pack all sequences (they are assumed to be padded and sorted by length)
         x = torch.nn.utils.rnn.pack_padded_sequence(x, lengths=lengths, batch_first=True)
 
-        # 1. Obtain node embeddings 
+        # apply rnn 
         output, (x, cn) = self.rnn(x)
-#        x = output
-        #x = x[0]
-#        x = self.m(x)
+
+        # take the last output 
+        x = x[0]
+        
+        # apply relu
+        x = x.relu() 
+
+        # dropout
         x = F.dropout(x, p=0.5, training=self.training)
+
+        # final linear layer
         x = self.lin(x)
 
-        return x[0]
-
+        return x
 
 class Model_3(torch.nn.Module):
-    def __init__(self, hidden_channels, num_classes, vocab_size, embed_dim=3):
+    def __init__(self, hidden_channels, out_channels, vocab_size, embed_dim=3):
         super(Model_3, self).__init__()
-        self.emb = Embedding(vocab_size, embed_dim)
+        self.emb = Embedding(vocab_size, embed_dim, padding_idx=0) # we assume 0 was used for padding sequences
         self.rnn = LSTM(embed_dim, hidden_channels, 1)
-        self.lin = Linear(hidden_channels, num_classes)
-        self.m = ReLU()
+        self.lin = Linear(hidden_channels, out_channels)
 
     def build_features_vec(self,token):
         features = [0]*self.vocab_size
@@ -89,11 +96,11 @@ class Model_3(torch.nn.Module):
 
         # 1. Obtain node embeddings 
         output, (x, cn) = self.rnn(x)
-#        x = output
-        #x = x[0]
-#        x = self.m(x)
+
+        x = x[0]
+        x = x.relu()
         x = F.dropout(x, p=0.5, training=self.training)
         x = self.lin(x)
 
-        return x[0]
+        return x
 

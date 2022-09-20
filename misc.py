@@ -15,7 +15,7 @@ def print_dataset_stats_g(dataset):
     labels_unique, counts = np.unique(all_labels,return_counts=True)
     class_weights = { i : 0 for i in range(dataset.num_classes) }
     total = sum(counts)
-    class_weights = { labels_unique[i] : f'{counts[i]/total:0.2f}% ' for i in range(len(counts)) }
+    class_weights = { labels_unique[i] : f'{counts[i]} ({counts[i]/total*100:0.2f})% ' for i in range(len(counts)) }
     print(class_weights)
     print()
 
@@ -35,7 +35,7 @@ def print_dataset_stats_s(dataset):
     labels_unique, counts = np.unique(all_labels,return_counts=True)
     class_weights = { i : 0 for i in range(dataset.num_classes) }
     total = sum(counts)
-    class_weights = { labels_unique[i] : f'{counts[i]/total:0.2f}% ' for i in range(len(counts)) }
+    class_weights = { labels_unique[i] : f'{counts[i]} ({counts[i]/total*100:0.2f})% ' for i in range(len(counts)) }
     print(class_weights)
     print()
 

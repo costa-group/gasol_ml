@@ -49,6 +49,10 @@ def class_generator_1(block_info, block_sfs):
         c = min(20,c)
         return c
 
+def class_generator_11(block_info, block_sfs):    
+        return float(block_info["optimized_n_instrs"]);
+
+
 def class_generator_2(block_info, block_sfs):    
         c = int(float(block_info["optimized_n_instrs"]))-len(block_sfs["user_instrs"])
         c = min(1,c)
@@ -81,11 +85,13 @@ class GraphBuilder_1:
                  in_stk_order=True,   # connect out_stk nodes
                  out_stk_order=True,  # connect in_stk nodes
                  features_gen=features_generator_1,
-                 class_gen=class_generator_1):
+                 class_gen=class_generator_1,
+                 regression=False):
         self.out_stk_order = out_stk_order
         self.in_stk_order = in_stk_order
         self.features_gen = features_gen
         self.class_gen = class_gen
+        self.regression = regression
         
     def build_graph(self, block_info, block_sfs):
 
@@ -176,20 +182,17 @@ class GraphBuilder_1:
         # compute class
         c = self.class_gen(block_info,block_sfs)
 
-        # print()
-        # print(block_sfs)
-        # print(nodes_map)
-        # print(inverse_map)
-        # print(edges_list)
-        # print(c)
-        # create tensors from graph data, and return a corresponding Data object
         x = torch.tensor(node_features_list, dtype=torch.long).to(torch.float)
+        # normalizing to 0-1 ---- not used for now
+        #        for i in range(len(x)):
+        #     x[i] = (x[i] - x[i].mean()) / x[i].std()
         edge_index = torch.tensor(edges_list, dtype=torch.long).t()
-        y = torch.tensor(c,dtype=torch.long)
+        if self.regression:
+            y = torch.tensor([[c]]).to(torch.float)
+        else:
+            y = torch.tensor(c).to(torch.long)            
         d = Data(x=x, edge_index=edge_index, y=y)
         return d
-
-
 
     # [in_var, out_var, commutative, opcode_0, opcode_2, ..., opcode_255] -- do we really need 255?
     

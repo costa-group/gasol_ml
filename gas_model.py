@@ -1,4 +1,4 @@
-from datasets import GasolBasicBlocks, GraphBuilder_2, class_generator_5
+from datasets import GasolBasicBlocks, GraphBuilder_2, class_generator_4
 from models import Model_1
 from training_on_graphs import training as training_g
 from misc import print_dataset_stats_g
@@ -14,7 +14,7 @@ def model_path():
     return "model_gas.pyt"
 
 def train(epochs=171):
-    dataset = GasolBasicBlocks(root='data', name='oms_gas', tag=2, graph_builder=GraphBuilder_2(class_gen=class_generator_5))
+    dataset = GasolBasicBlocks(root='data', name='oms_gas', tag=2, graph_builder=GraphBuilder_2(class_gen=class_generator_4))
     model_args = {
         "hidden_channels": 64,
         "num_node_features": dataset.num_node_features,
@@ -25,7 +25,7 @@ def train(epochs=171):
     criterion = torch.nn.CrossEntropyLoss()
 
     print_dataset_stats_g(dataset)
-    training_g(model,criterion,optimizer,dataset,balance_train_set=True,balance_test_set=True, epochs=epochs)
+    training_g(model,criterion,optimizer,dataset,balance_train_set=False,balance_test_set=False, epochs=epochs)
     torch.save( (model_args,model.state_dict()), model_path())
 
 class ModelQuery:
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     set_torch_rand_seed()
 
     # using 2 epocs just to save time for demo, should be changed to the epochs we need to get an optimal model
-    train(epochs=2)
+    train()
 
     # uncomment for a query test example
     #test_query()

@@ -8,10 +8,9 @@ def train(model, criterion, optimizer, loader):
     model.train()
 
     for data in loader:  # Iterate in batches over the training dataset.
-         # all_labels = data.y.tolist()
-         # labels_unique, counts = np.unique(all_labels,return_counts=True)
-         # print(counts)
-         out = model(data.x, data.edge_index, data.batch)  # Perform a single forward pass.
+         x = data.x
+#         x = (x - x.mean()) / x.std()
+         out = model(x, data.edge_index, data.batch)  # Perform a single forward pass.
          loss = criterion(out, data.y)  # Compute the loss.
          loss.backward()  # Derive gradients.
          optimizer.step()  # Update parameters based on gradients.
@@ -71,3 +70,21 @@ def training(model, criterion, optimizer, dataset, epochs=171, balance_train_set
         train_acc = test(model,train_loader)
         test_acc = test(model,test_loader)
         print(f'Epoch: {epoch:03d}, Train Acc: {train_acc:.4f}, Test Acc: {test_acc:.4f}')
+        # i=0
+        # j=0
+        # k=0
+        # l=0
+        # model.eval()
+        # for d in dataset:
+        #     out = model(d.x, d.edge_index, d.batch)
+        #     pred = out.argmax(dim=1)  # Use the class with highest probability.
+        #     if d.y[0].item() == 0:
+        #         i=i+1
+        #         if pred[0].item() == 0:
+        #             j=j+1
+        #     if d.y[0].item() == 1:
+        #         k=k+1
+        #         if pred[0].item() == 1:
+        #             l=l+1
+
+        # print(f'{j}/{i} ({j/i}%) {l}/{k} ({l/k}%)   ')
