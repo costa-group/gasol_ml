@@ -11,7 +11,7 @@ def set_torch_rand_seed():
     torch.manual_seed(56783)
 
 def model_path():
-    return "saved_models/gas_model.pyt"
+    return "saved_models/gas_model_1.pyt"
 
 def train(epochs=171):
     dataset = GasolBasicBlocks(root='data', name='oms_gas', tag=2, graph_builder=GraphBuilder_2(class_gen=class_generator_4))
@@ -21,7 +21,7 @@ def train(epochs=171):
         "num_classes": dataset.num_classes
     }
     model = Model_1(**model_args)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
     criterion = torch.nn.CrossEntropyLoss()
 
     print_dataset_stats_g(dataset)
@@ -37,13 +37,16 @@ class ModelQuery:
         self.model.eval()
         self.graph_builder = GraphBuilder_2()
 
+
+    # input: block as a string
+    # output: 0 if the block is classified as "gas will be saved", 1 or None othewise
+    #
     def eval(self, bytecode: str): # as a string
-        
         data = self.graph_builder.build_graph_for_evaluation(bytecode)
         if data is not None and len(data.edge_index) == 2 and len(data.edge_index[0]) > 0: # recall that edges list is transposed
             out = self.model(data.x, data.edge_index, data.batch)  
             pred = out.argmax(dim=1)  # Use the class with highest probability.
-            return pred[0].item()
+            return pred.item()
         else:
             return None
 
