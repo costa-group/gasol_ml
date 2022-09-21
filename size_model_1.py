@@ -35,7 +35,7 @@ class ModelQuery:
 
 
     # input: block as a string
-    # output: 0 if the block is classified as "gas will be saved", 1 or None othewise
+    # output: 0 if the block is classified as "size will be saved", 1 or None othewise
     #
     def eval(self, bytecode: str): # as a string
         data = self.graph_builder.build_graph_for_evaluation(bytecode)
