@@ -2,6 +2,7 @@ from datasets import GasolBytecodeSeq, SequenceBuilder_1, class_generator_11
 from models import Model_2
 from training_on_sequences_regression import training as training_s_reg
 import torch
+import sys
 
 def set_torch_rand_seed():
     torch.manual_seed(56783)
@@ -10,7 +11,7 @@ def model_path():
     return "saved_models/bound_model.pyt"
 
 def train(epochs=171):
-    dataset = GasolBytecodeSeq(root='data', name='oms_gas', tag=6, sequence_builder=SequenceBuilder_1(class_gen=class_generator_11, regression=True))
+    dataset = GasolBytecodeSeq(root='data', name='oms_gas', tag='bound_model', sequence_builder=SequenceBuilder_1(class_gen=class_generator_11, regression=True))
     model_args = {
         "hidden_channels": 64,
         "vocab_size": dataset.vocab_size,
@@ -49,9 +50,6 @@ def test_query():
 
 if __name__ == "__main__":
     set_torch_rand_seed()
-
-    # using 2 epocs just to save time for demo, should be changed to the epochs we need to get an optimal model
-    train(epochs=2)
-
-    # uncomment for a query test example
+    epochs = int(sys.argv[1]) if len(sys.argv)==2 else 2
+    train(epochs=epochs)
     test_query()
