@@ -18,7 +18,7 @@ def train(epochs=171):
         "out_channels": dataset.num_classes
     }
     model = Model_1(**model_args)
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-2)
     criterion = torch.nn.CrossEntropyLoss()
 
     training_g(model,criterion,optimizer,dataset,balance_train_set=False,balance_test_set=False, epochs=epochs)

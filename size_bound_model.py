@@ -18,7 +18,7 @@ def train(epochs=171):
         "out_channels": 1
     }
     model = Model_2(**model_args)
-    optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
+    optimizer = torch.optim.SGD(model.parameters(), lr=1e-2)
     criterion = torch.nn.MSELoss(reduction='mean')
     
     training_s_reg(model,criterion,optimizer,dataset,balance_train_set=False,balance_test_set=False, epochs=epochs)
