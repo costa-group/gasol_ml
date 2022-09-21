@@ -55,5 +55,6 @@ def test_query():
 if __name__ == "__main__":
     set_torch_rand_seed()
     epochs = int(sys.argv[1]) if len(sys.argv)==2 else 2
+    sys.stdout=sys.stderr=open(f'{model_path()}.log', 'w')
     train(epochs=epochs)
     test_query()
