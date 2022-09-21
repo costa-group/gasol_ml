@@ -11,7 +11,7 @@ def model_path():
     return "saved_models/gas_bound_model.pyt"
 
 def train(epochs=171):
-    dataset = GasolBytecodeSeq(root='data', name='oms_gas', tag='bound_model', sequence_builder=SequenceBuilder_1(class_gen=class_generator_11, regression=True))
+    dataset = GasolBytecodeSeq(root='data', name='oms_gas', tag='gas_bound_model', sequence_builder=SequenceBuilder_1(class_gen=class_generator_11, regression=True))
     model_args = {
         "hidden_channels": 64,
         "vocab_size": dataset.vocab_size,
