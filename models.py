@@ -17,7 +17,6 @@ class Model_1(torch.nn.Module):
         self.nl = LayerNorm(in_channels)
 
     def forward(self, x, edge_index, batch):
-
         x = self.nl(x)
         
         # 1. Obtain node embeddings 

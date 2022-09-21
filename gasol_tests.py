@@ -65,9 +65,9 @@ def test_6():
     model = Model_2(hidden_channels=64,vocab_size=dataset.vocab_size, out_channels=1)
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
     criterion = torch.nn.MSELoss(reduction='mean')
-    
+
     training_s_reg(model,criterion,optimizer,dataset,balance_train_set=False,balance_test_set=False)
 
 if __name__ == "__main__":
     torch.manual_seed(56783)
-    test_5()
+    test_2()
