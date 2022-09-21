@@ -1,0 +1,46 @@
+The game:
+
+state: sequence of bytecode with a marker that splits it in two
+
+ [* ADD PUSH1 SHL SUB MUL ... ]
+ [  ADD PUSH1 SHL * SUB MUL ... ]
+ [ ... * ]
+
+actions:
+
+ split [L * R]
+ 
+   + analyze L, and move to state [*R]
+   + reward: the gas/size gain of L, or some negative reward if timeout
+
+ move [L * b R]:
+
+   + move to state [ L b * R ]
+   + reward: 0
+
+---------------
+
+- one file with all initial states
+
+[
+{
+  "init_block": "b1 b2 b3 ..."
+  "init_seq" : ["t1",...,"tk"]
+},
+...
+]
+
+
+t1_id/t2_id/.../tk_id/info.json
+[
+{
+  "seq": ["t1",...]
+  "info": ....
+},
+...
+
+]
+-----
+
+"b1 b2 b3 * b4 b5" -> 3/false -> "* b4 b5"
+"b1 b2 b3 * b4 b5" -> 0/false -> "b1 b2 b3 b4 * b5"
