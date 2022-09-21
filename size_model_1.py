@@ -11,7 +11,7 @@ def model_path():
     return "saved_models/size_model_1.pyt"
 
 def train(epochs=171):
-    dataset = GasolBasicBlocks(root='data', name='size_gas', tag='size_model_1', graph_builder=GraphBuilder_2(class_gen=class_generator_4_size))
+    dataset = GasolBasicBlocks(root='data', name='oms_size', tag='size_model_1', graph_builder=GraphBuilder_2(class_gen=class_generator_4_size))
     model_args = {
         "hidden_channels": 64,
         "in_channels": dataset.num_node_features,
