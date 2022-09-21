@@ -8,10 +8,10 @@ def set_torch_rand_seed():
     torch.manual_seed(56783)
 
 def model_path():
-    return "saved_models/bound_model.pyt"
+    return "saved_models/size_bound_model.pyt"
 
 def train(epochs=171):
-    dataset = GasolBytecodeSeq(root='data', name='oms_gas', tag='bound_model', sequence_builder=SequenceBuilder_1(class_gen=class_generator_11, regression=True))
+    dataset = GasolBytecodeSeq(root='data', name='oms_size', tag='size_bound_model', sequence_builder=SequenceBuilder_1(class_gen=class_generator_11, regression=True))
     model_args = {
         "hidden_channels": 64,
         "vocab_size": dataset.vocab_size,
@@ -33,6 +33,9 @@ class ModelQuery:
         self.model.eval()
         self.seq_builder = SequenceBuilder_1()
 
+    # input: block as a string
+    # output: a bound n (float) on the number of instruction of the optimized code, None if the input is not valid
+    #
     def eval(self, bytecode: str): # as a string
         data = self.seq_builder.build_seq_for_evaluation(bytecode)["data"]
         if data is not None and len(data) > 0: # recall that edges list is transposed

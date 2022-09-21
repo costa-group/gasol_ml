@@ -24,6 +24,14 @@ def test_1():
     
     training_g(model,criterion,optimizer,dataset,balance_train_set=True,balance_test_set=True)
 
+def test_1_size():
+    dataset = GasolBasicBlocks(root='data', name='oms_size', tag=1, graph_builder=GraphBuilder_2(class_gen=class_generator_4_size))
+    model = Model_1(hidden_channels=64,in_channels=dataset.num_node_features, out_channels=dataset.num_classes)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+    criterion = torch.nn.CrossEntropyLoss()
+    
+    training_g(model,criterion,optimizer,dataset,balance_train_set=True,balance_test_set=True)
+    
 def test_2():
     dataset = GasolBytecodeSeq(root='data', name='oms_gas', tag=2, sequence_builder=SequenceBuilder_1(class_gen=class_generator_4))
     model = Model_2(hidden_channels=64,vocab_size=dataset.vocab_size, out_channels=dataset.num_classes)
@@ -68,4 +76,4 @@ def test_6():
 
 if __name__ == "__main__":
     torch.manual_seed(56783)
-    test_2()
+    test_1_size()

@@ -69,6 +69,12 @@ def class_generator_4(block_info, block_sfs):
     else:
         c = 1
     return c
+def class_generator_4_size(block_info, block_sfs):
+    if int(block_info["saved_size"]) > 0:
+        c = 0
+    else:
+        c = 1
+    return c
 
 
 def class_generator_5(block_info, block_sfs):    
