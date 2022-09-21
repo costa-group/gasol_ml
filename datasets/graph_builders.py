@@ -261,6 +261,12 @@ class SequenceBuilder_1:
     def vocab_size(self):
         return len(vocab)
 
+    def build_seq_for_evaluation(self, bytecode):
+        bytecode_sequence = split_bytecode(bytecode)
+        features_sequence = [ vocab.index(b) for b in bytecode_sequence ]
+        x = torch.tensor(features_sequence, dtype=torch.long).to(torch.long)
+        return {"data": x}
+    
     def build_seq(self, block_info, block_sfs):
 
         # we only handle benchamrks for which a model was found

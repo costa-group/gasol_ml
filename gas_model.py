@@ -11,7 +11,7 @@ def set_torch_rand_seed():
     torch.manual_seed(56783)
 
 def model_path():
-    return "model_gas.pyt"
+    return "saved_models/gas_model.pyt"
 
 def train(epochs=171):
     dataset = GasolBasicBlocks(root='data', name='oms_gas', tag=2, graph_builder=GraphBuilder_2(class_gen=class_generator_4))
