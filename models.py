@@ -26,6 +26,7 @@ class Model_1(torch.nn.Module):
         x = self.conv2(x, edge_index)
         x = x.relu()
         x = self.conv3(x, edge_index)
+        x = x.relu()
 
 
         # 2. Readout layer
