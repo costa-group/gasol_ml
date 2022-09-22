@@ -6,12 +6,12 @@ def print_dataset_stats_g(dataset,show_dist=True):
     print('====================')
     print(f'Number of graphs: {len(dataset)}')
     print(f'Number of features: {dataset.num_features}')
-    print(f'Number of classes: {dataset.num_classes}')
-    print()
 
     if show_dist:
         print("Class distribution:")
         print('===================')
+        print(f'Number of classes: {dataset.num_classes}')
+        print()
         
         all_labels = [d.y.tolist()[0] for d in dataset]    
         labels_unique, counts = np.unique(all_labels,return_counts=True)
@@ -28,12 +28,12 @@ def print_dataset_stats_s(dataset,show_dist=True):
     print('====================')
     print(f'Number of sequences: {len(dataset)}')
     print(f'Input sizes: {dataset.vocab_size}')
-    print(f'Number of classes: {dataset.num_classes}')
-    print()
 
     if show_dist:
         print("Class distribution:")
         print('===================')
+        print(f'Number of classes: {dataset.num_classes}')
+        print()
 
         all_labels = [label for (data,label,length) in dataset]
         labels_unique, counts = np.unique(all_labels,return_counts=True)

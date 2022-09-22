@@ -70,7 +70,7 @@ def training(model, criterion, optimizer, dataset, epochs=171, balance_train_set
 
 
     if balance_train_set:
-        print("Balancing train set ...")
+        print("Balancing train set ...", flush=True)
         all_labels = [ label for (data,label,length) in train_set]
         labels_unique, counts = np.unique(all_labels,return_counts=True)
         class_weights = { labels_unique[i] : f(sum(counts),counts[i]) for i in range(len(counts)) }
@@ -81,7 +81,7 @@ def training(model, criterion, optimizer, dataset, epochs=171, balance_train_set
         train_loader = DataLoader(train_set, batch_size=4, shuffle=True)
         
     if balance_test_set:
-        print("Balancing test set ...")
+        print("Balancing test set ...", flush=True)
         all_labels = [ label for (data,label,length) in test_set]
         labels_unique, counts = np.unique(all_labels,return_counts=True)
         class_weights = { labels_unique[i] : f(sum(counts),counts[i]) for i in range(len(counts)) }
@@ -95,7 +95,7 @@ def training(model, criterion, optimizer, dataset, epochs=171, balance_train_set
         train(model,criterion,optimizer,train_loader)
         train_acc = test(model,train_loader)
         test_acc = test(model,test_loader)
-        print(f'Epoch: {epoch:03d}, Train Acc: {train_acc:.4f}, Test Acc: {test_acc:.4f}')
+        print(f'Epoch: {epoch:03d}, Train Acc: {train_acc:.4f}, Test Acc: {test_acc:.4f}', flush=True)
 
         
         

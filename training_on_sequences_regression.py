@@ -22,7 +22,7 @@ def train(model, criterion, optimizer, loader):
 
          out = model(seq_tensor, seq_lengths)  # Perform a single forward pass.
          if out.isnan().sum() > 0:
-             print("NaN")
+             print("NaN", flush=True)
              exit(0)
 
          loss = criterion(out, labels)  # Compute the loss.
@@ -46,7 +46,7 @@ def test(model,loader,criterion):
 
          out = model(seq_tensor, seq_lengths)  # Perform a single forward pass.
          if out.isnan().sum() > 0:
-             print("NaN")
+             print("NaN", flush=True)
              exit(0)
          loss += criterion(out, labels).item()  # Compute the loss.
          i=i+1
@@ -73,7 +73,7 @@ def training(model, criterion, optimizer, dataset, epochs=171, balance_train_set
         train(model,criterion,optimizer,train_loader)
         train_acc = test(model,train_loader,criterion)
         test_acc = test(model,test_loader,criterion)
-        print(f'Epoch: {epoch:03d}, Train Acc: {train_acc:.4f}, Test Acc: {test_acc:.4f}')
+        print(f'Epoch: {epoch:03d}, Train Acc: {train_acc:.4f}, Test Acc: {test_acc:.4f}', flush=True)
 
         
         

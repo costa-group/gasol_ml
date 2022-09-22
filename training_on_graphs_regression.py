@@ -44,4 +44,4 @@ def training(model, criterion, optimizer, dataset, epochs=171, balance_train_set
         train(model,criterion,optimizer,train_loader)
         train_acc = test(model,criterion,train_loader)
         test_acc = test(model,criterion,test_loader)
-        print(f'Epoch: {epoch:03d}, Train Acc: {train_acc:.4f}, Test Acc: {test_acc:.4f}')
+        print(f'Epoch: {epoch:03d}, Train Acc: {train_acc:.4f}, Test Acc: {test_acc:.4f}', flush=True)

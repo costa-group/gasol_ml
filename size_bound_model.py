@@ -41,9 +41,9 @@ class ModelQuery:
         if data is not None and len(data) > 0: # recall that edges list is transposed
             x = data.view(1,len(data))
             out = self.model(x, [len(data)])
-            return out.item()
-        else:
-            return None
+            if out.item() > 0:
+                return out.item()
+        return None
 
 def test_query():
     m = ModelQuery()
@@ -54,5 +54,5 @@ def test_query():
 if __name__ == "__main__":
     set_torch_rand_seed()
     epochs = int(sys.argv[1]) if len(sys.argv)==2 else 2
-    train(epochs=epochs)
+    #train(epochs=epochs)
     test_query()
