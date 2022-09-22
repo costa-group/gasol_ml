@@ -54,7 +54,7 @@ def test_query():
     print(f"classified as: {c}") 
 
 def test_all():
-    correct = wrong = 0
+    correct = wrong = wrong0 = wrong1 = 0
     model_args, model_state_dic = torch.load(model_path())
     model = Model_2(**model_args)
     model.load_state_dict(model_state_dic)
@@ -70,10 +70,13 @@ def test_all():
              pred = out.argmax(dim=1)  # Use the class with highest probability.
              if pred.item() == label:
                  correct = correct + 1
+             elif label == 0:
+                 wrong0 = wrong0 + 1
              else:
-                 wrong = wrong + 1
+                 wrong1 = wrong1 + 1
+    wrong = wrong0+wrong1
     total = correct+wrong
-    print(f'total: {total} correct: {correct} ({correct/total*100.0:.2f}%)  wrong: {wrong} ({wrong/total*100.0:.2f}%)')
+    print(f'total: {total} correct: {correct} ({correct/total*100.0:.2f}%)  wrong: {wrong,wrong0,wrong1} ({wrong/total*100.0:.2f}%)')
 
 if __name__ == "__main__":
     set_torch_rand_seed()
