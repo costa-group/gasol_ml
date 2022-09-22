@@ -51,8 +51,32 @@ def test_query():
     c = m.eval(bytecode)
     print(f"bound: {c}") 
 
+def test_all():
+    max_err = 0
+    count = 0
+    total_err = 0
+    model_args, model_state_dic = torch.load(model_path())
+    model = Model_2(**model_args)
+    model.load_state_dict(model_state_dic)
+    model.eval()
+    dataset = GasolBytecodeSeq(root='data', name='oms_size', tag='size_bound_model', sequence_builder=SequenceBuilder_1(class_gen=class_generator_11, regression=True))
+    for data in dataset:
+         seq_length = data[2]
+         seq_tensor = data[0].view(1,len(data[0]))
+         actual = data[1].item()
+         if len(seq_tensor) > 0: # recall that edges list is transposed
+             out = model(seq_tensor, [seq_length])  # Perform a single forward pass.
+             pred = out.item()
+             err = (pred-actual)**2
+             total_err += err
+             max_err = max(max_err, err) 
+             count = count+1
+    precision = total_err/count
+    print(f'total_err: {total_err:.4f} count: {count}  precision: {total_err/count:.4f}  max_err: {max_err:.4f}')
+
 if __name__ == "__main__":
     set_torch_rand_seed()
     epochs = int(sys.argv[1]) if len(sys.argv)==2 else 2
     #train(epochs=epochs)
-    test_query()
+    #test_query()
+    test_all()

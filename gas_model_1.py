@@ -52,8 +52,27 @@ def test_query():
     c = m.eval(bytecode)
     print(f"classified as: {c}") 
 
+def test_all():
+    correct = wrong = 0
+    model_args, model_state_dic = torch.load(model_path())
+    model = Model_1(**model_args)
+    model.load_state_dict(model_state_dic)
+    model.eval()
+    dataset = GasolBasicBlocks(root='data', name='oms_gas', tag='gas_model_1', graph_builder=GraphBuilder_2(class_gen=class_generator_4))
+    for data in dataset:
+        if data is not None and len(data.edge_index) == 2 and len(data.edge_index[0]) > 0: # recall that edges list is transposed
+            out = model(data.x, data.edge_index, data.batch)  
+            pred = out.argmax(dim=1)  # Use the class with highest probability.
+            if pred.item() == data.y.item():
+                correct = correct + 1
+            else:
+                wrong = wrong + 1
+    total = correct+wrong
+    print(f'total: {total} correct: {correct} ({correct/total*100.0:.2f}%)  wrong: {wrong} ({wrong/total*100.0:.2f}%)')
+
 if __name__ == "__main__":
     set_torch_rand_seed()
     epochs = int(sys.argv[1]) if len(sys.argv)==2 else 2
     #train(epochs=epochs)
-    test_query()
+    #test_query()
+    test_all()
