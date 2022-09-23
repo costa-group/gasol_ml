@@ -70,7 +70,7 @@ class GasolBasicBlocks(InMemoryDataset):
                     block_id = block_info['block_id']
                     with open(f'{self.raw_dir}/jsons/{csv_filename_noext}/{block_id}_input.json', 'r') as f:
                         block_sfs = json.load(f)
-                        data = self.graph_builder.build_graph(block_info,block_sfs)
+                        data = self.graph_builder.build_graph(csv_filename_noext,block_info,block_sfs)
                         # remove empty graphs as well -- check with Alejandro why we have empty graphs?
                         if select_sample_1(block_info, block_sfs, data):
                             data_list.append(data)
@@ -141,6 +141,7 @@ class GasolBytecodeSeq(SeqDataSet):
     def process(self):
         data_list = []
         labels_list = []
+        info_list = []
         csv_dir = f'{self.raw_dir}/csv'
         for csv_filename in os.listdir(csv_dir):
             csv_filename_noext = os.path.splitext(csv_filename)[0]
@@ -154,5 +155,6 @@ class GasolBytecodeSeq(SeqDataSet):
                         if out != None and len(out["data"]) > 0:
                             data_list.append(out["data"])
                             labels_list.append(out["label"])
+                            info_list.append(out["info"])
 
-        torch.save((data_list, labels_list, self.sequence_builder.vocab_size()), self.processed_paths[0])
+        torch.save((data_list, labels_list, info_list, self.sequence_builder.vocab_size()), self.processed_paths[0])

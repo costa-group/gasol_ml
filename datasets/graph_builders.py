@@ -224,7 +224,7 @@ class GraphBuilder_2:
         d = Data(x=x, edge_index=edge_index)
         return d
 
-    def build_graph(self, block_info, block_sfs):
+    def build_graph(self, csv_filename_noext, block_info, block_sfs):
 
         # we only handle benchamrks for which a model was found
         if not block_info["model_found"]=="True":
@@ -246,6 +246,9 @@ class GraphBuilder_2:
             y = torch.tensor(c).to(torch.long)            
 
         d = Data(x=x, edge_index=edge_index, y=y)
+        d.time = torch.tensor(float(block_info["solver_time_in_sec"]))
+        d.gas_saved = torch.tensor(float(block_info["saved_gas"]))
+        d.size_saved = torch.tensor(float(block_info["saved_size"]))
         return d
 
 
@@ -292,4 +295,4 @@ class SequenceBuilder_1:
             y = torch.tensor([c]).to(torch.float)
         else:
             y = torch.tensor(c).to(torch.long)            
-        return {"data": x, "label": y}
+        return {"data": x, "label": y, "info": { "size_saved": torch.tensor(float(block_info["saved_size"])), "gas_saved": torch.tensor(float(block_info["saved_gas"])), "time": torch.tensor(float(block_info["solver_time_in_sec"]))}}

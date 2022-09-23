@@ -3,6 +3,7 @@ from models import Model_2
 from training_on_sequences_regression import training as training_s_reg
 import torch
 import sys
+import math
 
 def set_torch_rand_seed():
     torch.manual_seed(56783)
@@ -52,6 +53,9 @@ def test_query():
     print(f"bound: {c}") 
 
 def test_all():
+    lt = 0
+    eq = 0
+    gt = 0
     max_err = 0
     count = 0
     total_err = 0
@@ -66,13 +70,21 @@ def test_all():
          actual = data[1].item()
          if len(seq_tensor) > 0: # recall that edges list is transposed
              out = model(seq_tensor, [seq_length])  # Perform a single forward pass.
-             pred = out.item()
+             #pred = out.item()
+             #pred = math.floor(out.item())
+             pred = math.ceil(out.item())
              err = (pred-actual)**2
              total_err += err
-             max_err = max(max_err, err) 
+             max_err = max(max_err, err)
+             if pred < actual:
+                 lt = lt+1
+             elif pred > actual:
+                 gt = gt + 1
+             else:
+                 eq = eq + 1
              count = count+1
     precision = total_err/count
-    print(f'total_err: {total_err:.4f} count: {count}  precision: {total_err/count:.4f}  max_err: {max_err:.4f}')
+    print(f'total_err: {total_err:.4f} count: {count}  precision: {total_err/count:.4f}  max_err: {max_err:.4f}   {lt},{eq},{gt}')
 
 if __name__ == "__main__":
     set_torch_rand_seed()

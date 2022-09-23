@@ -53,6 +53,10 @@ def test_query():
     print(f"classified as: {c}") 
 
 def test_all():
+    lost_opt = 0
+    total_opt = 0
+    gained_time = 0
+    total_time = 0
     correct = wrong = wrong0 = wrong1 = 0
     model_args, model_state_dic = torch.load(model_path())
     model = Model_1(**model_args)
@@ -61,6 +65,8 @@ def test_all():
     dataset = GasolBasicBlocks(root='data', name='oms_size', tag='size_model_1', graph_builder=GraphBuilder_2(class_gen=class_generator_4_size))
     for data in dataset:
         if data is not None and len(data.edge_index) == 2 and len(data.edge_index[0]) > 0: # recall that edges list is transposed
+            total_opt = total_opt +  max(0,data.size_saved.item())
+            total_time = total_time + data.time.item()
             out = model(data.x, data.edge_index, data.batch)  
             pred = out.argmax(dim=1)  # Use the class with highest probability.
             if pred.item() == data.y.item():
@@ -69,9 +75,12 @@ def test_all():
                 wrong0 = wrong0 + 1
             else:
                 wrong1 = wrong1 + 1
+        if pred.item() == 1:
+            gained_time = gained_time+data.time.item()
+            lost_opt = lost_opt + max(0,data.size_saved.item())
     wrong = wrong0+wrong1
     total = correct+wrong
-    print(f'total: {total} correct: {correct} ({correct/total*100.0:.2f}%)  wrong: {wrong,wrong0,wrong1} ({wrong/total*100.0:.2f}%)')
+    print(f'total: {total} correct: {correct} ({correct/total*100.0:.2f}%)  wrong: {wrong,wrong0,wrong1} ({wrong/total*100.0:.2f}%)  {gained_time:.2f}/{total_time:.2f} {lost_opt:.2f}/{total_opt:.2f}')
 
 if __name__ == "__main__":
     set_torch_rand_seed()

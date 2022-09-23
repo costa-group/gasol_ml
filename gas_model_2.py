@@ -54,6 +54,10 @@ def test_query():
     print(f"classified as: {c}") 
 
 def test_all():
+    lost_opt = 0
+    total_opt = 0
+    gained_time = 0
+    total_time = 0
     correct = wrong = wrong0 = wrong1 = 0
     model_args, model_state_dic = torch.load(model_path())
     model = Model_2(**model_args)
@@ -65,7 +69,10 @@ def test_all():
          seq_length = data[2]
          seq_tensor = data[0].view(1,len(data[0]))
          label = data[1]
-         if len(seq_tensor) > 0: # recall that edges list is transposed
+         info = data[3]
+         if seq_length > 0: # recall that edges list is transposed
+             total_opt = total_opt +  max(0,info["gas_saved"].item())
+             total_time = total_time + info["time"].item()
              out = model(seq_tensor, [seq_length])  # Perform a single forward pass.
              pred = out.argmax(dim=1)  # Use the class with highest probability.
              if pred.item() == label:
@@ -74,9 +81,12 @@ def test_all():
                  wrong0 = wrong0 + 1
              else:
                  wrong1 = wrong1 + 1
+         if pred.item() == 1:
+             gained_time = gained_time+info["time"].item()
+             lost_opt = lost_opt + max(info["gas_saved"].item(),0)
     wrong = wrong0+wrong1
     total = correct+wrong
-    print(f'total: {total} correct: {correct} ({correct/total*100.0:.2f}%)  wrong: {wrong,wrong0,wrong1} ({wrong/total*100.0:.2f}%)')
+    print(f'total: {total} correct: {correct} ({correct/total*100.0:.2f}%)  wrong: {wrong,wrong0,wrong1} ({wrong/total*100.0:.2f}%)    {gained_time:.2f}/{total_time:.2f} {lost_opt:.2f}/{total_opt:.2f}')
 
 if __name__ == "__main__":
     set_torch_rand_seed()

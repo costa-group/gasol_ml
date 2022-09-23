@@ -74,7 +74,7 @@ def training(model, criterion, optimizer, dataset, epochs=171, balance_train_set
         all_labels = [ label for (data,label,length) in train_set]
         labels_unique, counts = np.unique(all_labels,return_counts=True)
         class_weights = { labels_unique[i] : f(sum(counts),counts[i]) for i in range(len(counts)) }
-        example_weights = [ class_weights[label.tolist()] for (data,label,length) in train_set ]
+        example_weights = [ class_weights[label.tolist()] for (data,label,length,_) in train_set ]
         sampler= WeightedRandomSampler(example_weights, len(example_weights))
         train_loader = DataLoader(train_set, batch_size=4, sampler=sampler)
     else:
@@ -85,7 +85,7 @@ def training(model, criterion, optimizer, dataset, epochs=171, balance_train_set
         all_labels = [ label for (data,label,length) in test_set]
         labels_unique, counts = np.unique(all_labels,return_counts=True)
         class_weights = { labels_unique[i] : f(sum(counts),counts[i]) for i in range(len(counts)) }
-        example_weights = [ class_weights[label.tolist()] for (data,label,length) in test_set ]
+        example_weights = [ class_weights[label.tolist()] for (data,label,length,_) in test_set ]
         sampler= WeightedRandomSampler(example_weights, len(example_weights))
         test_loader = DataLoader(test_set, batch_size=4, sampler=sampler)
     else:

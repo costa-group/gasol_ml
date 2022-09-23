@@ -24,7 +24,7 @@ def train(model, criterion, optimizer, loader):
          if out.isnan().sum() > 0:
              print("NaN", flush=True)
              exit(0)
-
+         #out=torch.ceil(out)
          loss = criterion(out, labels)  # Compute the loss.
          loss.backward()  # Derive gradients.
          optimizer.step()  # Update parameters based on gradients.

@@ -23,6 +23,7 @@ class SeqDataSet(torch.utils.data.Dataset):
     _data = []
     _labels = []
     _lengths = []
+    _info = []
     vocab_size = 0   # gets value in subclass
     num_classes = 0
     
@@ -33,7 +34,7 @@ class SeqDataSet(torch.utils.data.Dataset):
         self._download()
         self._process()
 
-        self._data, self._labels, self.vocab_size = torch.load(self.processed_paths[0])
+        self._data, self._labels, self._info, self.vocab_size = torch.load(self.processed_paths[0])
         self._indices =  [ idx for idx in range(len(self._data)) ]
 
         # pad sequences
@@ -75,7 +76,7 @@ class SeqDataSet(torch.utils.data.Dataset):
                 or (isinstance(idx, Tensor) and idx.dim() == 0)
                 or (isinstance(idx, np.ndarray) and np.isscalar(idx))):
             i = self._indices[idx]
-            return self._data[i], self._labels[i], self._lengths[i]
+            return self._data[i], self._labels[i], self._lengths[i], self._info[i]
         elif isinstance(idx, slice):
             indices = self._indices[idx]
             dataset = copy.copy(self)
