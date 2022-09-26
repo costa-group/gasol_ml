@@ -3,12 +3,14 @@ from models import Model_1
 from training_on_graphs import training as training_g
 import torch
 import sys
+from pathlib import Path
+
 
 def set_torch_rand_seed():
     torch.manual_seed(56783)
 
 def model_path():
-    return "saved_models/gas_model_1.pyt"
+    return Path(__file__).parent.joinpath(Path('saved_models/gas_model_1.pyt')).resolve()
 
 def train(epochs=171):
     dataset = GasolBasicBlocks(root='data', name='oms_gas', tag='gas_model_1', graph_builder=GraphBuilder_2(class_gen=class_generator_4))

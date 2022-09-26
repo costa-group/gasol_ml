@@ -3,12 +3,14 @@ from models import Model_2
 from training_on_sequences import training as training_s
 import torch
 import sys
+from pathlib import Path
+
 
 def set_torch_rand_seed():
     torch.manual_seed(56783)
 
 def model_path():
-    return "saved_models/gas_model_2.pyt"
+    return Path(__file__).parent.joinpath(Path('saved_models/gas_model_2.pyt')).resolve()
 
 def train(epochs=171):
     dataset = GasolBytecodeSeq(root='data', name='oms_gas', tag='gas_model_2', sequence_builder=SequenceBuilder_1(class_gen=class_generator_4))
