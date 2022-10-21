@@ -12,6 +12,7 @@ def model_path():
 
 def train(epochs=171):
     dataset = GasolBytecodeSeq(root='data', name='oms_gas', tag='gas_model_2', sequence_builder=SequenceBuilder_1(class_gen=class_generator_4))
+    print("a")
     model_args = {
         "hidden_channels": 64,
         "vocab_size": dataset.vocab_size,
@@ -54,16 +55,24 @@ def test_query():
     print(f"classified as: {c}") 
 
 def test_all():
+    model_args, model_state_dic = torch.load(model_path())
+    model = Model_2(**model_args)
+    model.load_state_dict(model_state_dic)
+    model.eval()
+    dataset1 = GasolBytecodeSeq(root='data', name='oms_gas', tag='gas_model_2', sequence_builder=SequenceBuilder_1(class_gen=class_generator_4))
+    dataset2 = GasolBytecodeSeq(root='data', name='rl_gas_opt', tag='rl_gas_opt_gas_model_2', sequence_builder=SequenceBuilder_1(class_gen=class_generator_4))
+
+    test_all_aux(model,dataset1)
+    test_all_aux(model,dataset2)
+
+
+
+def test_all_aux(model, dataset):
     lost_opt = 0
     total_opt = 0
     gained_time = 0
     total_time = 0
     correct = wrong = wrong0 = wrong1 = 0
-    model_args, model_state_dic = torch.load(model_path())
-    model = Model_2(**model_args)
-    model.load_state_dict(model_state_dic)
-    model.eval()
-    dataset = GasolBytecodeSeq(root='data', name='oms_gas', tag='gas_model_2', sequence_builder=SequenceBuilder_1(class_gen=class_generator_4))
     for data in dataset:
 
          seq_length = data[2]
@@ -91,6 +100,6 @@ def test_all():
 if __name__ == "__main__":
     set_torch_rand_seed()
     epochs = int(sys.argv[1]) if len(sys.argv)==2 else 2
-    #train(epochs=epochs)
+    train(epochs=epochs)
     #test_query()
     test_all()

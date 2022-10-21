@@ -20,8 +20,9 @@ def train(epochs=171):
     model = Model_1(**model_args)
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
     criterion = torch.nn.CrossEntropyLoss()
+    testset = GasolBasicBlocks(root='data', name='rl_gas_opt', tag='rl_gas_opt_gas_model_1', graph_builder=GraphBuilder_2(class_gen=class_generator_4))
 
-    training_g(model,criterion,optimizer,dataset,balance_train_set=False,balance_test_set=False, epochs=epochs)
+    training_g(model,criterion,optimizer,dataset,test_set=testset,balance_train_set=True,balance_test_set=True, epochs=epochs)
     torch.save( (model_args,model.state_dict()), model_path())
 
 class ModelQuery:
@@ -52,21 +53,30 @@ def test_query():
     c = m.eval(bytecode)
     print(f"classified as: {c}") 
 
+
 def test_all():
+    model_args, model_state_dic = torch.load(model_path())
+    model = Model_1(**model_args)
+    model.load_state_dict(model_state_dic)
+    model.eval()
+
+    dataset1 = GasolBasicBlocks(root='data', name='oms_gas', tag='gas_model_1', graph_builder=GraphBuilder_2(class_gen=class_generator_4))
+    dataset2 = GasolBasicBlocks(root='data', name='rl_gas_opt', tag='rl_gas_opt_gas_model_1', graph_builder=GraphBuilder_2(class_gen=class_generator_4))
+
+    test_all_aux(model,dataset1)
+    test_all_aux(model,dataset2)
+    
+def test_all_aux(model,dataset):
     lost_opt = 0
     total_opt = 0
     gained_time = 0
     total_time = 0
     correct = wrong = wrong1 = wrong0 = 0
-    model_args, model_state_dic = torch.load(model_path())
-    model = Model_1(**model_args)
-    model.load_state_dict(model_state_dic)
-    model.eval()
-    dataset = GasolBasicBlocks(root='data', name='oms_gas', tag='gas_model_1', graph_builder=GraphBuilder_2(class_gen=class_generator_4))
     for data in dataset:
         if data is not None and len(data.edge_index) == 2 and len(data.edge_index[0]) > 0: # recall that edges list is transposed
             total_opt = total_opt +  max(0,data.gas_saved.item())
             total_time = total_time + data.time.item()
+
             out = model(data.x, data.edge_index, data.batch)  
             pred = out.argmax(dim=1)  # Use the class with highest probability.
             if pred.item() == data.y.item():
@@ -85,6 +95,6 @@ def test_all():
 if __name__ == "__main__":
     set_torch_rand_seed()
     epochs = int(sys.argv[1]) if len(sys.argv)==2 else 2
-    #train(epochs=epochs)
+    train(epochs=epochs)
     #test_query()
     test_all()
