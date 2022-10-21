@@ -12,7 +12,7 @@ def model_path():
     return "saved_models/size_bound_model.pyt"
 
 def train(epochs=171):
-    dataset = GasolBytecodeSeq(root='data', name='oms_size', tag='size_bound_model', sequence_builder=SequenceBuilder_1(class_gen=class_generator_11, regression=True))
+    dataset = GasolBytecodeSeq(root='data', name='bex_size', tag='bex_size_bound_model_seq', sequence_builder=SequenceBuilder_1(class_gen=class_generator_11, regression=True))
     model_args = {
         "hidden_channels": 64,
         "vocab_size": dataset.vocab_size,
@@ -53,17 +53,22 @@ def test_query():
     print(f"bound: {c}") 
 
 def test_all():
+    model_args, model_state_dic = torch.load(model_path())
+    model = Model_2(**model_args)
+    model.load_state_dict(model_state_dic)
+    model.eval()
+    dataset1 = GasolBytecodeSeq(root='data', name='bex_size', tag='bex_size_bound_model_seq', sequence_builder=SequenceBuilder_1(class_gen=class_generator_11, regression=True))
+    dataset2 = GasolBytecodeSeq(root='data', name='oms_size', tag='size_bound_model', sequence_builder=SequenceBuilder_1(class_gen=class_generator_11, regression=True))
+    test_all_aux(model,dataset1)
+    test_all_aux(model,dataset2)
+    
+def test_all_aux(model,dataset):
     lt = 0
     eq = 0
     gt = 0
     max_err = 0
     count = 0
     total_err = 0
-    model_args, model_state_dic = torch.load(model_path())
-    model = Model_2(**model_args)
-    model.load_state_dict(model_state_dic)
-    model.eval()
-    dataset = GasolBytecodeSeq(root='data', name='oms_size', tag='size_bound_model', sequence_builder=SequenceBuilder_1(class_gen=class_generator_11, regression=True))
     for data in dataset:
          seq_length = data[2]
          seq_tensor = data[0].view(1,len(data[0]))
@@ -89,6 +94,6 @@ def test_all():
 if __name__ == "__main__":
     set_torch_rand_seed()
     epochs = int(sys.argv[1]) if len(sys.argv)==2 else 2
-    #train(epochs=epochs)
+    train(epochs=epochs)
     #test_query()
     test_all()

@@ -11,7 +11,9 @@ def model_path():
     return "saved_models/size_model_1.pyt"
 
 def train(epochs=171):
-    dataset = GasolBasicBlocks(root='data', name='oms_size', tag='size_model_1', graph_builder=GraphBuilder_2(class_gen=class_generator_4_size))
+    #dataset = GasolBasicBlocks(root='data', name='bex_size', tag='size_model_1212', graph_builder=GraphBuilder_2(class_gen=class_generator_4_size))
+    #dataset = GasolBasicBlocks(root='data', name='oms_size', tag='size_model_1', graph_builder=GraphBuilder_2(class_gen=class_generator_4_size))
+    dataset = GasolBasicBlocks(root='data', name='rl_size_opt', tag='rl_size_opt_size_model_1', graph_builder=GraphBuilder_2(class_gen=class_generator_4_size))
     model_args = {
         "hidden_channels": 64,
         "in_channels": dataset.num_node_features,
@@ -20,8 +22,9 @@ def train(epochs=171):
     model = Model_1(**model_args)
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
     criterion = torch.nn.CrossEntropyLoss()
+    testset = GasolBasicBlocks(root='data', name='rl_size_opt', tag='rl_size_opt_size_model_1', graph_builder=GraphBuilder_2(class_gen=class_generator_4_size))
 
-    training_g(model,criterion,optimizer,dataset,balance_train_set=False,balance_test_set=False, epochs=epochs)
+    training_g(model,criterion,optimizer,dataset,test_set=testset,balance_train_set=True,balance_test_set=True, epochs=epochs)
     torch.save( (model_args,model.state_dict()), model_path())
 
 class ModelQuery:
@@ -52,17 +55,27 @@ def test_query():
     c = m.eval(bytecode)
     print(f"classified as: {c}") 
 
+
 def test_all():
+    model_args, model_state_dic = torch.load(model_path())
+    model = Model_1(**model_args)
+    model.load_state_dict(model_state_dic)
+    model.eval()
+
+    dataset0 = GasolBasicBlocks(root='data', name='bex_size', tag='size_model_1212', graph_builder=GraphBuilder_2(class_gen=class_generator_4_size))
+    dataset1 = GasolBasicBlocks(root='data', name='oms_size', tag='size_model_1', graph_builder=GraphBuilder_2(class_gen=class_generator_4_size))
+    dataset2 = GasolBasicBlocks(root='data', name='rl_size_opt', tag='rl_size_opt_size_model_1', graph_builder=GraphBuilder_2(class_gen=class_generator_4_size))
+
+    test_all_aux(model,dataset0)
+    test_all_aux(model,dataset1)
+    test_all_aux(model,dataset2)
+    
+def test_all_aux(model,dataset):
     lost_opt = 0
     total_opt = 0
     gained_time = 0
     total_time = 0
     correct = wrong = wrong0 = wrong1 = 0
-    model_args, model_state_dic = torch.load(model_path())
-    model = Model_1(**model_args)
-    model.load_state_dict(model_state_dic)
-    model.eval()
-    dataset = GasolBasicBlocks(root='data', name='oms_size', tag='size_model_1', graph_builder=GraphBuilder_2(class_gen=class_generator_4_size))
     for data in dataset:
         if data is not None and len(data.edge_index) == 2 and len(data.edge_index[0]) > 0: # recall that edges list is transposed
             total_opt = total_opt +  max(0,data.size_saved.item())
@@ -85,6 +98,6 @@ def test_all():
 if __name__ == "__main__":
     set_torch_rand_seed()
     epochs = int(sys.argv[1]) if len(sys.argv)==2 else 2
-    #train(epochs=epochs)
+    train(epochs=epochs)
     #test_query()
     test_all()
