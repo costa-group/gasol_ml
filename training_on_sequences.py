@@ -71,7 +71,7 @@ def training(model, criterion, optimizer, dataset, epochs=171, balance_train_set
 
     if balance_train_set:
         print("Balancing train set ...", flush=True)
-        all_labels = [ label for (data,label,length) in train_set]
+        all_labels = [ label for (data,label,length,_) in train_set]
         labels_unique, counts = np.unique(all_labels,return_counts=True)
         class_weights = { labels_unique[i] : f(sum(counts),counts[i]) for i in range(len(counts)) }
         example_weights = [ class_weights[label.tolist()] for (data,label,length,_) in train_set ]
@@ -82,7 +82,7 @@ def training(model, criterion, optimizer, dataset, epochs=171, balance_train_set
         
     if balance_test_set:
         print("Balancing test set ...", flush=True)
-        all_labels = [ label for (data,label,length) in test_set]
+        all_labels = [ label for (data,label,length,_) in test_set]
         labels_unique, counts = np.unique(all_labels,return_counts=True)
         class_weights = { labels_unique[i] : f(sum(counts),counts[i]) for i in range(len(counts)) }
         example_weights = [ class_weights[label.tolist()] for (data,label,length,_) in test_set ]

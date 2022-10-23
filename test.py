@@ -1,6 +1,6 @@
 
 from models import *
-from precision_eval import CriterionLoss, CorrectClass, TimeGain_vs_OptLoss
+from precision_eval import CriterionLoss, CorrectClass, TimeGain_vs_OptLoss, CountEpsError
 from training import training
 from datasets_db import load_dataset
 import torch
@@ -61,7 +61,7 @@ def train_g(epochs=10):
 
 def train_s(epochs=10):
     dataset = load_dataset(12)
-    train_set=dataset
+    train_set= dataset
     test_set = load_dataset(14)
     model_args = {
         "hidden_channels": 64,
@@ -69,14 +69,16 @@ def train_s(epochs=10):
         "out_channels": dataset.num_classes
     }
     model = Model_2(**model_args)
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-2)
-    criterion = torch.nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+    criterion = torch.nn.CrossEntropyLoss(weight=torch.tensor([0.4,0.6]))
 
 
-    training(model,criterion,optimizer,train_set,test_set=test_set,get_label_f=label_of_sequence_1,get_class_f_for_balancing=label_of_sequence_1_for_balancing,balance_train_set=True,balance_validation_set=True,balance_test_set=False, epochs=epochs,precision_evals=[CriterionLoss(),CorrectClass(), TimeGain_vs_OptLoss()],batch_transformer=batch_transformer_for_sequence_1)
+    training(model,criterion,optimizer,train_set,test_set=test_set,get_label_f=label_of_sequence_1,get_class_f_for_balancing=label_of_sequence_1_for_balancing,balance_train_set=False,balance_validation_set=False,balance_test_set=False, epochs=epochs,precision_evals=[CriterionLoss(),CorrectClass(), TimeGain_vs_OptLoss()],batch_transformer=batch_transformer_for_sequence_1)
 
 # def train_s_reg(epochs=10):tr
-#     dataset = GasolBytecodeSeq(root='data', name='oms_gas', tag='gas_bound_model', sequence_builder=SequenceBuilder_1(class_gen=class_generator_11, regression=True))
+#     dataset = load_dataset(15)
+#     train_set=dataset
+#     test_set = load_dataset(17)
 #     model_args = {
 #         "hidden_channels": 64,
 #         "vocab_size": dataset.vocab_size,
@@ -84,24 +86,25 @@ def train_s(epochs=10):
 #     }
 #     model = Model_2(**model_args)
 #     optimizer = torch.optim.SGD(model.parameters(), lr=1e-2)
-#     criterion = torch.nn.MSELoss(reduction='sum')
+#     criterion = torch.nn.MSELoss(reduction='mean')
     
-#     training(model,criterion,optimizer,dataset, regression=True, get_label_f=label_of_sequence_1,get_class_f_for_balancing=label_of_sequence_1_for_balancing,batch_transformer=batch_transformer_for_sequence_1,balance_train_set=False,balance_validation_set=False, epochs=epochs)
+#     training(model,criterion,optimizer,dataset, test_set=test_set, regression=True, get_label_f=label_of_sequence_1,get_class_f_for_balancing=label_of_sequence_1_for_balancing,batch_transformer=batch_transformer_for_sequence_1,balance_train_set=False,balance_validation_set=False, epochs=epochs)
 
 def train_g_reg(epochs=10):
-    dataset = load_dataset(7)
+    dataset = load_dataset(21)
     train_set = dataset
-    test_set = load_dataset(6)
+    test_set = dataset #load_dataset(20)
     model_args = {
         "hidden_channels": 64,
         "in_channels": dataset.num_node_features,
         "out_channels": 1
     }
     model = Model_1(**model_args)
-    optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+    # optimizer = torch.optim.SGD(model.parameters(), lr=1e-2)
     criterion = torch.nn.MSELoss(reduction='mean')
     
-    training(model,criterion,optimizer,train_set,test_set=test_set,get_label_f=label_of_pyg_graph,get_class_f_for_balancing=label_of_pyg_graph_for_balancing,balance_train_set=True,balance_validation_set=True, epochs=epochs,precision_evals=[CriterionLoss()],regression=True)
+    training(model,criterion,optimizer,train_set,test_set=test_set,get_label_f=label_of_pyg_graph,get_class_f_for_balancing=label_of_pyg_graph_for_balancing,balance_train_set=True,balance_validation_set=True, epochs=epochs,precision_evals=[CriterionLoss(),CountEpsError()],regression=True)
 
 
 if __name__ == "__main__":

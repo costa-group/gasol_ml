@@ -102,7 +102,7 @@ def training(model, # a model that is suitable for the dataset provided, its for
 
     # create the loader of the testset if provided
     if test_set is not None:
-        test_loader = create_loader(test_set, name="test set", regression=regression, balance=balance_test_set, get_class_f_for_balancing=get_class_f_for_balancing, batch_size=batch_size)
+        test_loader = create_loader(test_set, name="test set", regression=regression, balance=balance_test_set, get_class_f_for_balancing=get_class_f_for_balancing, batch_size=1)
 
     # best epoch information
     best_epoch = None

@@ -43,24 +43,6 @@ class SequenceBasedBasicBlocksDataset(SequenceDataset):
         extract_zip(path, self.raw_dir)
         os.unlink(path)
 
-    def __build_seq(self, block_info, block_sfs):
-
-        # we only handle benchamrks for which a model was found
-        if not block_info["model_found"]=="True":
-            return None
-
-        bytecode_sequence = split_bytecode(block_sfs["original_instrs"])
-        features_sequence = [ self.__build_features_vec(b) for b in bytecode_sequence ]
-
-        # compute class
-        c = self.class_gen(block_info,block_sfs)
-
-        x = torch.tensor(node_features_list, dtype=torch.long).to(torch.float)
-        edge_index = torch.tensor(edges_list, dtype=torch.long).t()
-        y = torch.tensor(c,dtype=torch.long)
-        d = Data(x=x, edge_index=edge_index, y=y)
-        return d
-
     def process(self):
         data_list = []
         labels_list = []

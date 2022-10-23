@@ -1,7 +1,8 @@
 
 import torch
 from torch_geometric.data import Data
-from opcodes import vocab  as single_push_vocab, vocab_ as multi_push_vocab, is_push_instr, is_memory_instr, is_store_instr
+# from opcodes import vocab  as single_push_vocab, vocab_ as multi_push_vocab, is_push_instr, is_memory_instr, is_store_instr
+from opcodes import vocab as single_push_vocab, vocab_ as multi_push_vocab, is_push_instr, is_memory_read_instr, is_memory_write_instr, is_store_read_instr, is_store_write_instr, is_swap_instr, is_dup_instr, is_comm_instr, split_bytecode_
 
 
 # one-hot vector

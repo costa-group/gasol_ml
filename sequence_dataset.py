@@ -33,13 +33,18 @@ class SequenceDataset(torch.utils.data.Dataset):
 
         self._download()
         self._process()
+        print(1)
 
         self._data, self._labels, self._info, self.vocab_size = torch.load(self.processed_paths[0])
+        print(2)
         self._indices =  [ idx for idx in range(len(self._data)) ]
-
+        print(3)
         # pad sequences
         self._lengths = [ len(l) for l in self._data ]
+        print(4)
         self._data = torch.nn.utils.rnn.pad_sequence(self._data, batch_first=True)
+        print(5)
+        
         self.num_classes = max(self._labels)+1
 
     def to_list(self):
