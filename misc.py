@@ -1,5 +1,14 @@
 import numpy as np
+import torch_geometric
 
+
+def print_dataset_stats(dataset):
+    if issubclass(type(dataset),torch_geometric.data.Dataset):
+        print_dataset_stats_g(dataset)
+    else:
+        print_dataset_stats_s(dataset)
+
+    
 def print_dataset_stats_g(dataset,show_dist=True):
     print()
     print(f'Dataset: {dataset}:')
@@ -35,7 +44,7 @@ def print_dataset_stats_s(dataset,show_dist=True):
         print(f'Number of classes: {dataset.num_classes}')
         print()
 
-        all_labels = [label for (data,label,length) in dataset]
+        all_labels = [label for (data,label,length,_) in dataset]
         labels_unique, counts = np.unique(all_labels,return_counts=True)
         class_weights = { i : 0 for i in range(dataset.num_classes) }
         total = sum(counts)

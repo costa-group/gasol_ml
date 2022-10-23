@@ -7,10 +7,6 @@ from torch_geometric.data import InMemoryDataset, download_url, extract_zip, Dat
 from .graph_builders import GraphBuilder_1, SequenceBuilder_1
 from .CustomDataSets import SeqDataSet
 
-# Questions to alejandor/pablo:
-#
-# - Is it possible that values appear in tgt_ws, inpt_sk, and outpt_sk?
-# - there are some graphs with no edges, I
 
 def select_sample(block_info: Dict, block_sfs: Dict, data: Data) -> bool:
     return data is not None and len(data.edge_index) == 2 and len(data.edge_index[0]) > 0 # recall that edges list is transposed
@@ -28,11 +24,11 @@ class GasolBasicBlocks(InMemoryDataset):
 
     url = 'https://samir.fdi.ucm.es/download/costa_ml'
     
-    def __init__(self, root, name, tag=0, graph_builder=GraphBuilder_1(), transform=None, pre_transform=None, pre_filter=None):
+    def __init__(self, root, name, tag=0, graph_builder=GraphBuilder_1()):
         self.name = name
         self.tag = tag
         self.graph_builder = graph_builder
-        super().__init__(root, transform, pre_transform, pre_filter)
+        super().__init__(root)
         self.data, self.slices = torch.load(self.processed_paths[0])
 
     @property
@@ -45,7 +41,7 @@ class GasolBasicBlocks(InMemoryDataset):
 
     @property
     def raw_file_names(self):
-        return ['README']
+        return ['csv']
 
     @property
     def processed_file_names(self):
@@ -70,20 +66,18 @@ class GasolBasicBlocks(InMemoryDataset):
                     block_id = block_info['block_id']
                     with open(f'{self.raw_dir}/jsons/{csv_filename_noext}/{block_id}_input.json', 'r') as f:
                         block_sfs = json.load(f)
-                        data = self.graph_builder.build_graph(csv_filename_noext,block_info,block_sfs)
+                        data = self.graph_builder.build_graph(block_info,block_sfs)
                         # remove empty graphs as well -- check with Alejandro why we have empty graphs?
                         if select_sample_1(block_info, block_sfs, data):
                             data_list.append(data)
-                        
-        if self.pre_filter is not None:
-            data_list = [data for data in data_list if self.pre_filter(data)]
-
-        if self.pre_transform is not None:
-            data_list = [self.pre_transform(data) for data in data_list]
 
         data, slices = self.collate(data_list)
 
         torch.save((data, slices), self.processed_paths[0])
+
+    def extract_label(d):
+        return d.y
+
 
 
 # dataset that is based on pytorch geometring InMemoryDataset, it stores graphs
@@ -109,7 +103,7 @@ class GasolBytecodeSeq(SeqDataSet):
 
     @property
     def raw_file_names(self):
-        return ['README']
+        return ['csv']
 
     @property
     def processed_file_names(self):
@@ -152,9 +146,13 @@ class GasolBytecodeSeq(SeqDataSet):
                     with open(f'{self.raw_dir}/jsons/{csv_filename_noext}/{block_id}_input.json', 'r') as f:
                         block_sfs = json.load(f)
                         out = self.sequence_builder.build_seq(block_info,block_sfs)
-                        if out != None and len(out["data"]) > 0:
+                        if out != None and len(out["data"]) >= 1:
                             data_list.append(out["data"])
                             labels_list.append(out["label"])
                             info_list.append(out["info"])
 
         torch.save((data_list, labels_list, info_list, self.sequence_builder.vocab_size()), self.processed_paths[0])
+
+    def extract_label(d):
+        return d[2]
+        

@@ -14,7 +14,7 @@ def block_label_gas_saved(block_info, block_sfs):
     if int(block_info["saved_gas"]) > 0:
         c = 1
     else:
-        c = -1
+        c = 0
     return c
 
 # 1 if size was saved, and 0 otherwise -- for classification

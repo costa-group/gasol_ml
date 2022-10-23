@@ -1,5 +1,5 @@
 import torch
-from opcodes import vocab as single_push_vocab, vocab_ as multi_push_vocab, is_push_instr, is_memory_read_instr, is_memory_write_instr, is_store_read_instr, is_store_write_instr, is_swap_instr, is_dup_instr, is_comm_instr, split_bytecode_
+from opcodes import vocab as single_push_vocab, vocab_ as multi_push_vocab, is_push_instr, is_memory_read_instr, is_memory_write_instr, is_store_read_instr, is_store_write_instr, is_swap_instr, is_dup_instr, is_comm_instr, split_bytecode_, opcodes
 
 # one-hot vector
 #
@@ -64,6 +64,40 @@ def node_feature_com_category(opcode):
     elif is_dup_instr(opcode):
         idx = 8
     else:
+        idx = opcodes[opcode][1]+9
+
+    return idx
+
+# one-hot vector:
+#
+#  [commutative, mem_read_inst, mem_write_inst, store_read_inst, store_write_inst, push_inst, pop, swap_inst, dup_inst, other_inst]
+#
+#  - valid input: "empty", opcode
+#  - we just distinguish the class of the instruction swap/dup/push/memory/store/other (swap and dup never appear since we are using the sfs)
+#  - call with "empty" to get an empty vector
+#  
+def node_feature_com_category2(opcode):
+    idx = 0
+
+    if is_comm_instr(opcode):
+        idx = 0
+    elif is_memory_read_instr(opcode):
+        idx = 1
+    elif is_memory_write_instr(opcode):
+        idx = 2
+    elif is_store_read_instr(opcode):
+        idx = 3
+    elif is_store_write_instr(opcode):
+        idx = 4
+    elif opcode == "POP":
+        idx = 5
+    elif is_push_instr(opcode):
+        idx = 6
+    elif is_swap_instr(opcode):
+        idx = 7
+    elif is_dup_instr(opcode):
+        idx = 8
+    else:
         idx = 9
 
     return idx
@@ -86,6 +120,9 @@ class BytecodeSequence:
         elif encoding == 'category':
             self.opcode_vocab_size = 10
             self.encoding_f = node_feature_com_category
+        elif encoding == 'category2':
+            self.opcode_vocab_size = 16
+            self.encoding_f = node_feature_com_category2
         else:
             raise Exception(f"Invalid value for node_features: {node_features}")
 

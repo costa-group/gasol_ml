@@ -139,3 +139,39 @@ class CriterionLoss():
             return self.total_loss
         else:
             return self.max_loss
+
+
+        # tries to simulate the actual execution of gasol, counting how much
+# gas/size we lose and how much time we gain
+#
+class CountEpsError():
+    def __init__(self,eps=1):
+        self.eps = eps
+
+        self.correct = 0
+        self.total = 0
+
+    def reset(self):
+        self.correct = 0
+        self.total = 0
+
+    def eval(self,model_out,labels,data,loss_criterion):
+
+        pred=model_out
+        
+        self.total += len(pred)
+
+        # traverse all answers and collect some stats
+        for i in range(len(pred)):
+            diff = pred[i]-labels[i]
+            if abs(diff) < self.eps:
+                self.correct += 1
+
+    def tag(self):
+        return f'EPS({self.eps})'
+
+    def report(self):
+        return f'{self.correct}/{self.total}'
+
+    def loss(self):
+            return 1 - self.correct/self.total
