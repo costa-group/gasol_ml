@@ -1,0 +1,2 @@
+cleandata:
+	rm -rf data
