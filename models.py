@@ -101,7 +101,7 @@ class Model_2(torch.nn.Module):
         return x #self.sm(x)
 
 class Model_3(torch.nn.Module):
-    def __init__(self, hidden_channels, out_channels, vocab_size, embed_dim=4):
+    def __init__(self, hidden_channels, out_channels, vocab_size, embed_dim=3):
         super(Model_3, self).__init__()
         self.emb = Embedding(vocab_size, embed_dim, padding_idx=0) # we assume 0 was used for padding sequences
         self.rnn = GRU(embed_dim, hidden_channels, 1)
