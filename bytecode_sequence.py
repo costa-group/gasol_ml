@@ -1,5 +1,5 @@
 import torch
-from opcodes import vocab as single_push_vocab, vocab_ as multi_push_vocab, is_push_instr, is_memory_read_instr, is_memory_write_instr, is_store_read_instr, is_store_write_instr, is_swap_instr, is_dup_instr, is_comm_instr, split_bytecode_, opcodes
+from opcodes import vocab as single_push_vocab, vocab_ as multi_push_vocab, is_push_instr, is_memory_read_instr, is_memory_write_instr, is_store_read_instr, is_store_write_instr, is_swap_instr, is_dup_instr, is_comm_instr, split_bytecode_, opcodes, get_opcode
 
 # one-hot vector
 #
@@ -64,7 +64,7 @@ def node_feature_com_category(opcode):
     elif is_dup_instr(opcode):
         idx = 8
     else:
-        idx = opcodes[opcode][1]+9
+        idx = 9
 
     return idx
 
@@ -98,8 +98,12 @@ def node_feature_com_category2(opcode):
     elif is_dup_instr(opcode):
         idx = 8
     else:
-        idx = 9
-
+        try:
+            idx = get_opcode(opcode)[1]+9
+        except Exception as e:
+            print(f'error: {opcode}')
+            exit(1)
+            
     return idx
 
 
@@ -141,16 +145,11 @@ class BytecodeSequence:
 
     def vocab_size(self):
         return self.opcode_vocab_size + self.vocab_consts_shift + 1 # the zero is used for padding, this is why we add 1
-    
-    def build_seq(self, block_info, block_sfs):
-
-        # we only handle benchamrks for which a model was found -- should have been eliminated earlier
-        if not block_info["model_found"]=="True":
-            return None
 
 
-        # sequence of bytecodes to sequence of feature vectors (each vector represents a bytecode)
-        bytecode_sequence_orig =  split_bytecode_(block_sfs["original_instrs"])
+    def build_seq_from_bytecode(self, bytecode):
+
+        bytecode_sequence_orig = split_bytecode_(bytecode)
 
         if self.encode_consts:
             bytecode_sequence = []
@@ -172,6 +171,17 @@ class BytecodeSequence:
  
         # convert the sequence into sequence of ids    
         bytecode_ids_sequence = [ encode(b)+1 for b in bytecode_sequence ] # the +1 is for avoiding 0, we later use it for padding
+        return bytecode_ids_sequence
+
+    def build_seq(self, block_info, block_sfs):
+
+        # we only handle benchamrks for which a model was found -- should have been eliminated earlier
+        if not block_info["model_found"]=="True":
+            return None
+
+        # convert the sequence into sequence of ids    
+        bytecode_ids_sequence = self.build_seq_from_bytecode(block_sfs["original_instrs"])
+
         x = torch.tensor(bytecode_ids_sequence, dtype=torch.long).to(torch.long)
 
         # print(bytecode_sequence_orig)

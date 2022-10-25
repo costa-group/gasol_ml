@@ -11,11 +11,14 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 class Model_1(torch.nn.Module):
     def __init__(self, hidden_channels, in_channels, out_channels):
         super(Model_1, self).__init__()
-        gnn = GCNConv #GraphConv #GraphConv #SAGEConv #SGConv #GCNConv #GraphConv
+        gnn = GraphConv #SGConv #GraphConv #SAGEConv #SGConv #GCNConv 
         self.conv1 = gnn(in_channels, hidden_channels,  aggr='mean')
         self.conv2 = gnn(hidden_channels, hidden_channels,  aggr='mean')
         self.conv3 = gnn(hidden_channels, hidden_channels,  aggr='mean')
-        self.lin1 = Linear(hidden_channels, hidden_channels)
+        # self.conv4 = gnn(hidden_channels, hidden_channels,  aggr='mean')
+        # self.conv5 = gnn(hidden_channels, hidden_channels,  aggr='mean')
+        # self.conv6 = gnn(hidden_channels, hidden_channels,  aggr='mean')
+        # self.lin1 = Linear(hidden_channels, hidden_channels)
         self.lin = Linear(hidden_channels, out_channels)
     def forward(self, data):
 
@@ -32,14 +35,23 @@ class Model_1(torch.nn.Module):
         x = self.conv3(x, edge_index)
         x = x.relu()
         
+        # x = self.conv4(x, edge_index)
+        # x = x.relu()
+        
+        # x = self.conv5(x, edge_index)
+        # x = x.relu()
+        
+        # x = self.conv6(x, edge_index)
+        # x = x.relu()
+        
         # 2. Readout layer
         x = global_mean_pool(x, batch)  # [batch_size, hidden_channels]
 
         x = F.dropout(x, p=0.5, training=self.training)
         x = x.relu()
 
-        x = self.lin1(x)
-        x = x.relu()
+        # x = self.lin1(x)
+        # x = x.relu()
 
         # 3. Apply a final classifier
         x = self.lin(x)
@@ -59,8 +71,8 @@ class Model_2(torch.nn.Module):
         # self.lin3 = Linear(hidden_channels, hidden_channels)
         # self.lin4 = Linear(hidden_channels, hidden_channels)
         self.lin = Linear(hidden_channels, out_channels)
-        self.act = Sigmoid()
-        self.sm = Softmax(dim=1)
+        # self.act = Sigmoid()
+        # self.sm = Softmax(dim=1)
 
     def __build_features_vec(self,token):
         features = [0]*self.vocab_size
@@ -98,7 +110,7 @@ class Model_2(torch.nn.Module):
         # final linear layer
         x = self.lin(x)
 
-        return x #self.sm(x)
+        return x #self.act(x)  #self.sm(x)
 
 class Model_3(torch.nn.Module):
     def __init__(self, hidden_channels, out_channels, vocab_size, embed_dim=3):

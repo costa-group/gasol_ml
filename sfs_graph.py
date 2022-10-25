@@ -121,6 +121,7 @@ class SFSGraph:
                  add_dep_edges=True,   # add egdes between instruction that are declared dependent in the sfs
                  node_features='single_push', #  node features builder (single_push, multi_push, category)
                  label_f=None,         # function for calculating the label
+                 edges='both',      # can be 'forward', 'backwards' or 'both'                 
                  regression=False):    # if it is a regression problem (should be eliminated at some point, it is ugly)
 
         if node_features == 'single_push':
@@ -137,6 +138,7 @@ class SFSGraph:
         self.add_const_nodes = add_const_nodes
         self.add_dep_edges = add_dep_edges
         self.label_f = label_f
+        self.edges = edges
         self.regression = regression
 
         
@@ -250,8 +252,12 @@ class SFSGraph:
                 edges_list.append([nodes_map[e[0]],nodes_map[e[1]]])
             for e in block_sfs["memory_dependences"]:
                 edges_list.append([nodes_map[e[0]],nodes_map[e[1]]])
-        
-           
+
+        if self.edges == 'backwards':
+           edges_list = [ [t,s] for [s,t] in edges_list ]
+        elif self.edges == 'both':
+           edges_list.extend( [ [t,s] for [s,t] in edges_list ] )
+
         # tensor for nodes
         x = torch.tensor(node_features_list, dtype=torch.long).to(torch.float)
 

@@ -61,6 +61,11 @@ def process_sub_block_from_seq_elem(seq_element: str, source_path: str) -> Dict:
     return process_sub_block_from_asm_list(block.instructions, source_path)
 
 
+def load_list_of_sequences(source_path):
+    with open(Path(source_path).joinpath('hierarchy.txt').resolve(), 'rb') as f:
+        list_of_seq = pickle.load(f)
+    return list_of_seq
+
 if __name__=="__main__":
     if len(sys.argv) != 2:
         raise ValueError('Wrong number of arguments')

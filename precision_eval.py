@@ -1,3 +1,5 @@
+import math
+import random
 
 # This module includes classes that are used as precision
 # evaluators. Each such class should provide methods
@@ -22,6 +24,7 @@ class CorrectClass():
 
     def eval(self,model_out,labels,data,loss_criterion):
         pred = model_out.argmax(dim=1)
+        #labels = labels.argmax(dim=1)
         self.correct += int((pred == labels).sum())
         self.total += len(labels)
     
@@ -34,76 +37,6 @@ class CorrectClass():
     def loss(self):
         return 1.0-self.correct/self.total
 
-
-
-# tries to simulate the actual execution of gasol, counting how much
-# gas/size we lose and how much time we gain
-#
-class TimeGain_vs_OptLoss():
-    def __init__(self,opt_key='size_saved',time_key='time'):
-        self.opt_key = opt_key
-        self.time_key = time_key
-
-        self.correct = 0
-        self.total = 0
-        self.total_opt = 0
-        self.total_time = 0
-        self.lost_opt = 0
-        self.saved_time = 0
-        self._correct = 0
-        self.wrong_0_ans = 0
-        self.wrong_1_answ = 0
-
-    def reset(self):
-        self.correct = 0
-        self.total = 0
-        self.total_opt = 0
-        self.total_time = 0
-        self.lost_opt = 0
-        self.saved_time = 0
-        self._correct = 0
-        self.wrong_0_ans = 0
-        self.wrong_1_answ = 0
-
-    def eval(self,model_out,labels,data,loss_criterion):
-        size_saved = data[3][self.opt_key]
-        time = data[3][self.time_key]
-
-        # calculate the predicted values
-        pred = model_out.argmax(dim=1)
-
-        # total correct predictions
-        self.correct += int((pred == labels).sum())
-        self.total += len(labels)
-
-        # traverse all answers and collect some stats
-        for i in range(len(pred)):
-
-            # the total gas/size save, and total time spent
-            self.total_opt += max(0,size_saved[i].item())
-            self.total_time += time[i].item()
-
-            # if we predict do not optimize, we save the time and lose the size/gas
-            if pred[i].item() == 0:
-                self.lost_opt += max(0,size_saved[i].item())
-                self.saved_time += time[i].item()
-
-            # how many 0 answers are wrong, and how many 1 answers are wrong    
-            if labels[i].item() == 1 and pred[i].item() == 0:
-                self.wrong_0_ans += 1
-            elif labels[i].item() == 0 and pred[i].item() == 1:
-                self.wrong_1_answ += 1
-                
-            
-        
-    def tag(self):
-        return "TimeGain_OptLoss"
-    
-    def report(self):
-        return f'{self.saved_time:.2f}/{self.total_time:.2f},{self.lost_opt:.2f}/{self.total_opt:.2f})@({self.correct},{self.wrong_0_ans},{self.wrong_1_answ}'
-
-    def loss(self):
-        return 1.0-self.correct/self.total
 
 
 # count the aggregated batch loss wrt the given criterion, it can be sum, mean, or max.
@@ -141,7 +74,7 @@ class CriterionLoss():
             return self.max_loss
 
 
-        # tries to simulate the actual execution of gasol, counting how much
+# tries to simulate the actual execution of gasol, counting how much
 # gas/size we lose and how much time we gain
 #
 class CountEpsError():
@@ -163,7 +96,7 @@ class CountEpsError():
 
         # traverse all answers and collect some stats
         for i in range(len(pred)):
-            diff = pred[i]-labels[i]
+            diff = math.ceil(pred[i])-labels[i]
             if abs(diff) < self.eps:
                 self.correct += 1
 
@@ -175,3 +108,225 @@ class CountEpsError():
 
     def loss(self):
             return 1 - self.correct/self.total
+
+
+# tries to simulate the actual execution of gasol, counting how much
+# gas/size we lose and how much time we gain
+#
+class SafeBound():
+    def __init__(self):
+        self.correct = 0
+        self.total = 0
+
+    def reset(self):
+        self.correct = 0
+        self.total = 0
+
+    def eval(self,model_out,labels,data,loss_criterion):
+
+        pred=model_out
+        
+        self.total += len(pred)
+
+        # traverse all answers and collect some stats
+        for i in range(len(pred)):
+            p = math.ceil(pred[i])
+            if p >= labels[i]:
+                self.correct += 1
+
+    def tag(self):
+        return f'SAFE'
+
+    def report(self):
+        return f'{self.correct}/{self.total}'
+
+    def loss(self):
+            return 1 - self.correct/self.total
+
+
+# tries to simulate the actual execution of gasol, counting how much
+# gas/size we lose and how much time we gain
+#
+class PreciseBound():
+    def __init__(self):
+        self.correct = 0
+        self.total = 0
+        self.canbeimprove = 0
+
+    def reset(self):
+        self.correct = 0
+        self.total = 0
+        self.canbeimprove = 0
+
+    def eval(self,model_out,labels,data,loss_criterion):
+
+        init_n = data.initial_n_instrs
+        
+        pred=model_out
+        
+        self.total += len(pred)
+
+        # traverse all answers and collect some stats
+        for i in range(len(pred)):
+            if init_n[i]>labels[i]:
+                p = math.ceil(pred[i])
+                self.canbeimprove += 1
+                if p >= labels[i] and p < init_n[i]: 
+                    self.correct += 1
+
+    def tag(self):
+        return f'PR'
+
+    def report(self):
+        return f'{self.correct},{self.canbeimprove},{self.total}'
+
+    def loss(self):
+            return 1 - self.correct/self.canbeimprove
+
+
+
+
+        
+# tries to simulate the actual execution of gasol, counting how much
+# gas/size we lose and how much time we gain
+#
+class TimeGain_vs_OptLoss():
+    def __init__(self,opt_key='size_saved',time_key='time'):
+        self.opt_key = opt_key
+        self.time_key = time_key
+
+        self.correct = 0
+        self.total = 0
+        self.total_opt = 0
+        self.total_time = 0
+        self.lost_opt = 0
+        self.saved_time = 0
+        self._correct = 0
+        self.wrong_0_ans = 0
+        self.wrong_1_answ = 0
+
+    def reset(self):
+        self.correct = 0
+        self.total = 0
+        self.total_opt = 0
+        self.total_time = 0
+        self.lost_opt = 0
+        self.saved_time = 0
+        self._correct = 0
+        self.wrong_0_ans = 0
+        self.wrong_1_answ = 0
+
+    def eval(self,model_out,labels,data,loss_criterion):
+        size_saved = data[3][self.opt_key]
+        time = data[3][self.time_key]
+
+        # calculate the predicted values
+        pred = model_out.argmax(dim=1)
+#        labels = labels.argmax(dim=1)
+
+        # total correct predictions
+        self.correct += int((pred == labels).sum())
+        self.total += len(labels)
+
+        # traverse all answers and collect some stats
+        for i in range(len(pred)):
+
+            # the total gas/size save, and total time spent
+            self.total_opt += max(0,size_saved[i].item())
+            self.total_time += time[i].item()
+
+            # if we predict do not optimize, we save the time and lose the size/gas
+            if pred[i].item() == 0:
+                self.lost_opt += max(0,size_saved[i].item())
+                self.saved_time += time[i].item()
+
+            # how many 0 answers are wrong, and how many 1 answers are wrong    
+            if labels[i].item() == 1 and pred[i].item() == 0:
+                self.wrong_0_ans += 1
+            elif labels[i].item() == 0 and pred[i].item() == 1:
+                self.wrong_1_answ += 1
+                
+            
+        
+    def tag(self):
+        return "TimeGain_OptLoss"
+    
+    def report(self):
+        return f'{self.saved_time:.2f}/{self.total_time:.2f},{self.lost_opt:.2f}/{self.total_opt:.2f})@({self.correct},{self.wrong_0_ans},{self.wrong_1_answ}'
+
+    def loss(self):
+        return 1.0-self.correct/self.total
+
+
+# tries to simulate the actual execution of gasol, counting how much
+# gas/size we lose and how much time we gain
+#
+class TimeGain_vs_OptLossRand():
+    def __init__(self,opt_key='size_saved',time_key='time'):
+        self.opt_key = opt_key
+        self.time_key = time_key
+
+        self.correct = 0
+        self.total = 0
+        self.total_opt = 0
+        self.total_time = 0
+        self.lost_opt = 0
+        self.saved_time = 0
+        self._correct = 0
+        self.wrong_0_ans = 0
+        self.wrong_1_answ = 0
+
+    def reset(self):
+        self.correct = 0
+        self.total = 0
+        self.total_opt = 0
+        self.total_time = 0
+        self.lost_opt = 0
+        self.saved_time = 0
+        self._correct = 0
+        self.wrong_0_ans = 0
+        self.wrong_1_answ = 0
+
+    def eval(self,model_out,labels,data,loss_criterion):
+        size_saved = data[3][self.opt_key]
+        time = data[3][self.time_key]
+
+        # calculate the predicted values
+        pred = model_out.argmax(dim=1)
+#        labels = labels.argmax(dim=1)
+
+        # total correct predictions
+        self.correct += int((pred == labels).sum())
+        self.total += len(labels)
+
+        # traverse all answers and collect some stats
+        for i in range(len(pred)):
+
+            p = 0 if random.randint(0, 10) > 5 else 1
+            
+            # the total gas/size save, and total time spent
+            self.total_opt += max(0,size_saved[i].item())
+            self.total_time += time[i].item()
+
+            # if we predict do not optimize, we save the time and lose the size/gas
+            if p == 0:
+                self.lost_opt += max(0,size_saved[i].item())
+                self.saved_time += time[i].item()
+
+            # how many 0 answers are wrong, and how many 1 answers are wrong    
+            if labels[i].item() == 1 and p == 0:
+                self.wrong_0_ans += 1
+            elif labels[i].item() == 0 and p == 1:
+                self.wrong_1_answ += 1
+                
+            
+        
+    def tag(self):
+        return "TimeGain_OptLoss"
+    
+    def report(self):
+        return f'{self.saved_time:.2f}/{self.total_time:.2f},{self.lost_opt:.2f}/{self.total_opt:.2f})@({self.correct},{self.wrong_0_ans},{self.wrong_1_answ}'
+
+    def loss(self):
+        return 1.0-self.correct/self.total
+
