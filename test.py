@@ -68,24 +68,29 @@ def train_g(epochs=10):
 
 
 def train_s(epochs=10):
-    dataset = load_dataset(15)
-    dataset = dataset.shuffle()
+    dataset = load_dataset(12)
 
-    n = int(len(dataset)*0.5)
-    train_set= dataset[:n]
-    test_set = dataset[n:]
+    # dataset = dataset.shuffle()
+    # n = int(len(dataset)*0.5)
+    # train_set= dataset[:n]
+    # test_set = dataset[n:]
+
+    train_set= dataset
+    test_set = load_dataset(13)
+
+    
     model_args = {
         "hidden_channels": 64,
         "vocab_size": dataset.vocab_size,
         "out_channels": dataset.num_classes
     }
     model = Model_2(**model_args)
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-2)
-    criterion = torch.nn.CrossEntropyLoss(weight=torch.tensor([0.2,0.8]),reduction='mean')
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+    criterion = torch.nn.CrossEntropyLoss(weight=torch.tensor([0.4,0.6]),reduction='mean')
     #criterion = torch.nn.BCELoss(weight=torch.tensor([0.4,0.6]))
     #criterion = torch.nn.NLLLoss(weight=torch.tensor([0.4,0.6]))
 
-    training(model,criterion,optimizer,train_set,test_set=test_set,get_label_f=label_of_sequence_1,get_class_f_for_balancing=label_of_sequence_1_for_balancing,balance_train_set=False,balance_validation_set=False,balance_test_set=True, epochs=epochs,precision_evals=[CriterionLoss(),CorrectClass(), TimeGain_vs_OptLoss(), TimeGain_vs_OptLossRand()],batch_transformer=batch_transformer_for_sequence_1)
+    training(model,criterion,optimizer,train_set,test_set=test_set,get_label_f=label_of_sequence_1,get_class_f_for_balancing=label_of_sequence_1_for_balancing,balance_train_set=False,balance_validation_set=False,balance_test_set=False, epochs=epochs,precision_evals=[CriterionLoss(),CorrectClass(), TimeGain_vs_OptLoss(), TimeGain_vs_OptLossRand()],batch_transformer=batch_transformer_for_sequence_1)
 
 # def train_s_reg(epochs=10):tr
 #     dataset = load_dataset(15)
