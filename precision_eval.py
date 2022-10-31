@@ -164,18 +164,18 @@ class SafeBound():
 class PreciseBound():
     def __init__(self):
         self.canbeimprove = 0
-        self.canbeimprove_hit = 0
-        self.canbeimprove_lt = 0
-        self.canbeimprove_gt = 0
-        self.canbeimprove_eq = 0
+        self.hit = 0
+        self.lt = 0
+        self.gt = 0
+        self.eq = 0
         self.total = 0
 
     def reset(self):
         self.canbeimprove = 0
-        self.canbeimprove_hit = 0
-        self.canbeimprove_lt = 0
-        self.canbeimprove_gt = 0
-        self.canbeimprove_eq = 0
+        self.hit = 0
+        self.lt = 0
+        self.gt = 0
+        self.eq = 0
         self.total = 0
 
     def eval(self,model_out,labels,data,loss_criterion):
@@ -197,13 +197,13 @@ class PreciseBound():
             if init_n[i]>sfs_size[i]+labels[i]: # can be improved
                 self.canbeimprove += 1
                 if p+sfs_size[i] >= labels[i]+sfs_size[i] and p+sfs_size[i] < init_n[i]: 
-                    self.canbeimprove_hit += 1
+                    self.hit += 1
                 elif p+sfs_size[i] == init_n[i]:
-                    self.canbeimprove_eq += 1
+                    self.eq += 1
                 elif p+sfs_size[i] > init_n[i]:
-                    self.canbeimprove_gt += 1
+                    self.gt += 1
                 elif p+sfs_size[i] < init_n[i]:
-                    self.canbeimprove_lt += 1
+                    self.lt += 1
 
                     
 
@@ -211,10 +211,10 @@ class PreciseBound():
         return f'PR'
 
     def report(self):
-        return f'{self.canbeimprove} (H{self.canbeimprove_hit},={self.canbeimprove_eq},>{self.canbeimprove_gt},<{self.canbeimprove_lt})'
+        return f'{self.canbeimprove} (H{self.hit},={self.eq},>{self.gt},<{self.lt})'
 
     def loss(self):
-            return 1 - self.canbeimprove_hit/self.canbeimprove
+            return 1 - self.hit/self.canbeimprove
 
 
 

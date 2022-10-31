@@ -64,45 +64,37 @@ dataset_db[5] = lambda tag: SequenceBasedBasicBlocksDataset(root='data',
 
 
 
-
 dataset_db[100] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
                                                            name='100-8-17',
                                                            tag=tag,
-                                                           graph_builder=SFSGraph(label_f=block_label_extra_instr,node_features='category',regression=True),
-                                                           basic_block_filter=MinSizeOfInputBlockFilter(5)
+                                                           graph_builder=SFSGraph(label_f=block_label_extra_instr,node_features='multi_push',regression=True),
+                                                           basic_block_filter=MinSizeOfInputBlockFilter(1)
                                                            )
 dataset_db[101] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
                                                            name='jul22-0xa-8-17',
                                                            tag=tag,
-                                                           graph_builder=SFSGraph(label_f=block_label_extra_instr,node_features='category',regression=True),
-                                                           basic_block_filter=MinSizeOfInputBlockFilter(5)
+                                                           graph_builder=SFSGraph(label_f=block_label_extra_instr,node_features='multi_push',regression=True),
+                                                           basic_block_filter=MinSizeOfInputBlockFilter(1)
                                                            )
 dataset_db[102] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
                                                            name='jul22-0xABC-8-17',
                                                            tag=tag,
-                                                           graph_builder=SFSGraph(label_f=block_label_extra_instr,node_features='category',regression=True),
-                                                           basic_block_filter=MinSizeOfInputBlockFilter(5)
+                                                           graph_builder=SFSGraph(label_f=block_label_extra_instr,node_features='multi_push',regression=True),
+                                                           basic_block_filter=MinSizeOfInputBlockFilter(1)
                                                            )
-
-
 dataset_db[103] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
-                                                           name='100-8-17',
+                                                           name='jul22-0xb-8.17',
                                                            tag=tag,
                                                            graph_builder=SFSGraph(label_f=block_label_extra_instr,node_features='multi_push',regression=True),
                                                            basic_block_filter=MinSizeOfInputBlockFilter(1)
                                                            )
 dataset_db[104] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
-                                                           name='jul22-0xa-8-17',
+                                                           name='jul22-0xd-8.17',
                                                            tag=tag,
                                                            graph_builder=SFSGraph(label_f=block_label_extra_instr,node_features='multi_push',regression=True),
                                                            basic_block_filter=MinSizeOfInputBlockFilter(1)
                                                            )
-dataset_db[105] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
-                                                           name='jul22-0xABC-8-17',
-                                                           tag=tag,
-                                                           graph_builder=SFSGraph(label_f=block_label_extra_instr,node_features='multi_push',regression=True),
-                                                           basic_block_filter=MinSizeOfInputBlockFilter(1)
-                                                           )
+
 
 #
 dataset_db[1000] = lambda tag: SequenceBasedBasicSplitDataset(root='data',
