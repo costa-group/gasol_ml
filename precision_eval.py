@@ -1,5 +1,6 @@
 import math
 import random
+import operator
 
 # This module includes classes that are used as precision
 # evaluators. Each such class should provide methods
@@ -42,7 +43,7 @@ class CorrectClass():
 # count the aggregated batch loss wrt the given criterion, it can be sum, mean, or max.
 #
 class CriterionLoss():
-    def __init__(self,reduction='sum'): # sum, mean, or max
+    def __init__(self,reduction='mean'): # sum, mean, or max
         self.reduction = reduction
         self.total_loss = 0
         self.num_of_batches = 0
@@ -115,12 +116,18 @@ class CountEpsError():
 #
 class SafeBound():
     def __init__(self):
-        self.correct = 0
         self.total = 0
+        self.hit = 0
+        self.lt = 0
+        self.gt = 0
+        self.neg = 0
 
     def reset(self):
-        self.correct = 0
         self.total = 0
+        self.hit = 0
+        self.lt = 0
+        self.gt = 0
+        self.neg = 0
 
     def eval(self,model_out,labels,data,loss_criterion):
 
@@ -130,18 +137,25 @@ class SafeBound():
 
         # traverse all answers and collect some stats
         for i in range(len(pred)):
-            p = math.ceil(pred[i])
-            if p >= labels[i]:
-                self.correct += 1
+            p = int(math.ceil(pred[i].item()))
+            l = int(labels[i].item())
+            if p<0:
+                self.neg += 1
+            if p == l:
+                self.hit += 1
+            elif p > l:
+                self.gt += 1            
+            else:
+                self.lt += 1
 
     def tag(self):
         return f'SAFE'
 
     def report(self):
-        return f'{self.correct}/{self.total}'
+        return f'{self.total}: ={self.hit}),>{self.gt},<{self.lt},M{self.neg}'
 
     def loss(self):
-            return 1 - self.correct/self.total
+            return 1 - (self.hit+self.gt)/self.total
 
 
 # tries to simulate the actual execution of gasol, counting how much
@@ -149,18 +163,29 @@ class SafeBound():
 #
 class PreciseBound():
     def __init__(self):
-        self.correct = 0
-        self.total = 0
         self.canbeimprove = 0
+        self.canbeimprove_hit = 0
+        self.canbeimprove_lt = 0
+        self.canbeimprove_gt = 0
+        self.canbeimprove_eq = 0
+        self.total = 0
 
     def reset(self):
-        self.correct = 0
-        self.total = 0
         self.canbeimprove = 0
+        self.canbeimprove_hit = 0
+        self.canbeimprove_lt = 0
+        self.canbeimprove_gt = 0
+        self.canbeimprove_eq = 0
+        self.total = 0
 
     def eval(self,model_out,labels,data,loss_criterion):
 
-        init_n = data.initial_n_instrs
+        if hasattr(data, 'initial_n_instrs'):
+            init_n = data.initial_n_instrs
+            sfs_size = data.sfs_size
+        else:
+            init_n = data[3]['initial_n_instrs']
+
         
         pred=model_out
         
@@ -168,20 +193,28 @@ class PreciseBound():
 
         # traverse all answers and collect some stats
         for i in range(len(pred)):
-            if init_n[i]>labels[i]:
-                p = math.ceil(pred[i])
+            p = math.ceil(pred[i])
+            if init_n[i]>sfs_size[i]+labels[i]: # can be improved
                 self.canbeimprove += 1
-                if p >= labels[i] and p < init_n[i]: 
-                    self.correct += 1
+                if p+sfs_size[i] >= labels[i]+sfs_size[i] and p+sfs_size[i] < init_n[i]: 
+                    self.canbeimprove_hit += 1
+                elif p+sfs_size[i] == init_n[i]:
+                    self.canbeimprove_eq += 1
+                elif p+sfs_size[i] > init_n[i]:
+                    self.canbeimprove_gt += 1
+                elif p+sfs_size[i] < init_n[i]:
+                    self.canbeimprove_lt += 1
+
+                    
 
     def tag(self):
         return f'PR'
 
     def report(self):
-        return f'{self.correct},{self.canbeimprove},{self.total}'
+        return f'{self.canbeimprove} (H{self.canbeimprove_hit},={self.canbeimprove_eq},>{self.canbeimprove_gt},<{self.canbeimprove_lt})'
 
     def loss(self):
-            return 1 - self.correct/self.canbeimprove
+            return 1 - self.canbeimprove_hit/self.canbeimprove
 
 
 

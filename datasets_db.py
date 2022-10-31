@@ -9,184 +9,106 @@ from bytecode_block_graph import BytecodeBlockGraph
 from sequence_based_basic_blocks_dataset import SequenceBasedBasicBlocksDataset
 from bytecode_sequence import BytecodeSequence  
 
-from label_generators import block_label_gas_saved, block_label_size_saved, block_label_opt_ninstr
+from label_generators import block_label_gas_saved, block_label_size_saved, block_label_opt_ninstr, block_label_extra_instr
 from basic_block_filters import MinSizeOfInputBlockFilter
+from sequence_based_block_split_dataset import SequenceBasedBasicSplitDataset
+
 
 dataset_db={};
 
 ##
-dataset_db[0] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
-                                                         name='bex_size',
-                                                         tag=tag,
-                                                         graph_builder=BytecodeBlockGraph(label_f=block_label_size_saved, node_features='multi_push'),
-                                                         basic_block_filter=MinSizeOfInputBlockFilter(5)
-                                                        )
-dataset_db[1] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
-                                                         name='rl_size_opt',
-                                                         tag=tag,
-                                                         graph_builder=BytecodeBlockGraph(label_f=block_label_size_saved, node_features='multi_push'),
-                                                         basic_block_filter=MinSizeOfInputBlockFilter(5)
-                                                        )
 
 ##
-dataset_db[2] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
-                                                         name='bex_size',
-                                                         tag=tag,
-                                                         graph_builder=BytecodeBlockGraph(label_f=block_label_size_saved, node_features='single_push'),
-                                                         basic_block_filter=MinSizeOfInputBlockFilter(5)
-                                                        )
-dataset_db[3] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
-                                                         name='oms_size',
-                                                         tag=tag,
-                                                         graph_builder=BytecodeBlockGraph(label_f=block_label_size_saved, node_features='single_push'),
-                                                         basic_block_filter=MinSizeOfInputBlockFilter(5)
-                                                        )
-
-
-##
-dataset_db[4] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
-                                                         name='bex_size',
-                                                         tag=tag,
-                                                         graph_builder=BytecodeBlockGraph(label_f=block_label_size_saved, node_features='category'),
-                                                         basic_block_filter=MinSizeOfInputBlockFilter(5)
-                                                        )
-dataset_db[5] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
-                                                         name='oms_size',
-                                                         tag=tag,
-                                                         graph_builder=BytecodeBlockGraph(label_f=block_label_size_saved, node_features='category'),
-                                                         basic_block_filter=MinSizeOfInputBlockFilter(5)
-                                                        )
-
-##
-dataset_db[6] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
-                                                         name='bex_gas',
-                                                         tag=tag,
-                                                         graph_builder=BytecodeBlockGraph(label_f=block_label_gas_saved, node_features='multi_push'),
-                                                         basic_block_filter=MinSizeOfInputBlockFilter(5)
-                                                        )
-dataset_db[7] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
-                                                         name='oms_gas',
-                                                         tag=tag,
-                                                         graph_builder=BytecodeBlockGraph(label_f=block_label_gas_saved, node_features='multi_push'),
-                                                         basic_block_filter=MinSizeOfInputBlockFilter(5)
-                                                        )
-
-##
-dataset_db[8] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
-                                                         name='bex_gas',
-                                                         tag=tag,
-                                                         graph_builder=BytecodeBlockGraph(label_f=block_label_gas_saved, node_features='single_push'),
-                                                         basic_block_filter=MinSizeOfInputBlockFilter(5)
-                                                        )
-dataset_db[9] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
-                                                         name='oms_gas',
-                                                         tag=tag,
-                                                         graph_builder=BytecodeBlockGraph(label_f=block_label_gas_saved, node_features='single_push'),
-                                                         basic_block_filter=MinSizeOfInputBlockFilter(5)
-                                                        )
-
-
-##
-dataset_db[10] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
-                                                         name='bex_gas',
-                                                         tag=tag,
-                                                         graph_builder=BytecodeBlockGraph(label_f=block_label_gas_saved, node_features='category'),
-                                                         basic_block_filter=MinSizeOfInputBlockFilter(1)
-                                                        )
-dataset_db[11] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
-                                                         name='oms_gas',
-                                                         tag=tag,
-                                                         graph_builder=BytecodeBlockGraph(label_f=block_label_gas_saved, node_features='category'),
-                                                         basic_block_filter=MinSizeOfInputBlockFilter(1)
-                                                        )
-
-
-##
-dataset_db[12] = lambda tag: SequenceBasedBasicBlocksDataset(root='data',
-                                                            name='bex_size',
+dataset_db[0] = lambda tag: SequenceBasedBasicBlocksDataset(root='data',
+                                                            name='100-8-17',
                                                             tag=tag,
-                                                            sequence_builder=BytecodeSequence(label_f=block_label_size_saved,encoding='category2'),
+                                                            sequence_builder=BytecodeSequence(label_f=block_label_size_saved,encoding='category'),
                                                             basic_block_filter=MinSizeOfInputBlockFilter(5)
                                                         )
 
-dataset_db[13] = lambda tag: SequenceBasedBasicBlocksDataset(root='data',
-                                                            name='oms_size',
+dataset_db[1] = lambda tag: SequenceBasedBasicBlocksDataset(root='data',
+                                                            name='jul22-0xa-8-17',
                                                             tag=tag,
-                                                            sequence_builder=BytecodeSequence(label_f=block_label_size_saved,encoding='category2'),
+                                                            sequence_builder=BytecodeSequence(label_f=block_label_size_saved,encoding='category'),
                                                             basic_block_filter=MinSizeOfInputBlockFilter(5)
                                                         )
-dataset_db[14] = lambda tag: SequenceBasedBasicBlocksDataset(root='data',
-                                                            name='rl_size_opt',
+
+dataset_db[2] = lambda tag: SequenceBasedBasicBlocksDataset(root='data',
+                                                            name='jul22-0xABC-8-17',
                                                             tag=tag,
-                                                            sequence_builder=BytecodeSequence(label_f=block_label_size_saved,encoding='category2'),
+                                                            sequence_builder=BytecodeSequence(label_f=block_label_size_saved,encoding='category'),
                                                             basic_block_filter=MinSizeOfInputBlockFilter(5)
                                                         )
 
 ##
-dataset_db[15] = lambda tag: SequenceBasedBasicBlocksDataset(root='data',
-                                                            name='bex_size',
+dataset_db[3] = lambda tag: SequenceBasedBasicBlocksDataset(root='data',
+                                                            name='100-8-17',
                                                             tag=tag,
-                                                            sequence_builder=BytecodeSequence(label_f=block_label_size_saved,encoding='multi_push'),
+                                                            sequence_builder=BytecodeSequence(label_f=block_label_opt_ninstr,encoding='category',regression=True),
                                                             basic_block_filter=MinSizeOfInputBlockFilter(5)
                                                         )
 
-dataset_db[16] = lambda tag: SequenceBasedBasicBlocksDataset(root='data',
-                                                            name='oms_size',
+dataset_db[4] = lambda tag: SequenceBasedBasicBlocksDataset(root='data',
+                                                            name='jul22-0xa-8-17',
                                                             tag=tag,
-                                                            sequence_builder=BytecodeSequence(label_f=block_label_size_saved,encoding='multi_push'),
-                                                            basic_block_filter=MinSizeOfInputBlockFilter(5)
-                                                        )
-dataset_db[17] = lambda tag: SequenceBasedBasicBlocksDataset(root='data',
-                                                            name='rl_size_opt',
-                                                            tag=tag,
-                                                            sequence_builder=BytecodeSequence(label_f=block_label_size_saved,encoding='multi_push'),
+                                                            sequence_builder=BytecodeSequence(label_f=block_label_opt_ninstr,encoding='category',regression=True),
                                                             basic_block_filter=MinSizeOfInputBlockFilter(5)
                                                         )
 
+dataset_db[5] = lambda tag: SequenceBasedBasicBlocksDataset(root='data',
+                                                            name='jul22-0xABC-8-17',
+                                                            tag=tag,
+                                                            sequence_builder=BytecodeSequence(label_f=block_label_opt_ninstr,encoding='category',regression=True),
+                                                            basic_block_filter=MinSizeOfInputBlockFilter(5)
+                                                        )
 
-##
-dataset_db[18] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
-                                                          name='bex_size',
-                                                          tag=tag,
-                                                          graph_builder=SFSGraph(label_f=block_label_opt_ninstr,node_features='multi_push',regression=True),
-                                                          basic_block_filter=MinSizeOfInputBlockFilter(5)
-                                                          )
 
-dataset_db[19] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
-                                                          name='oms_size',
-                                                          tag=tag,
-                                                          graph_builder=SFSGraph(label_f=block_label_opt_ninstr,node_features='multi_push',regression=True),
-                                                          basic_block_filter=MinSizeOfInputBlockFilter(5)
-                                                          )
 
-dataset_db[20] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
-                                                          name='rl_size_opt',
-                                                          tag=tag,
-                                                          graph_builder=SFSGraph(label_f=block_label_opt_ninstr,node_features='multi_push',regression=True),
-                                                          basic_block_filter=MinSizeOfInputBlockFilter(5)
-                                                          )
 
-##
-dataset_db[21] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
-                                                          name='bex_size',
-                                                          tag=tag,
-                                                          graph_builder=SFSGraph(label_f=block_label_opt_ninstr,node_features='category',regression=True),
-                                                          basic_block_filter=MinSizeOfInputBlockFilter(1)
-                                                          )
+dataset_db[100] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
+                                                           name='100-8-17',
+                                                           tag=tag,
+                                                           graph_builder=SFSGraph(label_f=block_label_extra_instr,node_features='category',regression=True),
+                                                           basic_block_filter=MinSizeOfInputBlockFilter(5)
+                                                           )
+dataset_db[101] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
+                                                           name='jul22-0xa-8-17',
+                                                           tag=tag,
+                                                           graph_builder=SFSGraph(label_f=block_label_extra_instr,node_features='category',regression=True),
+                                                           basic_block_filter=MinSizeOfInputBlockFilter(5)
+                                                           )
+dataset_db[102] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
+                                                           name='jul22-0xABC-8-17',
+                                                           tag=tag,
+                                                           graph_builder=SFSGraph(label_f=block_label_extra_instr,node_features='category',regression=True),
+                                                           basic_block_filter=MinSizeOfInputBlockFilter(5)
+                                                           )
 
-dataset_db[22] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
-                                                          name='oms_size',
-                                                          tag=tag,
-                                                          graph_builder=SFSGraph(label_f=block_label_opt_ninstr,node_features='category',regression=True),
-                                                          basic_block_filter=MinSizeOfInputBlockFilter(1)
-                                                          )
 
-dataset_db[23] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
-                                                          name='rl_size_opt',
-                                                          tag=tag,
-                                                          graph_builder=SFSGraph(label_f=block_label_opt_ninstr,node_features='category',regression=True),
-                                                          basic_block_filter=MinSizeOfInputBlockFilter(1)
-                                                          )
+dataset_db[103] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
+                                                           name='100-8-17',
+                                                           tag=tag,
+                                                           graph_builder=SFSGraph(label_f=block_label_extra_instr,node_features='multi_push',regression=True),
+                                                           basic_block_filter=MinSizeOfInputBlockFilter(1)
+                                                           )
+dataset_db[104] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
+                                                           name='jul22-0xa-8-17',
+                                                           tag=tag,
+                                                           graph_builder=SFSGraph(label_f=block_label_extra_instr,node_features='multi_push',regression=True),
+                                                           basic_block_filter=MinSizeOfInputBlockFilter(1)
+                                                           )
+dataset_db[105] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
+                                                           name='jul22-0xABC-8-17',
+                                                           tag=tag,
+                                                           graph_builder=SFSGraph(label_f=block_label_extra_instr,node_features='multi_push',regression=True),
+                                                           basic_block_filter=MinSizeOfInputBlockFilter(1)
+                                                           )
+
+#
+dataset_db[1000] = lambda tag: SequenceBasedBasicSplitDataset(root='data',
+                                                            name='hierarchy',
+                                                            tag=tag
+                                                        )
 
 def load_dataset(id):
     print(f'Loading dataset with id {id}')

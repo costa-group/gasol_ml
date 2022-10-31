@@ -48,6 +48,7 @@ class SequenceBasedBasicBlocksDataset(SequenceDataset):
         labels_list = []
         info_list = []
         csv_dir = f'{self.raw_dir}/csv'
+        i=0
         for csv_filename in os.listdir(csv_dir):
             csv_filename_noext = os.path.splitext(csv_filename)[0]
             with open(f'{csv_dir}/{csv_filename}', newline='') as csvfile:

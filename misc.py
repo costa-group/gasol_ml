@@ -2,21 +2,21 @@ import numpy as np
 import torch_geometric
 
 
-def print_dataset_stats(dataset):
+def print_dataset_stats(dataset, regression=False):
     if issubclass(type(dataset),torch_geometric.data.Dataset):
-        print_dataset_stats_g(dataset)
+        print_dataset_stats_g(dataset,regression=regression)
     else:
-        print_dataset_stats_s(dataset)
+        print_dataset_stats_s(dataset,regression=regression)
 
     
-def print_dataset_stats_g(dataset,show_dist=True):
+def print_dataset_stats_g(dataset,show_dist=True, regression=False):
     print()
     print(f'Dataset: {dataset}:')
     print('====================')
     print(f'Number of graphs: {len(dataset)}')
     print(f'Number of features: {dataset.num_features}')
 
-    if show_dist:
+    if show_dist and not regression:
         print("Class distribution:")
         print('===================')
         print(f'Number of classes: {dataset.num_classes}')
@@ -31,14 +31,14 @@ def print_dataset_stats_g(dataset,show_dist=True):
         print()
 
 
-def print_dataset_stats_s(dataset,show_dist=True):
+def print_dataset_stats_s(dataset,show_dist=True, regression=False):
     print()
     print(f'Dataset: {dataset}:')
     print('====================')
     print(f'Number of sequences: {len(dataset)}')
     print(f'Input sizes: {dataset.vocab_size}')
 
-    if show_dist:
+    if show_dist and not regression:
         print("Class distribution:")
         print('===================')
         print(f'Number of classes: {dataset.num_classes}')

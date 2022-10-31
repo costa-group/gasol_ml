@@ -45,15 +45,20 @@ class SequenceBasedBasicSplitDataset(SequenceDataset):
     def process(self):
         print("Loading environment ...")
         env = GasolEnv(source_path=self.raw_dir)
+        print("Constructing all sequences ...")
         env.calculate_state_values(gen_sequences=True)
-        print("Constructing sequences ...")
-
+        ts = len(env.sequences_store)
+        print(f'Encoding {ts} sequences ...')
+        
         
         data_list = []
         labels_list = []
         info_list = []
 
+        i = 0
         for (left,right,value,action) in env.sequences_store:
+            print(f'encoding sequence {i} out of {ts}')
+            i += 1
             left_s = self.sequence_builder.build_seq_from_bytecode( ' '.join(left) )
             right_s = self.sequence_builder.build_seq_from_bytecode( ' '.join(right) )
             seq = []

@@ -191,7 +191,7 @@ class BytecodeSequence:
         # compute label -- must get rid of self.regression, it is ugly!!
         label = self.label_f(block_info,block_sfs)
         if self.regression:
-            y = torch.tensor([[label]]).to(torch.float)
+            y = torch.tensor([label]).to(torch.float)
         else:
             y = torch.tensor(label).to(torch.long)            
 

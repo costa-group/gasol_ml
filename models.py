@@ -11,30 +11,33 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 class Model_1(torch.nn.Module):
     def __init__(self, hidden_channels, in_channels, out_channels):
         super(Model_1, self).__init__()
-        gnn = GraphConv #SGConv #GraphConv #SAGEConv #SGConv #GCNConv 
+        gnn = GraphConv  #SGConv #GraphConv #SAGEConv #SGConv #GCNConv 
         self.conv1 = gnn(in_channels, hidden_channels,  aggr='mean')
         self.conv2 = gnn(hidden_channels, hidden_channels,  aggr='mean')
         self.conv3 = gnn(hidden_channels, hidden_channels,  aggr='mean')
         # self.conv4 = gnn(hidden_channels, hidden_channels,  aggr='mean')
         # self.conv5 = gnn(hidden_channels, hidden_channels,  aggr='mean')
         # self.conv6 = gnn(hidden_channels, hidden_channels,  aggr='mean')
-        # self.lin1 = Linear(hidden_channels, hidden_channels)
+        self.lin1 = Linear(hidden_channels, hidden_channels)
+        self.lin2 = Linear(hidden_channels, hidden_channels)
+        # self.lin3 = Linear(hidden_channels, hidden_channels)
         self.lin = Linear(hidden_channels, out_channels)
+#        self.bn = BatchNorm(hidden_channels)
+
+
     def forward(self, data):
 
         x, edge_index, batch = data.x, data.edge_index, data.batch
-        
-        
         # 1. Obtain node embeddings 
         x = self.conv1(x, edge_index)
         x = x.relu()
 
         x = self.conv2(x, edge_index)
         x = x.relu()
+        # x = self.bn2(x)
 
         x = self.conv3(x, edge_index)
-        x = x.relu()
-        
+
         # x = self.conv4(x, edge_index)
         # x = x.relu()
         
@@ -43,14 +46,22 @@ class Model_1(torch.nn.Module):
         
         # x = self.conv6(x, edge_index)
         # x = x.relu()
-        
+
+#        x = self.bn(x)
+
         # 2. Readout layer
         x = global_mean_pool(x, batch)  # [batch_size, hidden_channels]
 
         x = F.dropout(x, p=0.5, training=self.training)
+        # x = x.relu()
+
+        x = self.lin1(x)
         x = x.relu()
 
-        # x = self.lin1(x)
+        x = self.lin2(x)
+        x = x.relu()
+
+        # x = self.lin3(x)
         # x = x.relu()
 
         # 3. Apply a final classifier

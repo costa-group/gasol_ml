@@ -91,6 +91,7 @@ class GasolEnv:
                             self.sequences_store.append((seq[i:j+1],seq[j+1:k+1],values[i][j][k],actions[i][j][k])) # (prefix,suffice,action)
 
     def calculate_state_values(self, gen_sequences = False):
+        print(f'total initial states = {len(self.init_states)}')
         if gen_sequences:
             self.sequences_store = []
 
@@ -103,6 +104,7 @@ class GasolEnv:
         for i in range(len(self.init_states)):
             seq = self.init_states[i]
             curr_n = len(seq)
+            print(f'processing state {i} of length {curr_n}')
             if  n < curr_n:
                 n = curr_n
                 values = np.zeros((n,n,n))

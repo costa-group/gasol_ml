@@ -1,6 +1,8 @@
 
 import torch
 from torch_geometric.data import Data
+import networkx as nx
+
 # from opcodes import vocab  as single_push_vocab, vocab_ as multi_push_vocab, is_push_instr, is_memory_instr, is_store_instr
 from opcodes import vocab as single_push_vocab, vocab_ as multi_push_vocab, is_push_instr, is_memory_read_instr, is_memory_write_instr, is_store_read_instr, is_store_write_instr, is_swap_instr, is_dup_instr, is_comm_instr, split_bytecode_
 
@@ -115,11 +117,11 @@ def node_feature_iovar_com_category(node_info):
 class SFSGraph:
     
     def __init__(self,
-                 in_stk_order=True,    # connect in_stk nodes with edges
-                 out_stk_order=True,   # connect out_stk nodes with edges
+                 in_stk_order=False,    # connect in_stk nodes with edges
+                 out_stk_order=False,   # connect out_stk nodes with edges
                  add_const_nodes=True, # add nodes for constants (the input to push, several push might share the same number)
                  add_dep_edges=True,   # add egdes between instruction that are declared dependent in the sfs
-                 node_features='single_push', #  node features builder (single_push, multi_push, category)
+                 node_features='category', #  node features builder (single_push, multi_push, category)
                  label_f=None,         # function for calculating the label
                  edges='both',      # can be 'forward', 'backwards' or 'both'                 
                  regression=False):    # if it is a regression problem (should be eliminated at some point, it is ugly)
@@ -141,28 +143,26 @@ class SFSGraph:
         self.edges = edges
         self.regression = regression
 
-        
-    def build_graph(self, block_info, block_sfs):
 
-        # we only handle benchamrks for which a model was found -- should have been eliminated earlier
-        if not block_info["model_found"]=="True":
-            return None
-
-        # ignore those with empty sfs -- should have been eliminated earlier
-        if len(block_sfs["user_instrs"])==0:
-            return None
-
+    def build_graph_from_sfs(self, block_sfs):
+ 
         number_of_nodes = 0           # node identifiers should start from zero and be consecutive
         nodes_map = {}                # s(i) -> idx, "PUSH_0" -> idx, ...
         edges_list = []               # [ [src,tgt],.... ]
         node_features_list = []       # the i-th element is the feasters vector of node i
         inverse_map = {}              # maps the output variable of an instructions to its 'id', used to avoid temporal variable nodes 
 
+
+        # node 0/1 is an auxiliary node connected to all input/output
+        node_features_list.append(self.node_features_f("empty"))
+        node_features_list.append(self.node_features_f("empty"))
+        number_of_nodes += 2
         
         # create the the input variable nodes 
         for node_id in block_sfs["src_ws"]:
             if not node_id in nodes_map:  # this check is because the data might have some duplicates
                 nodes_map[node_id] = number_of_nodes
+                edges_list.append( [0, number_of_nodes] )
                 number_of_nodes = number_of_nodes + 1
                 node_features_list.append(self.node_features_f("in_var"))
             else:
@@ -176,6 +176,7 @@ class SFSGraph:
         # create output variable nodes (one for each position in the output stack)
         for i in range(len(block_sfs["tgt_ws"])):
             nodes_map[f"o({i})"] = number_of_nodes
+            edges_list.append( [number_of_nodes,1] )
             number_of_nodes = number_of_nodes + 1
             node_features_list.append(self.node_features_f("out_var"))
 
@@ -243,8 +244,22 @@ class SFSGraph:
                 node_features_list.append(features)
                 this_node_id = number_of_nodes
                 number_of_nodes = number_of_nodes + 1
+                edges_list.append([0,this_node_id])
                 for k in nums[n]:
                     edges_list.append([this_node_id,k])
+
+#        print(f'> {len(block_sfs["tgt_ws"])}')
+        # if len(block_sfs["tgt_ws"]) > 0 and len(block_sfs["src_ws"])>0:
+        #     G = nx.Graph(edges_list)
+        #     d1 = nx.algorithms.connectivity.connectivity.local_edge_connectivity(G,0,1)
+        #     d2 = nx.algorithms.connectivity.connectivity.local_node_connectivity(G,0,1)
+        # else:
+        #     d1 = d2 = 0
+        # n = len(node_features_list)
+        # for v in node_features_list:
+        #     # v.append(n)
+        #     v.append(d1) 
+        #     v.append(d2)            
 
         # add dependency edges
         if self.add_dep_edges:
@@ -263,6 +278,20 @@ class SFSGraph:
 
         # tensor for edges
         edge_index = torch.tensor(edges_list, dtype=torch.long).t()
+
+        return (x, edge_index)
+    
+    def build_graph(self, block_info, block_sfs):
+
+        # we only handle benchamrks for which a model was found -- should have been eliminated earlier
+        if not block_info["model_found"]=="True":
+            return None
+
+        # ignore those with empty sfs -- should have been eliminated earlier
+        if len(block_sfs["user_instrs"])==0:
+            return None
+
+        x, edge_index = self.build_graph_from_sfs(block_sfs)
         
         # compute label -- must get rid of self.regression, it is ugly!!
         label = self.label_f(block_info,block_sfs)
@@ -273,9 +302,11 @@ class SFSGraph:
 
         # construct pyg Data object 
         d = Data(x=x, edge_index=edge_index, y=y)
-
+        
         # fill in extra information in Data (to be used in precision evaluators)
         d.initial_n_instrs = torch.tensor(int(block_info["initial_n_instrs"]))
+        d.sfs_size = torch.tensor(len(block_sfs["user_instrs"]))
+        d.size_saved = torch.tensor(float(block_info["saved_size"]))
 
         return d
 

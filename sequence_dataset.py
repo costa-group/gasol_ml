@@ -42,11 +42,11 @@ class SequenceDataset(torch.utils.data.Dataset):
         
         self.num_classes = max(self._labels)+1
 
-    def to_list(self):
-         l = []
-         for i in range(len(self._data)):
-             l.append( (self._data[i],self._labels[i],self._lengths[i]) )
-         return l
+    # def to_list(self):
+    #      l = []
+    #      for i in range(len(self._data)):
+    #          l.append( (self._data[i],self._labels[i],self._lengths[i]) )
+    #      return l
 #        return [ (data,label,length) for (data,label,length) in (self._data,self.labels,self.lengths) ]
         
     def _download(self):
