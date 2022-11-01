@@ -1,0 +1,11 @@
+obtained with:
+
+  python3 test.py -ds 101 -ts 100 -e 98 -lr 0.001 -lf 'mse' -of last_model.pyt
+
+used Model_1
+
+ 3 layers of
+
+  GraphConv -> relu -> GraphConv -> relu -> GraphConv ->
+     gloabl_mean -> F.dropout -> lin -> relu -> lin -> relu -> lin -> out
+
