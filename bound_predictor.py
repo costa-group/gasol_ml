@@ -1,10 +1,8 @@
 from sfs_graph import SFSGraph
 from models import Model_1
-from label_generators import block_label_gas_saved, block_label_size_saved, block_label_opt_ninstr, block_label_extra_instr
 
 from pathlib import Path
 import torch
-import math
 import json
 import argparse
 
@@ -18,7 +16,7 @@ class ModelQuery:
         self.model = Model_1(**model_args)
         self.model.load_state_dict(model_state_dic)
         self.model.eval()
-        self.sfs_builder = SFSGraph(label_f=block_label_extra_instr,node_features='multi_push',regression=True)
+        self.sfs_builder = SFSGraph(node_features='multi_push',regression=True)
 
     def eval(self, block_sfs):
         x, edge_index = self.sfs_builder.build_graph_from_sfs(block_sfs)
@@ -30,7 +28,7 @@ class ModelQuery:
 
         out = self.model(data)
 
-        bound = math.ceil(out.item()) + len(block_sfs["user_instrs"])
+        bound = round(out.item()) + len(block_sfs["user_instrs"])
 
         return bound
 
@@ -42,7 +40,10 @@ def example(model_filename):
     print(f'Bound: {bound}')
 
 
-
+# Usage example:
+#
+#   python3 bound_predictor.py -m saved_models/bound_predictor_size_01112022_0645_costa2.pyt
+#
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 

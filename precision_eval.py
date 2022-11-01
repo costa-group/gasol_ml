@@ -1,6 +1,4 @@
-import math
 import random
-import operator
 
 # This module includes classes that are used as precision
 # evaluators. Each such class should provide methods
@@ -97,7 +95,7 @@ class CountEpsError():
 
         # traverse all answers and collect some stats
         for i in range(len(pred)):
-            diff = math.ceil(pred[i])-labels[i]
+            diff = round(pred[i].item())-labels[i]
             if abs(diff) < self.eps:
                 self.correct += 1
 
@@ -137,7 +135,7 @@ class SafeBound():
 
         # traverse all answers and collect some stats
         for i in range(len(pred)):
-            p = int(math.ceil(pred[i].item()))
+            p = int(round(pred[i].item()))
             l = int(labels[i].item())
             if p<0:
                 self.neg += 1
@@ -152,7 +150,7 @@ class SafeBound():
         return f'SAFE'
 
     def report(self):
-        return f'{self.total}: ={self.hit}),>{self.gt},<{self.lt},M{self.neg}'
+        return f'{self.total}: ={self.hit}({self.hit/self.total*100:.2f}%),>{self.gt}({self.gy/self.total*100:.2f}%),<{self.lt}({self.lt/self.total*100:.2f}%),M{self.neg}'
 
     def loss(self):
             return 1 - (self.hit+self.gt)/self.total
@@ -165,6 +163,7 @@ class PreciseBound():
     def __init__(self):
         self.canbeimprove = 0
         self.hit = 0
+        self.imp = 0
         self.lt = 0
         self.gt = 0
         self.eq = 0
@@ -173,6 +172,7 @@ class PreciseBound():
     def reset(self):
         self.canbeimprove = 0
         self.hit = 0
+        self.imp = 0
         self.lt = 0
         self.gt = 0
         self.eq = 0
@@ -193,11 +193,13 @@ class PreciseBound():
 
         # traverse all answers and collect some stats
         for i in range(len(pred)):
-            p = math.ceil(pred[i])
+            p = round(pred[i].item())
             if init_n[i]>sfs_size[i]+labels[i]: # can be improved
                 self.canbeimprove += 1
-                if p+sfs_size[i] >= labels[i]+sfs_size[i] and p+sfs_size[i] < init_n[i]: 
-                    self.hit += 1
+                if p+sfs_size[i] == labels[i]+sfs_size[i]:
+                    self.hit += 1                   
+                elif p+sfs_size[i] > labels[i]+sfs_size[i] and p+sfs_size[i] < init_n[i]: 
+                    self.imp += 1
                 elif p+sfs_size[i] == init_n[i]:
                     self.eq += 1
                 elif p+sfs_size[i] > init_n[i]:
@@ -211,7 +213,7 @@ class PreciseBound():
         return f'PR'
 
     def report(self):
-        return f'{self.canbeimprove} (H{self.hit},={self.eq},>{self.gt},<{self.lt})'
+        return f'{self.canbeimprove} (H{self.hit}({self.hit/self.canbeimprove*100:.2f}%),I{self.imp}({self.imp/self.canbeimprove*100:.2f}%),={self.eq}({self.eq/self.canbeimprove*100:.2f}%),>{self.gt}({self.gt/self.canbeimprove*100:.2f}%),<{self.lt}({self.lt/self.canbeimprove*100:.2f}%))'
 
     def loss(self):
             return 1 - self.hit/self.canbeimprove

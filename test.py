@@ -142,7 +142,15 @@ def train_s_reg(epochs=10):
              precision_evals=[CriterionLoss(),CountEpsError(eps=1),SafeBound(), PreciseBound()],
              regression=True)
 
-def train_g_reg(epochs=10, dataset_id=None, testset_id=None, loadmodel=None, outfilename=None):
+def train_g_reg(epochs=10,
+                dataset_id=None,
+                testset_id=None,
+                loss_f_tag=None,
+                optimizer_tag=None,
+                lr=1e-3,
+                loadmodel=None,
+                outfilename=None):
+    
     # create the data set if needed
     if dataset_id is not None:
         dataset = load_dataset(dataset_id)
@@ -171,17 +179,14 @@ def train_g_reg(epochs=10, dataset_id=None, testset_id=None, loadmodel=None, out
 
     if model_state_dic is not None:
         model.load_state_dict(model_state_dic)
-    
-    # optimizer
-    #
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-    #optimizer = torch.optim.SGD(model.parameters(), lr=1e-2)
 
-    #loss function
-    #
-    #criterion = torch.nn.MSELoss(reduction='mean')
-    #criterion = torch.nn.SmoothL1Loss(reduction='mean',beta=1)
-    criterion = torch.nn.L1Loss(reduction='mean')
+    criterion = create_loss_function(loss_f_tag)
+    optimizer = create_optimizer(model, optimizer_tag, lr)
+
+    print()
+    print(f'Loss function: {criterion}')
+    print(f'Optimizer: {optimizer}')
+    print()
     
     training(model=model,
              criterion=criterion,
@@ -200,21 +205,54 @@ def train_g_reg(epochs=10, dataset_id=None, testset_id=None, loadmodel=None, out
     if dataset_id is not None and outfilename is not None:
         save_model(model,model_args,outfilename)
 
+def create_loss_function(tag):
+    if tag == 'mse':
+        loss_f = torch.nn.MSELoss(reduction='mean')
+    elif tag == 'l1':
+        loss_f = torch.nn.L1Loss(reduction='mean')
+    else:
+        raise Exception(f'Invalid loss function: {tag}')
+
+    return loss_f
+
+def create_optimizer(model, tag, lr):
+    if tag == 'adam':
+        optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    elif tag == 'sgd':
+        optimizer = torch.optim.SGD(model.parameters(), lr=lr)
+    else:
+        raise Exception(f'Invalid optimizer: {tag}')
+
+    return optimizer
 
 def save_model(model,model_args,filename):
     torch.save( (model_args,model.state_dict()), Path(__file__).parent.joinpath(Path(filename)).resolve() )
 
 def main():
+    cmd = ' '.join(sys.argv)
+    print(f'Command line: {cmd}')
+    print()
+    
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-e', '--epochs', type=int)
+    parser.add_argument('-e', '--epochs', type=int, default=1)
     parser.add_argument('-ds', '--dataset', type=int)
     parser.add_argument('-ts', '--testset', type=int)
     parser.add_argument('-of', '--outfilename', type=str)
     parser.add_argument('-lm', '--loadmodel', type=str)
+    parser.add_argument('-lr', '--learningrate', type=float, default=1e-3)
+    parser.add_argument('-lf', '--lossfunction', type=str, default='mse')
+    parser.add_argument('-opt', '--optimizer', type=str, default='adam')
     args = parser.parse_args()
 
-    train_g_reg(epochs=args.epochs,dataset_id=args.dataset,testset_id=args.testset,loadmodel=args.loadmodel,outfilename=args.outfilename)
+    train_g_reg(epochs=args.epochs,
+                dataset_id=args.dataset,
+                testset_id=args.testset,
+                loadmodel=args.loadmodel,
+                loss_f_tag=args.lossfunction,
+                optimizer_tag=args.optimizer,
+                lr=args.learningrate,
+                outfilename=args.outfilename)
 
         
 if __name__ == "__main__":

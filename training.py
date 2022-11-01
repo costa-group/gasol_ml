@@ -7,7 +7,7 @@ from precision_eval import CriterionLoss, CorrectClass
 from precision_cmp import train_first_elem_cmp, val_first_elem_cmp
 
 
-def myloss(l,r):
+def myloss1(l,r):
     loss = (l-r).square().mean()
     return loss
 
@@ -23,7 +23,7 @@ def myloss1(l,r):
     loss = ave/len(l)
     return loss
 
-def myloss2(l,r):
+def myloss(l,r):
     loss = (l-r).abs().mean()
     return loss
 
@@ -31,7 +31,7 @@ def myloss2(l,r):
 # Training a model on a given data, it returns the accumulated loss
 #
 def train(model, criterion, optimizer, loader, get_label_f=None, batch_transformer=lambda d : d):
-    criterion = myloss
+#    criterion = myloss
     model.train()
     for data in loader:
         data = batch_transformer(data)  # trasfom the batch if needed
@@ -46,7 +46,7 @@ def train(model, criterion, optimizer, loader, get_label_f=None, batch_transform
 # Test a model on a given data. 
 #
 def test_c(model,criterion,loader,get_label_f=None, batch_transformer=lambda d : d, precision_evals=[]):
-    criterion = myloss
+#    criterion = myloss
     model.eval()
 
     with torch.no_grad():
