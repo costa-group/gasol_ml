@@ -5,6 +5,10 @@ from pathlib import Path
 import torch
 import json
 import argparse
+import os
+import csv
+import json
+import time
 
 class Data():
     pass
@@ -19,7 +23,7 @@ class ModelQuery:
         self.sfs_builder = SFSGraph(node_features='multi_push',regression=True)
 
     def eval(self, block_sfs):
-        with torch.no_grad():
+        #with torch.no_grad():
 
             x, edge_index = self.sfs_builder.build_graph_from_sfs(block_sfs)
 
@@ -41,7 +45,31 @@ def example(model_filename):
     bound = query.eval(block_sfs)
     print(f'Bound: {bound}')
 
+def testall(model_filename):
+    query = ModelQuery(model_filename)
+    total_time = 0.0
 
+    i=0
+    raw_dir = 'data/jul22-0xa-8-17/raw'
+    csv_dir = f'{raw_dir}/csv'
+    for csv_filename in os.listdir(csv_dir):
+        csv_filename_noext = os.path.splitext(csv_filename)[0]
+        with open(f'{csv_dir}/{csv_filename}', newline='') as csvfile:
+            csv_reader = csv.DictReader(csvfile)
+            for block_info in csv_reader:
+                block_id = block_info['block_id']
+                with open(f'{raw_dir}/jsons/{csv_filename_noext}/{block_id}_input.json', 'r') as f:
+                    block_sfs = json.load(f)
+                    st = time.time()
+                    bound = query.eval(block_sfs)
+                    et = time.time()
+                    total_time += (et - st)
+                    i += 1
+                    if i % 1000 == 0:
+                        print(f'{i}: {total_time}')
+
+    print(f'total time: {total_time}')
+    
 # Usage example:
 #
 #   python3 bound_predictor.py -m saved_models/bound_predictor_size_01112022_0645_costa2.pyt
@@ -52,4 +80,4 @@ if __name__ == "__main__":
     parser.add_argument('-m', '--model', type=str, required=True)
     args = parser.parse_args()
 
-    example(args.model)
+    testall(args.model)
