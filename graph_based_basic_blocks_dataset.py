@@ -63,6 +63,3 @@ class GraphBasedBasicBlocksDataset(InMemoryDataset):
         data, slices = self.collate(data_list)
 
         torch.save((data, slices), self.processed_paths[0])
-
-    def extract_label(d):
-        return d.y

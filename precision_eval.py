@@ -95,7 +95,7 @@ class CountEpsError():
 
         # traverse all answers and collect some stats
         for i in range(len(pred)):
-            diff = round(pred[i].item())-labels[i]
+            diff = pred[i].item()-labels[i]
             if abs(diff) < self.eps:
                 self.correct += 1
 
@@ -150,7 +150,7 @@ class SafeBound():
         return f'SAFE'
 
     def report(self):
-        return f'{self.total}: ={self.hit}({self.hit/self.total*100:.2f}%),>{self.gt}({self.gy/self.total*100:.2f}%),<{self.lt}({self.lt/self.total*100:.2f}%),M{self.neg}'
+        return f'{self.total}: ={self.hit}({self.hit/self.total*100:.2f}%),>{self.gt}({self.gt/self.total*100:.2f}%),<{self.lt}({self.lt/self.total*100:.2f}%),M{self.neg}'
 
     def loss(self):
             return 1 - (self.hit+self.gt)/self.total
@@ -236,6 +236,7 @@ class TimeGain_vs_OptLoss():
         self.total_time = 0
         self.lost_opt = 0
         self.saved_time = 0
+        self.saved_time_w = 0
         self._correct = 0
         self.wrong_0_ans = 0
         self.wrong_1_answ = 0
@@ -247,6 +248,7 @@ class TimeGain_vs_OptLoss():
         self.total_time = 0
         self.lost_opt = 0
         self.saved_time = 0
+        self.saved_time_w = 0
         self._correct = 0
         self.wrong_0_ans = 0
         self.wrong_1_answ = 0
@@ -278,6 +280,8 @@ class TimeGain_vs_OptLoss():
             # how many 0 answers are wrong, and how many 1 answers are wrong    
             if labels[i].item() == 1 and pred[i].item() == 0:
                 self.wrong_0_ans += 1
+                self.saved_time_w += time[i].item()
+                # print(data[2][i]," ",size_saved[i])
             elif labels[i].item() == 0 and pred[i].item() == 1:
                 self.wrong_1_answ += 1
                 
@@ -287,7 +291,7 @@ class TimeGain_vs_OptLoss():
         return "TimeGain_OptLoss"
     
     def report(self):
-        return f'{self.saved_time:.2f}/{self.total_time:.2f},{self.lost_opt:.2f}/{self.total_opt:.2f})@({self.correct},{self.wrong_0_ans},{self.wrong_1_answ}'
+        return f'{self.saved_time:.2f}/{self.total_time:.2f},{self.lost_opt:.2f}/{self.total_opt:.2f})@({self.correct},{self.wrong_0_ans}({self.saved_time_w/self.saved_time*100:.2f}%),{self.wrong_1_answ}'
 
     def loss(self):
         return 1.0-self.correct/self.total

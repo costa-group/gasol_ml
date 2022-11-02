@@ -68,7 +68,7 @@ def node_feature_com_category(opcode):
 
     return idx
 
-# one-hot vector:
+# one-hot vector: clasify instructions by the number of elements that they remove from the stack
 #
 #  [commutative, mem_read_inst, mem_write_inst, store_read_inst, store_write_inst, push_inst, pop, swap_inst, dup_inst, other_inst]
 #
@@ -135,8 +135,8 @@ class BytecodeSequence:
         self.encode_consts = encode_consts
 
         if encode_consts:
-            self.vocab_consts_shift = 17
-            self.vocab_consts =['#','0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F']
+            self.vocab_consts_shift = 12
+            self.vocab_consts =['#','!','0','1','2','3','4','5','6','7','8','9']
         else:
             self.vocab_consts_shift = 0
             self.vocab_consts =[]
@@ -153,10 +153,12 @@ class BytecodeSequence:
 
         if self.encode_consts:
             bytecode_sequence = []
+            consts = list(dict.fromkeys((filter(lambda x: x.startswith('#'), bytecode_sequence_orig)))) # all constants in a list, without repetitions
             for t in bytecode_sequence_orig:
                 if t.startswith("#"):
+                    t = f'#{consts.index(t)}!' # repetitions are kept, but with smaller number of digits, we also add ! at the end
                     for c in t:
-                        bytecode_sequence.append(c.upper())
+                        bytecode_sequence.append(c.upper()) # upper used when we had hex, i keep it for now
                 else:
                     bytecode_sequence.append(t)
         else:
@@ -184,10 +186,6 @@ class BytecodeSequence:
 
         x = torch.tensor(bytecode_ids_sequence, dtype=torch.long).to(torch.long)
 
-        # print(bytecode_sequence_orig)
-        # print(bytecode_sequence)
-        # print(x)
-        
         # compute label -- must get rid of self.regression, it is ugly!!
         label = self.label_f(block_info,block_sfs)
         if self.regression:

@@ -14,56 +14,51 @@ from basic_block_filters import MinSizeOfInputBlockFilter
 from sequence_based_block_split_dataset import SequenceBasedBasicSplitDataset
 
 
+
+
+
 dataset_db={};
 
 ##
-
 ##
 dataset_db[0] = lambda tag: SequenceBasedBasicBlocksDataset(root='data',
                                                             name='100-8-17',
                                                             tag=tag,
-                                                            sequence_builder=BytecodeSequence(label_f=block_label_size_saved,encoding='category'),
-                                                            basic_block_filter=MinSizeOfInputBlockFilter(5)
-                                                        )
+                                                            sequence_builder=BytecodeSequence(label_f=block_label_size_saved,encoding='multi_push'),
+                                                            basic_block_filter=MinSizeOfInputBlockFilter(1)
+                                                            )
 
 dataset_db[1] = lambda tag: SequenceBasedBasicBlocksDataset(root='data',
                                                             name='jul22-0xa-8-17',
                                                             tag=tag,
-                                                            sequence_builder=BytecodeSequence(label_f=block_label_size_saved,encoding='category'),
-                                                            basic_block_filter=MinSizeOfInputBlockFilter(5)
-                                                        )
+                                                            sequence_builder=BytecodeSequence(label_f=block_label_size_saved,encoding='multi_push'),
+                                                            basic_block_filter=MinSizeOfInputBlockFilter(1)
+                                                            )
 
 dataset_db[2] = lambda tag: SequenceBasedBasicBlocksDataset(root='data',
                                                             name='jul22-0xABC-8-17',
                                                             tag=tag,
-                                                            sequence_builder=BytecodeSequence(label_f=block_label_size_saved,encoding='category'),
-                                                            basic_block_filter=MinSizeOfInputBlockFilter(5)
-                                                        )
+                                                            sequence_builder=BytecodeSequence(label_f=block_label_size_saved,encoding='multi_push'),
+                                                            basic_block_filter=MinSizeOfInputBlockFilter(1)
+                                                            )
 
-##
 dataset_db[3] = lambda tag: SequenceBasedBasicBlocksDataset(root='data',
-                                                            name='100-8-17',
+                                                            name='jul22-0xb-8.17',
                                                             tag=tag,
-                                                            sequence_builder=BytecodeSequence(label_f=block_label_opt_ninstr,encoding='category',regression=True),
-                                                            basic_block_filter=MinSizeOfInputBlockFilter(5)
-                                                        )
+                                                            sequence_builder=BytecodeSequence(label_f=block_label_size_saved,encoding='multi_push'),
+                                                            basic_block_filter=MinSizeOfInputBlockFilter(1)
+                                                            )
 
 dataset_db[4] = lambda tag: SequenceBasedBasicBlocksDataset(root='data',
-                                                            name='jul22-0xa-8-17',
+                                                            name='jul22-0xd-8.17',
                                                             tag=tag,
-                                                            sequence_builder=BytecodeSequence(label_f=block_label_opt_ninstr,encoding='category',regression=True),
-                                                            basic_block_filter=MinSizeOfInputBlockFilter(5)
-                                                        )
-
-dataset_db[5] = lambda tag: SequenceBasedBasicBlocksDataset(root='data',
-                                                            name='jul22-0xABC-8-17',
-                                                            tag=tag,
-                                                            sequence_builder=BytecodeSequence(label_f=block_label_opt_ninstr,encoding='category',regression=True),
-                                                            basic_block_filter=MinSizeOfInputBlockFilter(5)
-                                                        )
+                                                            sequence_builder=BytecodeSequence(label_f=block_label_size_saved,encoding='multi_push'),
+                                                            basic_block_filter=MinSizeOfInputBlockFilter(1)
+                                                            )
 
 
-
+##
+##
 dataset_db[100] = lambda tag: GraphBasedBasicBlocksDataset(root='data',
                                                            name='100-8-17',
                                                            tag=tag,

@@ -1,5 +1,18 @@
 import numpy as np
 import torch_geometric
+import torch
+
+def calc_dist(dataset, get_class_f_for_balancing=None):
+    def get_class(d):
+        c = get_class_f_for_balancing(d)
+        return c.item() if type(c) == torch.Tensor else c
+
+    all_labels = [ get_class(d) for d in dataset]
+    labels_unique, counts = np.unique(all_labels,return_counts=True)
+    n = sum(counts)
+    dist = [  counts[i]/n for i in range(len(labels_unique)) ]
+
+    return dist
 
 
 def print_dataset_stats(dataset, regression=False):
