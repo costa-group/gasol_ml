@@ -119,7 +119,7 @@ def train_s(epochs=10,
         }
         model_state_dic = None
 
-    model = Model_2(**model_args)
+    model = Model_3(**model_args)
 
     if model_state_dic is not None:
         model.load_state_dict(model_state_dic)

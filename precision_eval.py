@@ -237,7 +237,9 @@ class TimeGain_vs_OptLoss():
         self.lost_opt = 0
         self.saved_time = 0
         self.saved_time_w = 0
-        self._correct = 0
+        self.correct = 0
+        self.correct_0 = 0
+        self.correct_1 = 0
         self.wrong_0_ans = 0
         self.wrong_1_answ = 0
 
@@ -249,7 +251,9 @@ class TimeGain_vs_OptLoss():
         self.lost_opt = 0
         self.saved_time = 0
         self.saved_time_w = 0
-        self._correct = 0
+        self.correct = 0
+        self.correct_0 = 0
+        self.correct_1 = 0
         self.wrong_0_ans = 0
         self.wrong_1_answ = 0
 
@@ -276,7 +280,14 @@ class TimeGain_vs_OptLoss():
             if pred[i].item() == 0:
                 self.lost_opt += max(0,size_saved[i].item())
                 self.saved_time += time[i].item()
+                
+            if pred[i].item() == 0 and labels[i].item() == 0:
+                self.correct_0 += 1
 
+            if pred[i].item() == 1 and labels[i].item() == 1:
+                self.correct_1 += 1
+
+                
             # how many 0 answers are wrong, and how many 1 answers are wrong    
             if labels[i].item() == 1 and pred[i].item() == 0:
                 self.wrong_0_ans += 1
@@ -291,7 +302,7 @@ class TimeGain_vs_OptLoss():
         return "TimeGain_OptLoss"
     
     def report(self):
-        return f'{self.saved_time:.2f}/{self.total_time:.2f},{self.lost_opt:.2f}/{self.total_opt:.2f})@({self.correct},{self.wrong_0_ans}({self.saved_time_w/self.saved_time*100:.2f}%),{self.wrong_1_answ}'
+        return f'{self.saved_time:.2f}/{self.total_time:.2f},{self.lost_opt:.2f}/{self.total_opt:.2f})@({self.correct}:{self.correct_0}:{self.correct_1},{self.wrong_0_ans}({self.saved_time_w/self.saved_time*100:.2f}%),{self.wrong_1_answ}'
 
     def loss(self):
         return 1.0-self.correct/self.total
@@ -311,7 +322,7 @@ class TimeGain_vs_OptLossRand():
         self.total_time = 0
         self.lost_opt = 0
         self.saved_time = 0
-        self._correct = 0
+        self.correct = 0
         self.wrong_0_ans = 0
         self.wrong_1_answ = 0
 
@@ -322,7 +333,7 @@ class TimeGain_vs_OptLossRand():
         self.total_time = 0
         self.lost_opt = 0
         self.saved_time = 0
-        self._correct = 0
+        self.correct = 0
         self.wrong_0_ans = 0
         self.wrong_1_answ = 0
 

@@ -1,5 +1,5 @@
 from bytecode_sequence import BytecodeSequence  
-from models import Model_2
+from fixed_models import Model_opt_classifier_size_03112022_1230_samirpc as Model
 
 from pathlib import Path
 import torch
@@ -10,8 +10,9 @@ import argparse
 
 class ModelQuery:
     def __init__(self,model_filename):
+        torch.set_num_threads(1)
         model_args, model_state_dic = torch.load(Path(__file__).parent.joinpath(Path(model_filename)).resolve())
-        self.model = Model_2(**model_args)
+        self.model = Model(**model_args)
         self.model.load_state_dict(model_state_dic)
         self.model.eval()
         self.sequence_builder = BytecodeSequence(encoding='multi_push')

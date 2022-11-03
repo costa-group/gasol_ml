@@ -113,7 +113,7 @@ class BytecodeSequence:
                  label_f=None,         # function for calculating the label
                  encoding = 'single_push', # can be 'single_push', 'multi_push', or 'category'
                  encode_consts = False,
-                 regression=False):
+                 regression = False):
 
         if encoding == 'single_push':
             self.encoding_f = node_features_com_single_push

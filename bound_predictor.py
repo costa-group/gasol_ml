@@ -1,5 +1,5 @@
 from sfs_graph import SFSGraph
-from models import Model_1
+from fixed_models import Model_bound_predictor_size_01112022_0645_costa2 as Model
 
 from pathlib import Path
 import torch
@@ -16,8 +16,9 @@ class Data():
 
 class ModelQuery:
     def __init__(self,model_filename):
+        torch.set_num_threads(1)
         model_args, model_state_dic = torch.load(Path(__file__).parent.joinpath(Path(model_filename)).resolve())
-        self.model = Model_1(**model_args)
+        self.model = Model(**model_args)
         self.model.load_state_dict(model_state_dic)
         self.model.eval()
         self.sfs_builder = SFSGraph(node_features='multi_push',regression=True)
@@ -50,6 +51,7 @@ def testall(model_filename):
     total_time = 0.0
 
     i=0
+    nm = ui = ex = 0
     raw_dir = 'data/jul22-0xa-8-17/raw'
     csv_dir = f'{raw_dir}/csv'
     for csv_filename in os.listdir(csv_dir):
@@ -60,15 +62,28 @@ def testall(model_filename):
                 block_id = block_info['block_id']
                 with open(f'{raw_dir}/jsons/{csv_filename_noext}/{block_id}_input.json', 'r') as f:
                     block_sfs = json.load(f)
+                    
                     st = time.time()
                     bound = query.eval(block_sfs)
                     et = time.time()
                     total_time += (et - st)
+
+                    # we only handle benchamrks for which a model was found -- should have been eliminated earlier
+                    if not block_info["model_found"]=="True":
+                        nm += 1
+                        # print(bound," ",block_info["initial_n_instrs"],bound<int(block_info["initial_n_instrs"]))
+                    # ignore those with empty sfs -- should have been eliminated earlier
+                    if len(block_sfs["user_instrs"])==0:
+                        ui += 1
+
+                    if not block_info["model_found"]=="True" and len(block_sfs["user_instrs"])==0:
+                        ex += 1
+                        
                     i += 1
                     if i % 1000 == 0:
-                        print(f'{i}: {total_time}')
+                        print(f'{i}: {total_time} {nm} {ui} {ex}')
 
-    print(f'total time: {total_time}')
+    print(f'total time: {total_time} {nm} {ui} {ex}')
     
 # Usage example:
 #

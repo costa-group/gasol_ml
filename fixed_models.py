@@ -7,11 +7,10 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 
 
-#
-class Model_1(torch.nn.Module):
+class Model_bound_predictor_size_01112022_0645_costa2(torch.nn.Module):
     def __init__(self, hidden_channels, in_channels, out_channels):
-        super(Model_1, self).__init__()
-        gnn = GraphConv  #SGConv #GraphConv #SAGEConv #SGConv #GCNConv 
+        super(Model_bound_predictor_size_01112022_0645_costa2, self).__init__()
+        gnn = GraphConv 
         self.conv1 = gnn(in_channels, hidden_channels,  aggr='mean')
         self.conv2 = gnn(hidden_channels, hidden_channels,  aggr='mean')
         self.conv3 = gnn(hidden_channels, hidden_channels,  aggr='mean')
@@ -53,54 +52,9 @@ class Model_1(torch.nn.Module):
 
 
 
-class Model_2(torch.nn.Module):
-    def __init__(self, hidden_channels, out_channels, vocab_size):
-        super(Model_2, self).__init__()
-        self.vocab_size = vocab_size
-        self.rnn = GRU(vocab_size, hidden_channels, 1)
-        self.lin = Linear(hidden_channels, out_channels)
-        self.lin1 = Linear(hidden_channels, hidden_channels)
-        self.lin2 = Linear(hidden_channels, hidden_channels)
-
-    def __build_features_vec(self,token):
-        features = [0]*self.vocab_size
-        features[ token ] = 1
-        return features
-
-    def forward(self, data):
-        x, lengths = data[0], data[2]
-
-        # change every token by a corresponding one-hot vector
-        x = torch.tensor([ [ self.__build_features_vec(i) for i in j ] for j in x.tolist() ]).to(torch.float)
-
-        # pack all sequences (they are assumed to be padded and sorted by length)
-        x = torch.nn.utils.rnn.pack_padded_sequence(x, lengths=lengths, batch_first=True)
-
-        # apply rnn 
-#        output, (x, cn) = self.rnn(x) # for LSTM
-        output, x = self.rnn(x) # gor GRU
-
-        # take the last output 
-        x = x[0]
-
-#        x.relu()
-        # dropout
-        x = F.dropout(x, p=0.5, training=self.training)
-
-        # final linear layer
-        x = self.lin1(x)
-        x = x.relu()
-        x = self.lin2(x)
-        x = x.relu()
-
-        x = self.lin(x)
-
-        
-        return x
-
-class Model_3(torch.nn.Module):
+class Model_opt_classifier_size_03112022_1230_samirpc(torch.nn.Module):
     def __init__(self, hidden_channels, out_channels, vocab_size, embed_dim=16):
-        super(Model_3, self).__init__()
+        super(Model_opt_classifier_size_03112022_1230_samirpc, self).__init__()
         self.emb = Embedding(vocab_size, embed_dim, padding_idx=0) # we assume 0 was used for padding sequences
         self.rnn = LSTM(embed_dim, hidden_channels, 1)
         self.lin = Linear(hidden_channels, out_channels)
@@ -134,4 +88,5 @@ class Model_3(torch.nn.Module):
         x = self.lin(x)
 
         return x
+
 
