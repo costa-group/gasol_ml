@@ -94,7 +94,7 @@ def client_example():
         # This object should be created only once, and then call eval as many as you like
         server = Pyro4.Proxy(f"PYRONAME:bound_predictor.server") 
 
-        for i in range(10):
+        for i in range(1000):
             block_sfs = json.loads(input_json)
             bound = server.eval(block_sfs)
             print(bound)
