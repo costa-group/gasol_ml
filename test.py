@@ -15,26 +15,22 @@ from pathlib import Path
 # pyg graphs
 #
 def label_of_pyg_graph(d):
-    return d.y
+    return d[3]
 
 def label_of_pyg_graph_for_balancing(d):
-    return d.y.item()
+    return d[3].item()
+
+def batch_transformer_for_pyg_graph(d):
+     return 'pyg', { 'initial_n_instrs' : d.initial_n_instrs, 'sfs_size': d.sfs_size, 'size_saved' : d.size_saved }, d.x, d.y, d.edge_index, d.batch
 
 
 # sequence of type 1
 #
 def label_of_sequence_1(d):
-    # l = []
-    # for i in d[2]:
-    #     if i.item() == 1:
-    #         l.append([0.0,1.0])
-    #     else:
-    #         l.append([1.0,0.0])
-
-    return d[1] #torch.tensor(l).to(torch.float) #d[2]
+    return d[3] 
 
 def label_of_sequence_1_for_balancing(d):
-    return d[1]
+    return d[3]
 
 def batch_transformer_for_sequence_1(d):
     seq_tensor = d[0]
@@ -49,7 +45,7 @@ def batch_transformer_for_sequence_1(d):
     for key in seq_info:
         seq_info[key] = seq_info[key][perm_idx]
         
-    return (seq_tensor, seq_labels, seq_lengths, seq_info)
+    return 'seq', seq_info, seq_tensor, seq_labels, seq_lengths
 
 
 def train_g(epochs=10):
@@ -238,6 +234,7 @@ def train_g_reg(epochs=10,
              testset=testset,
              get_label_f=label_of_pyg_graph,
              get_class_f_for_balancing=label_of_pyg_graph_for_balancing,
+             batch_transformer=batch_transformer_for_pyg_graph,
              balance_train_set=False,
              balance_validation_set=False,
              balance_testset=False,
@@ -273,7 +270,8 @@ def create_optimizer(model, tag, lr):
     return optimizer
 
 def save_model(model,model_args,filename):
-    torch.save( (model_args,model.state_dict()), Path(__file__).parent.joinpath(Path(filename)).resolve() )
+#    torch.save( (model_args,model.state_dict()), Path(__file__).parent.joinpath(Path(filename)).resolve() )
+    torch.save( model, Path(__file__).parent.joinpath(Path(filename)).resolve() )
 
 def main():
     cmd = ' '.join(sys.argv)

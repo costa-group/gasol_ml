@@ -23,7 +23,7 @@ class Model_1(torch.nn.Module):
 
     def forward(self, data):
 
-        x, edge_index, batch = data.x, data.edge_index, data.batch
+        x, edge_index, batch = data[2], data[4], data[5]
 
         # 1. Obtain node embeddings 
         x = self.conv1(x, edge_index)
@@ -68,7 +68,7 @@ class Model_2(torch.nn.Module):
         return features
 
     def forward(self, data):
-        x, lengths = data[0], data[2]
+        x, lengths = data[2], data[4]
 
         # change every token by a corresponding one-hot vector
         x = torch.tensor([ [ self.__build_features_vec(i) for i in j ] for j in x.tolist() ]).to(torch.float)
@@ -99,17 +99,17 @@ class Model_2(torch.nn.Module):
         return x
 
 class Model_3(torch.nn.Module):
-    def __init__(self, hidden_channels, out_channels, vocab_size, embed_dim=16):
+    def __init__(self, hidden_channels, out_channels, vocab_size, embed_dim=64):
         super(Model_3, self).__init__()
         self.emb = Embedding(vocab_size, embed_dim, padding_idx=0) # we assume 0 was used for padding sequences
         self.rnn = LSTM(embed_dim, hidden_channels, 1)
         self.lin = Linear(hidden_channels, out_channels)
-        self.lin1 = Linear(hidden_channels, hidden_channels)
-        self.lin2 = Linear(hidden_channels, hidden_channels)
+        # self.lin1 = Linear(hidden_channels, hidden_channels)
+        # self.lin2 = Linear(hidden_channels, hidden_channels)
 
     def forward(self, data):
 
-        x, lengths = data[0], data[2]
+        x, lengths = data[2], data[4]
 
         # embedding of the tokens into a relatively small dimensional space
         x = self.emb(x)
@@ -126,10 +126,10 @@ class Model_3(torch.nn.Module):
 
         x = F.dropout(x, p=0.5, training=self.training)
 
-        x = self.lin1(x)
-        x = x.relu()
-        x = self.lin2(x)
-        x = x.relu()
+        # x = self.lin1(x)
+        # x = x.relu()
+        # x = self.lin2(x)
+        # x = x.relu()
 
         x = self.lin(x)
 

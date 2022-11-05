@@ -92,7 +92,7 @@ def training(model = None, # a model that is suitable for the dataset provided, 
     # if there is a data set, then we are doing training 
     if dataset is not None:
         print()
-        print(f'** The trianing set ({train_set_size_percentage*100:.2f}% for training and {(1-train_set_size_percentage)*100:.2f}% for validation')
+        print(f'** The training set ({train_set_size_percentage*100:.2f}% for training and {(1-train_set_size_percentage)*100:.2f}% for validation)')
         print_dataset_stats(dataset, regression=regression)
 
         # split the dataset into training and validation

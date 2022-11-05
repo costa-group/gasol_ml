@@ -179,14 +179,9 @@ class PreciseBound():
         self.total = 0
 
     def eval(self,model_out,labels,data,loss_criterion):
+        init_n = data[1]['initial_n_instrs']
+        sfs_size = data[1]['sfs_size']
 
-        if hasattr(data, 'initial_n_instrs'):
-            init_n = data.initial_n_instrs
-            sfs_size = data.sfs_size
-        else:
-            init_n = data[3]['initial_n_instrs']
-
-        
         pred=model_out
         
         self.total += len(pred)
@@ -258,8 +253,8 @@ class TimeGain_vs_OptLoss():
         self.wrong_1_answ = 0
 
     def eval(self,model_out,labels,data,loss_criterion):
-        size_saved = data[3][self.opt_key]
-        time = data[3][self.time_key]
+        size_saved = data[1][self.opt_key]
+        time = data[1][self.time_key]
 
         # calculate the predicted values
         pred = model_out.argmax(dim=1)
@@ -292,7 +287,6 @@ class TimeGain_vs_OptLoss():
             if labels[i].item() == 1 and pred[i].item() == 0:
                 self.wrong_0_ans += 1
                 self.saved_time_w += time[i].item()
-                # print(data[2][i]," ",size_saved[i])
             elif labels[i].item() == 0 and pred[i].item() == 1:
                 self.wrong_1_answ += 1
                 
@@ -338,8 +332,8 @@ class TimeGain_vs_OptLossRand():
         self.wrong_1_answ = 0
 
     def eval(self,model_out,labels,data,loss_criterion):
-        size_saved = data[3][self.opt_key]
-        time = data[3][self.time_key]
+        size_saved = data[1][self.opt_key]
+        time = data[1][self.time_key]
 
         # calculate the predicted values
         pred = model_out.argmax(dim=1)
