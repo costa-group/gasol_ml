@@ -30,7 +30,7 @@ def label_of_sequence_1(d):
     return d[3] 
 
 def label_of_sequence_1_for_balancing(d):
-    return d[3]
+    return d[1]
 
 def batch_transformer_for_sequence_1(d):
     seq_tensor = d[0]
@@ -106,19 +106,14 @@ def train_s(epochs=10,
     # Create or load the model
     #
     if loadmodel is not None:
-        model_args, model_state_dic = torch.load(loadmodel)
+        model = torch.load(loadmodel)
     else:
         model_args = {
             "hidden_channels": 128,
             "vocab_size": dataset.vocab_size,
             "out_channels": dataset.num_classes
         }
-        model_state_dic = None
-
-    model = Model_3(**model_args)
-
-    if model_state_dic is not None:
-        model.load_state_dict(model_state_dic)
+        model = Model_3(**model_args)
 
     
     criterion = create_loss_function(loss_f_tag,weight=weight)
@@ -205,19 +200,14 @@ def train_g_reg(epochs=10,
     # Create or load the model
     #
     if loadmodel is not None:
-        model_args, model_state_dic = torch.load(loadmodel)
+        model = torch.load(loadmodel)
     else:
         model_args = {
             "hidden_channels": 128,
             "in_channels": dataset.num_node_features,
             "out_channels": 1
         }
-        model_state_dic = None
-
-    model = Model_1(**model_args)
-
-    if model_state_dic is not None:
-        model.load_state_dict(model_state_dic)
+        model = Model_1(**model_args)
 
     criterion = create_loss_function(loss_f_tag)
     optimizer = create_optimizer(model, optimizer_tag, lr)

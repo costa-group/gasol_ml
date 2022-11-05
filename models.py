@@ -99,13 +99,13 @@ class Model_2(torch.nn.Module):
         return x
 
 class Model_3(torch.nn.Module):
-    def __init__(self, hidden_channels, out_channels, vocab_size, embed_dim=64):
+    def __init__(self, hidden_channels, out_channels, vocab_size, embed_dim=16):
         super(Model_3, self).__init__()
         self.emb = Embedding(vocab_size, embed_dim, padding_idx=0) # we assume 0 was used for padding sequences
         self.rnn = LSTM(embed_dim, hidden_channels, 1)
         self.lin = Linear(hidden_channels, out_channels)
-        # self.lin1 = Linear(hidden_channels, hidden_channels)
-        # self.lin2 = Linear(hidden_channels, hidden_channels)
+        self.lin1 = Linear(hidden_channels, hidden_channels)
+        self.lin2 = Linear(hidden_channels, hidden_channels)
 
     def forward(self, data):
 
@@ -126,10 +126,10 @@ class Model_3(torch.nn.Module):
 
         x = F.dropout(x, p=0.5, training=self.training)
 
-        # x = self.lin1(x)
-        # x = x.relu()
-        # x = self.lin2(x)
-        # x = x.relu()
+        x = self.lin1(x)
+        x = x.relu()
+        x = self.lin2(x)
+        x = x.relu()
 
         x = self.lin(x)
 

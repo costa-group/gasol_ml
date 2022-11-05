@@ -2,10 +2,52 @@ obtained with:
 
   python3 test.py -ds 101 -ts 100 -e 98 -lr 0.001 -lf 'mse' -of last_model.pyt
 
-used Model_1
+on the costa2 machine
 
- 3 layers of
+use the model
 
-  GraphConv -> relu -> GraphConv -> relu -> GraphConv ->
-     gloabl_mean -> F.dropout -> lin -> relu -> lin -> relu -> lin -> out
+
+
+#
+class Model_1(torch.nn.Module):
+    def __init__(self, hidden_channels, in_channels, out_channels):
+        super(Model_1, self).__init__()
+        gnn = GraphConv  #SGConv #GraphConv #SAGEConv #SGConv #GCNConv 
+        self.conv1 = gnn(in_channels, hidden_channels,  aggr='mean')
+        self.conv2 = gnn(hidden_channels, hidden_channels,  aggr='mean')
+        self.conv3 = gnn(hidden_channels, hidden_channels,  aggr='mean')
+        
+        self.lin1 = Linear(hidden_channels, hidden_channels)
+        self.lin2 = Linear(hidden_channels, hidden_channels)
+        self.lin = Linear(hidden_channels, out_channels)
+
+
+    def forward(self, data):
+
+        x, edge_index, batch = data[2], data[4], data[5]
+
+        # 1. Obtain node embeddings 
+        x = self.conv1(x, edge_index)
+        x = x.relu()
+
+        x = self.conv2(x, edge_index)
+        x = x.relu()
+
+        x = self.conv3(x, edge_index)
+
+        # 2. Whole graph embedding
+        x = global_mean_pool(x, batch)  # [batch_size, hidden_channels]
+
+        x = F.dropout(x, p=0.5, training=self.training)
+
+        # 3. Apply a final classifier
+        x = self.lin1(x)
+        x = x.relu()
+
+        x = self.lin2(x)
+        x = x.relu()
+
+        x = self.lin(x)
+
+        return x
 
