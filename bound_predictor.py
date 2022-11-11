@@ -16,6 +16,7 @@ import Pyro4
 class ModelQuery:
     def __init__(self,model_filename):
         torch.set_num_threads(1)
+        torch.set_num_interop_threads(1)
         self.model = torch.load(Path(__file__).parent.joinpath(Path(model_filename)).resolve())
         self.model.eval()
         self.sfs_builder = SFSGraph(node_features='multi_push',regression=True)

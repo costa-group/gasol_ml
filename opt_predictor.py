@@ -16,6 +16,7 @@ import Pyro4
 class ModelQuery:
     def __init__(self,model_filename):
         torch.set_num_threads(1)
+        torch.set_num_interop_threads(1)
         self.model = torch.load(Path(__file__).parent.joinpath(Path(model_filename)).resolve())
         self.model.eval()
         self.sequence_builder = BytecodeSequence(encoding='multi_push')
@@ -25,13 +26,13 @@ class ModelQuery:
         with torch.no_grad():
 
             # convert the sequence into sequence of ids    
-            bytecode_ids_sequence = self.sequence_builder.build_seq_from_bytecode(bytecode)
+            bytecode_ids_sequence, bcs = self.sequence_builder.build_seq_from_bytecode(bytecode)
         
             data = 'seq', {}, torch.tensor([bytecode_ids_sequence]), [], torch.tensor([len(bytecode_ids_sequence)])  # [] is not used, it is supposed to be the labels of the batch
 
             pred = self.model(data).argmax(dim=1).item()
 
-            return pred
+            return pred, bcs
 
 def example(model_filename):
     bc=  "PUSH 2 SSTORE PUSH 1 PUSH 1 PUSH A0 SHL SUB DUP3 AND PUSH 0 SWAP1 DUP2 MSTORE PUSH 20 DUP2 DUP2 MSTORE PUSH 40 SWAP1 SWAP2 KECCAK256 SLOAD PUSH [tag] 80 SWAP2 DUP4 SWAP1 PUSH [tag] 18446744073709551971 PUSH [tag] 79 DUP3 SHL OR SWAP1 SHR"
@@ -61,18 +62,22 @@ def testall(model_filename,raw_dir):
                 bc = block_info['previous_solution']
                     
                 st = time.time()
-                c = query.eval(bc)
+                c, bcs = query.eval(bc)
                 et = time.time()
                 total_time += (et - st)
-                print(f'Class {c}')
+                # print(f'Class {c}')
+
+                if c == 0 and float(block_info['saved_size']) > 0:
+                    print(block_info['solver_time_in_sec']," : ",block_info['saved_size']," : ",block_info['previous_solution'])
+                    print(bcs)
 
                 # we only handle benchamrks for which a model was found -- should have been eliminated earlier
                 if not block_info["model_found"]=="True":
                     nm += 1
 
-                i += 1
-                if i % 1000 == 0:
-                    print(f'stats {i}: {total_time} {nm} {ui} {ex}')
+                # i += 1
+                # if i % 1000 == 0:
+                #     print(f'stats {i}: {total_time} {nm} {ui} {ex}')
 
     print(f'stats: {total_time} {nm} {ui} {ex}')
 
