@@ -13,3 +13,11 @@ class MinSizeOfInputBlockFilter:
 
     def inlude(self,block_info, block_sfs):
         return float(block_info["initial_n_instrs"]) >= self.min_size # using float because it appears as float in the data files
+
+
+class OptimalModelFound:
+    def __init__(self):
+        pass
+    
+    def inlude(self,block_info, block_sfs):
+        return block_info["shown_optimal"] == "True" # using float because it appears as float in the data files

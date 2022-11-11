@@ -60,9 +60,10 @@ class SequenceBasedBasicBlocksDataset(SequenceDataset):
                         if self.basic_block_filter.inlude(block_info,block_sfs):
                             out = self.sequence_builder.build_seq(block_info,block_sfs)
                             if out != None:
-                                data_list.append(out["data"])
-                                labels_list.append(out["label"])
-                                info_list.append(out["info"])
+                                for o in out:
+                                    data_list.append(o["data"])
+                                    labels_list.append(o["label"])
+                                    info_list.append(o["info"])
 
         torch.save((data_list, labels_list, info_list, self.sequence_builder.vocab_size()), self.processed_paths[0])
 

@@ -1,3 +1,4 @@
+import re
 import torch
 from opcodes import vocab as single_push_vocab, vocab_ as multi_push_vocab, is_push_instr, is_memory_read_instr, is_memory_write_instr, is_store_read_instr, is_store_write_instr, is_swap_instr, is_dup_instr, is_comm_instr, split_bytecode_, opcodes, get_opcode
 
@@ -112,7 +113,7 @@ class BytecodeSequence:
     def __init__(self,
                  label_f=None,         # function for calculating the label
                  encoding = 'single_push', # can be 'single_push', 'multi_push', or 'category'
-                 encode_consts = False,
+                 encode_consts = True,
                  regression = False):
 
         if encoding == 'single_push':
@@ -135,8 +136,8 @@ class BytecodeSequence:
         self.encode_consts = encode_consts
 
         if encode_consts:
-            self.vocab_consts_shift = 12
-            self.vocab_consts =['#','!','0','1','2','3','4','5','6','7','8','9']
+            self.vocab_consts_shift = 10
+            self.vocab_consts =['0','1','2','3','4','5','6','7','8','9']
         else:
             self.vocab_consts_shift = 0
             self.vocab_consts =[]
@@ -156,7 +157,7 @@ class BytecodeSequence:
             consts = list(dict.fromkeys((filter(lambda x: x.startswith('#'), bytecode_sequence_orig)))) # all constants in a list, without repetitions
             for t in bytecode_sequence_orig:
                 if t.startswith("#"):
-                    t = f'#{consts.index(t)}!' # repetitions are kept, but with smaller number of digits, we also add ! at the end
+                    t = f'{consts.index(t)}' # repetitions are kept, but with smaller number of digits, we also add ! at the end
                     for c in t:
                         bytecode_sequence.append(c.upper()) # upper used when we had hex, i keep it for now
                 else:
@@ -197,4 +198,4 @@ class BytecodeSequence:
 
         self.idx += 1
         
-        return d
+        return [d]

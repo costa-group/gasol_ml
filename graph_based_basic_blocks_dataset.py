@@ -58,7 +58,8 @@ class GraphBasedBasicBlocksDataset(InMemoryDataset):
                         if self.basic_block_filter.inlude(block_info,block_sfs):
                             data = self.graph_builder.build_graph(block_info,block_sfs)
                             if data is not None:
-                                data_list.append(data)
+                                for d in data:
+                                    data_list.append(d)
 
         data, slices = self.collate(data_list)
 

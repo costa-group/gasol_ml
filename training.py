@@ -14,7 +14,7 @@ def train(model, criterion, optimizer, loader, get_label_f=None, batch_transform
     model.train()
     for data in loader:
         data = batch_transformer(data)  # trasfom the batch if needed
-        out = model(data) 
+        out = model(data)
         labels = get_label_f(data) # get the label (class for classification and value for regression)
         loss = criterion(out, labels)
         loss.backward()

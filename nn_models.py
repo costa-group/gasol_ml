@@ -7,10 +7,18 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 
 
+# This model receives pyg graphs as input, can be used for regression
+# or classification
 #
 class Model_1(torch.nn.Module):
-    def __init__(self, hidden_channels, in_channels, out_channels):
+    def __init__(self, dataset, args):
         super(Model_1, self).__init__()
+
+        hidden_channels = args.hiddenchannels
+        in_channels = dataset.num_node_features
+        out_channels = 1 if args.learningtype == 'regression' else dataset.num_classes
+        
+        
         gnn = GraphConv  #SGConv #GraphConv #SAGEConv #SGConv #GCNConv 
         self.conv1 = gnn(in_channels, hidden_channels,  aggr='mean')
         self.conv2 = gnn(hidden_channels, hidden_channels,  aggr='mean')
@@ -52,10 +60,16 @@ class Model_1(torch.nn.Module):
 
 
 
-
+# This model is supposed to receives sequences as input
+#
 class Model_2(torch.nn.Module):
-    def __init__(self, hidden_channels, out_channels, vocab_size):
+    def __init__(self, dataset, args):
         super(Model_2, self).__init__()
+
+        hidden_channels = args.hiddenchannels
+        vocab_size = dataset.vocab_size
+        out_channels = 1 if args.learningtype == 'regression' else dataset.num_classes
+
         self.vocab_size = vocab_size
         self.rnn = LSTM(vocab_size, hidden_channels, 1)
         self.lin = Linear(hidden_channels, out_channels)
@@ -96,9 +110,17 @@ class Model_2(torch.nn.Module):
         
         return x
 
+# This model is supposed to receives sequences as input
+#
 class Model_3(torch.nn.Module):
-    def __init__(self, hidden_channels, out_channels, vocab_size, embed_dim=64):
+    def __init__(self, dataset, args):
         super(Model_3, self).__init__()
+
+        hidden_channels = args.hiddenchannels
+        vocab_size = dataset.vocab_size
+        out_channels = 1 if args.learningtype == 'regression' else dataset.num_classes
+        embed_dim=args.embeddingdim
+         
         self.emb = Embedding(vocab_size, embed_dim, padding_idx=0) # we assume 0 was used for padding sequences
         self.rnn = LSTM(embed_dim, hidden_channels, 1)
         self.lin = Linear(hidden_channels, out_channels)

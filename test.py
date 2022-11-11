@@ -18,10 +18,10 @@ def label_of_pyg_graph(d):
     return d[3]
 
 def label_of_pyg_graph_for_balancing(d):
-    return d[3].item()
+    return d.y.item()
 
 def batch_transformer_for_pyg_graph(d):
-     return 'pyg', { 'initial_n_instrs' : d.initial_n_instrs, 'sfs_size': d.sfs_size, 'size_saved' : d.size_saved }, d.x, d.y, d.edge_index, d.batch
+     return 'pyg', { 'initial_n_instrs' : d.initial_n_instrs, 'sfs_size': d.sfs_size, 'size_saved' : d.size_saved, "time": d.time }, d.x, d.y, d.edge_index, d.batch
 
 
 # sequence of type 1
@@ -48,32 +48,75 @@ def batch_transformer_for_sequence_1(d):
     return 'seq', seq_info, seq_tensor, seq_labels, seq_lengths
 
 
-def train_g(epochs=10):
-    dataset = load_dataset(1)
-    n = int(len(dataset)*0.5)
-    train_set= dataset[:n]
-    testset = dataset[n:]
 
 
-    model_args = {
-        "hidden_channels": 64,
-        "in_channels": dataset.num_node_features,
-        "out_channels": dataset.num_classes
-    }
-    model = Model_1(**model_args)
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-    criterion = torch.nn.CrossEntropyLoss()
+### Classification on graphs
+###
+def train_g(epochs=10,
+            dataset_id=None,
+            testset_id=None,
+            loss_f_tag=None,
+            optimizer_tag=None,
+            lr=1e-3,
+            loadmodel=None,
+            outfilename=None):
+
+    # create the data set if needed
+    if dataset_id is not None:
+        dataset = load_dataset(dataset_id)
+        dist = calc_dist(dataset, get_class_f_for_balancing=label_of_pyg_graph_for_balancing)
+        dist = torch.tensor(dist,dtype=torch.float)
+        dist = dist.sum()/dist
+        weight = dist/dist.sum()
+    else:
+        dataset = None
+        weight = None
+    # create the test set if needed
+    if testset_id is not None:
+        testset = load_dataset(testset_id)
+    else:
+        testset = None
+
+    # Create or load the model
+    #
+    if loadmodel is not None:
+        model = torch.load(loadmodel)
+    else:
+        model_args = {
+            "hidden_channels": 128,
+            "in_channels": dataset.num_node_features,
+            "out_channels": dataset.num_classes
+        }
+        model = Model_1(**model_args)
+
+    
+    criterion = create_loss_function(loss_f_tag,weight=weight)
+    optimizer = create_optimizer(model, optimizer_tag, lr)
+
+    print()
+    print(f'Loss function: {criterion}')
+    if weight is not None:
+        print(f'Class weights: {weight}')
+    print(f'Optimizer: {optimizer}')
+    print()
+
     training(model=model,
              criterion=criterion,
              optimizer=optimizer,
-             dataset=train_set,
+             dataset=dataset,
              testset=testset,
              get_label_f=label_of_pyg_graph,
              get_class_f_for_balancing=label_of_pyg_graph_for_balancing,
-             balance_train_set=True,
-             balance_validation_set=True,
-             epochs=epochs,precision_evals=[CriterionLoss(),CorrectClass()])
+             batch_transformer=batch_transformer_for_pyg_graph,
+             balance_train_set=False,
+             balance_validation_set=False,
+             balance_testset=False,
+             epochs=epochs,
+             precision_evals=[CriterionLoss(),CorrectClass(), TimeGain_vs_OptLoss()])
 
+    # save the last model
+    if dataset_id is not None and outfilename is not None:
+        save_model(model,model_args,outfilename)
 
 
 ### Classification on sequences
@@ -153,7 +196,7 @@ def train_s_reg(epochs=10):
         "vocab_size": dataset.vocab_size,
         "out_channels": 1
     }
-    model = Model_2(**model_args)
+    model = Model_3(**model_args)
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-2)
     criterion = torch.nn.MSELoss(reduction='mean')
     
@@ -287,31 +330,29 @@ def main():
 
     if args.datatype == 'pyg':
         if args.learningtype == 'reg':
-            train_g_reg(epochs=args.epochs,
-                        dataset_id=args.dataset,
-                        testset_id=args.testset,
-                        loadmodel=args.loadmodel,
-                        loss_f_tag=args.lossfunction,
-                        optimizer_tag=args.optimizer,
-                        lr=args.learningrate,
-                        outfilename=args.outfilename)
+            train_f = train_g_reg
+        elif args.learningtype == 'cl':
+            train_f = train_g
         else:
-            pass
-        
+            raise Exception(f'Invalid value for learningtype: {args.learningtype}')
     elif args.datatype == 'seq':
         if args.learningtype == 'reg':
-            pass
+            train_f = train_s_reg
         elif args.learningtype == 'cl':
-            train_s(epochs=args.epochs,
-                    dataset_id=args.dataset,
-                    testset_id=args.testset,
-                    loadmodel=args.loadmodel,
-                    loss_f_tag=args.lossfunction,
-                    optimizer_tag=args.optimizer,
-                    lr=args.learningrate,
-                    outfilename=args.outfilename)
+            train_f = train_s
+        else:
+            raise Exception(f'Invalid value for learningtype: {args.learningtype}')
     else:
-        raise Exception('No supported yet')
+        raise Exception(f'Invalid value for datatype: {args.datatype}')
+
+    train_f(epochs=args.epochs,
+            dataset_id=args.dataset,
+            testset_id=args.testset,
+            loadmodel=args.loadmodel,
+            loss_f_tag=args.lossfunction,
+            optimizer_tag=args.optimizer,
+            lr=args.learningrate,
+            outfilename=args.outfilename)
 
         
 if __name__ == "__main__":

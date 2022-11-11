@@ -4,7 +4,7 @@ from torch_geometric.data import Data
 import networkx as nx
 
 # from opcodes import vocab  as single_push_vocab, vocab_ as multi_push_vocab, is_push_instr, is_memory_instr, is_store_instr
-from opcodes import vocab as single_push_vocab, vocab_ as multi_push_vocab, is_push_instr, is_memory_read_instr, is_memory_write_instr, is_store_read_instr, is_store_write_instr, is_swap_instr, is_dup_instr, is_comm_instr, split_bytecode_
+from opcodes import vocab_sfs as single_push_vocab, vocab_sfs_ as multi_push_vocab, is_push_instr, is_memory_read_instr, is_memory_write_instr, is_store_read_instr, is_store_write_instr, is_swap_instr, is_dup_instr, is_comm_instr, split_bytecode_
 
 
 # one-hot vector
@@ -228,7 +228,6 @@ class SFSGraph:
 
             # create a map from constants to lists of their corresponding instructions
             nums = {}
-            i = 0
             for instr in block_sfs["user_instrs"]:
                 if instr.get("value") is not None:
                     b = instr["value"][0]
@@ -302,11 +301,13 @@ class SFSGraph:
 
         # construct pyg Data object 
         d = Data(x=x, edge_index=edge_index, y=y)
-        
+
         # fill in extra information in Data (to be used in precision evaluators)
         d.initial_n_instrs = torch.tensor(int(block_info["initial_n_instrs"]))
         d.sfs_size = torch.tensor(len(block_sfs["user_instrs"]))
         d.size_saved = torch.tensor(float(block_info["saved_size"]))
+        d.time = torch.tensor(float(block_info["solver_time_in_sec"]))
+        d.gas_saved = torch.tensor(float(block_info["saved_gas"]))
 
-        return d
+        return [d]
 
