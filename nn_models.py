@@ -148,6 +148,7 @@ class Model_3(torch.nn.Module):
 
         x = self.lin1(x)
         x = x.relu()
+        
         x = self.lin2(x)
         x = x.relu()
 

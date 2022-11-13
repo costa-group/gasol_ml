@@ -14,9 +14,9 @@ class SequenceBasedBasicBlocksDataset(SequenceDataset):
     
     url = 'https://samir.fdi.ucm.es/download/costa_ml'
     
-    def __init__(self, root, name, tag, sequence_builder, basic_block_filter=AlwaysTrueFilter()):
+    def __init__(self, root, zips, tag, sequence_builder, basic_block_filter=AlwaysTrueFilter()):
         self.root = root
-        self.name = name
+        self.zips = zips
         self.tag = tag
         self.sequence_builder = sequence_builder
         self.basic_block_filter = basic_block_filter
@@ -24,24 +24,28 @@ class SequenceBasedBasicBlocksDataset(SequenceDataset):
 
     @property
     def raw_dir(self) -> str:
-        return os.path.join(self.root, self.name, 'raw')
+        return os.path.join(self.root, 'raw')
 
     @property
     def processed_dir(self) -> str:
-        return os.path.join(self.root, self.name, 'processed')
+        return os.path.join(self.root, 'processed')
 
     @property
     def raw_file_names(self):
-        return ['csv']
+        return self.zips
 
     @property
     def processed_file_names(self):
         return [f'data_{self.tag}.pt']
 
     def download(self):
-        path = download_url(f'{self.url}/{self.name}.zip', self.raw_dir)
-        extract_zip(path, self.raw_dir)
-        os.unlink(path)
+        for z in self.zips:
+            if not os.path.exists(f'{self.raw_dir}/{z}'):
+                path = download_url(f'{self.url}/{z}.zip', self.raw_dir)
+                extract_zip(path, f'{self.raw_dir}/{z}')
+                os.unlink(path)
+            else:
+                print(f'Skipping download of {self.raw_dir}/{z}, already available.')
 
     def process(self):
         data_list = []
@@ -49,21 +53,24 @@ class SequenceBasedBasicBlocksDataset(SequenceDataset):
         info_list = []
         csv_dir = f'{self.raw_dir}/csv'
         i=0
-        for csv_filename in os.listdir(csv_dir):
-            csv_filename_noext = os.path.splitext(csv_filename)[0]
-            with open(f'{csv_dir}/{csv_filename}', newline='') as csvfile:
-                csv_reader = csv.DictReader(csvfile)
-                for block_info in csv_reader:
-                    block_id = block_info['block_id']
-                    with open(f'{self.raw_dir}/jsons/{csv_filename_noext}/{block_id}_input.json', 'r') as f:
-                        block_sfs = json.load(f)
-                        if self.basic_block_filter.inlude(block_info,block_sfs):
-                            out = self.sequence_builder.build_seq(block_info,block_sfs)
-                            if out != None:
-                                for o in out:
-                                    data_list.append(o["data"])
-                                    labels_list.append(o["label"])
-                                    info_list.append(o["info"])
+        for d in self.zips:
+            csv_dir = f'{self.raw_dir}/{d}/csv'
+            json_dir = f'{self.raw_dir}/{d}/jsons'
+            for csv_filename in os.listdir(csv_dir):
+                csv_filename_noext = os.path.splitext(csv_filename)[0]
+                with open(f'{csv_dir}/{csv_filename}', newline='') as csvfile:
+                    csv_reader = csv.DictReader(csvfile)
+                    for block_info in csv_reader:
+                        block_id = block_info['block_id']
+                        with open(f'{json_dir}/{csv_filename_noext}/{block_id}_input.json', 'r') as f:
+                            block_sfs = json.load(f)
+                            if self.basic_block_filter.inlude(block_info,block_sfs):
+                                out = self.sequence_builder.build_seq(block_info,block_sfs)
+                                if out != None:
+                                    for o in out:
+                                        data_list.append(o["data"])
+                                        labels_list.append(o["label"])
+                                        info_list.append(o["info"])
 
         torch.save((data_list, labels_list, info_list, self.sequence_builder.vocab_size()), self.processed_paths[0])
 

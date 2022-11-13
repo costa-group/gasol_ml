@@ -34,6 +34,7 @@ def create_loss_function(dataset,args):
         loss_f = torch.nn.L1Loss(reduction='mean')
     elif tag == 'cross_entropy':
         weight = calculate_class_weight(dataset)
+        print(f'Cross entropy weights: {weight}')
         loss_f =torch.nn.CrossEntropyLoss(weight=weight)
         #criterion = torch.nn.CrossEntropyLoss(weight=torch.tensor([0.3,0.7]),reduction='mean')
     else:
