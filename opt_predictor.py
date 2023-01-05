@@ -32,7 +32,8 @@ class ModelQuery:
             if p is None:
                 pred = pred_t.argmax(dim=1).item()
             else:
-                pred = 1 if self.model(data).softmax(0)[1] > p else 0  # this can be used to select with probability threshold (here 0.5)
+                pred = 1 if self.model(data).softmax(1)[0][1] > p else 0  # this can be used to select with probability threshold (here 0.5)
+
                 
             return pred
 
@@ -51,39 +52,39 @@ def testall(model_filename,raw_dir):
     query = ModelQuery(model_filename)
     #query = Pyro4.Proxy(f"PYRONAME:opt_predictor.server")  # 
 
-    total_time = 0.0
 
     i=0
-    nm = ui = ex = 0
+    total = total0 = total1 = wrong0 = wrong1 = 0
     csv_dir = f'{raw_dir}/csv'
     for csv_filename in os.listdir(csv_dir):
         csv_filename_noext = os.path.splitext(csv_filename)[0]
         with open(f'{csv_dir}/{csv_filename}', newline='') as csvfile:
             csv_reader = csv.DictReader(csvfile)
             for block_info in csv_reader:
-                bc = block_info['previous_solution']
+
+                if block_info["model_found"]=="True":
+
+                    bc = block_info['previous_solution']
                     
-                st = time.time()
-                c, bcs = query.eval(bc)
-                et = time.time()
-                total_time += (et - st)
-                # print(f'Class {c}')
+                    c = query.eval(bc) # ,p=0.75
+                    #print(f'Class {c}')
 
-                if c == 0 and float(block_info['saved_size']) > 0:
-                    print(block_info['solver_time_in_sec']," : ",block_info['saved_size']," : ",block_info['previous_solution'])
-                    print(bcs)
+                    if float(block_info['saved_size']) > 0:  # should be changed to the desired classification parameter
+                        total1 += 1
+                        if c == 0:
+                            wrong1 += 1
+                    else:
+                        total0 += 1
+                        if c == 1:
+                            wrong0 += 1
 
-                # we only handle benchamrks for which a model was found -- should have been eliminated earlier
-                if not block_info["model_found"]=="True":
-                    nm += 1
+                    total += 1
 
-                # i += 1
-                # if i % 1000 == 0:
-                #     print(f'stats {i}: {total_time} {nm} {ui} {ex}')
+                i += 1
+                if i % 1000 == 0:
+                    print(f'stats {i}: {total} {total0} ({wrong0}) {total1} ({wrong1})')
 
-    print(f'stats: {total_time} {nm} {ui} {ex}')
-
-    
+    print(f'stats {i}: {total} {total0} ({wrong0}) {total1} ({wrong1})')
 
 #
 def client_example():

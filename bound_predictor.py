@@ -21,7 +21,10 @@ class ModelQuery:
 
     def eval(self, block_sfs):
         with torch.no_grad():
-            
+
+            if len(block_sfs["user_instrs"])==0:
+                return block_sfs["min_length"]
+
             x, edge_index = self.sfs_builder.build_graph_from_sfs(block_sfs)
 
             data = ('pyg', {}, x, [], edge_index,torch.zeros(len(x),dtype=torch.int64))
@@ -44,10 +47,8 @@ def testall(model_filename,raw_dir):
     query = ModelQuery(model_filename)
     #query = Pyro4.Proxy(f"PYRONAME:bound_predictor.server")  # 
 
-    total_time = 0.0
 
     i=0
-    nm = ui = ex = 0
     csv_dir = f'{raw_dir}/csv'
     for csv_filename in os.listdir(csv_dir):
         csv_filename_noext = os.path.splitext(csv_filename)[0]
@@ -58,28 +59,14 @@ def testall(model_filename,raw_dir):
                 with open(f'{raw_dir}/jsons/{csv_filename_noext}/{block_id}_input.json', 'r') as f:
                     block_sfs = json.load(f)
                     
-                    st = time.time()
                     bound = query.eval(block_sfs)
-                    et = time.time()
-                    total_time += (et - st)
                     print(f'Bound: {bound}')
-
-                    # we only handle benchamrks for which a model was found -- should have been eliminated earlier
-                    if not block_info["model_found"]=="True":
-                        nm += 1
-                        # print(bound," ",block_info["initial_n_instrs"],bound<int(block_info["initial_n_instrs"]))
-                    # ignore those with empty sfs -- should have been eliminated earlier
-                    if len(block_sfs["user_instrs"])==0:
-                        ui += 1
-
-                    if not block_info["model_found"]=="True" and len(block_sfs["user_instrs"])==0:
-                        ex += 1
                         
                     i += 1
                     if i % 1000 == 0:
-                        print(f'stats {i}: {total_time} {nm} {ui} {ex}')
+                        print(f'stats {i}: ...')
 
-    print(f'stats: {total_time} {nm} {ui} {ex}')
+    print(f'stats {i}: ...')
 
 #
 def client_example():
