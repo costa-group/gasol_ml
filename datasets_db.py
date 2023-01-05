@@ -13,7 +13,7 @@ from label_generators import block_label_gas_saved, block_label_size_saved, bloc
 from basic_block_filters import MinSizeOfInputBlockFilter, OptimalModelFound
 from sequence_based_block_split_dataset import SequenceBasedBasicSplitDataset
 from bytecode_seq_graph import BytecodeSequenceGraph
-
+import torch
 
 
 
@@ -160,11 +160,29 @@ dataset_db[106] = lambda tag: GraphBasedBasicBlocksDataset(root='data/gasol',
 
 
 #
+dataset_db[106] = lambda tag: GraphBasedBasicBlocksDataset(root='data/gasol',
+                                                           zips=['contract-jul22-subset1-size'],
+                                                           tag=tag,
+                                                           graph_builder=SFSGraph(label_f=block_label_extra_instr,node_features='multi_push',regression=True),
+                                                           basic_block_filter=OptimalModelFound() #MinSizeOfInputBlockFilter(1)
+                                                           )
+dataset_db[107] = lambda tag: GraphBasedBasicBlocksDataset(root='data/gasol',
+                                                           zips=['contract-jul22-subset2-size'],
+                                                           tag=tag,
+                                                           graph_builder=SFSGraph(label_f=block_label_extra_instr,node_features='multi_push',regression=True),
+                                                           basic_block_filter=OptimalModelFound() #MinSizeOfInputBlockFilter(1)
+                                                           )
+
+
+#
 dataset_db[1000] = lambda tag: SequenceBasedBasicSplitDataset(root='data/gasol',
                                                             zips=['hierarchy'],
                                                             tag=tag
                                                         )
 
+
+
+#
 
 #
 #
@@ -179,6 +197,7 @@ def load_dataset(id):
 def label_of_pyg_graph(d):
     return d[3]
 
+
 def label_of_pyg_graph_for_balancing(d):
     return d.y.item()
 
@@ -190,6 +209,12 @@ def batch_transformer_for_pyg_graph(d):
 #
 def label_of_sequence_1(d):
     return d[3] 
+
+def label_of_sequence_11(d):
+    def f(x):
+        return [0.0,1.0] if x==1 else [1.0,0]
+
+    return torch.tensor([ f(x) for x in d[3] ])
 
 def label_of_sequence_1_for_balancing(d):
     return d[1]

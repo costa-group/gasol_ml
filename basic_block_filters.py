@@ -19,5 +19,5 @@ class OptimalModelFound:
     def __init__(self):
         pass
     
-    def inlude(self,block_info, block_sfs):
+    def include(self,block_info, block_sfs):
         return block_info["shown_optimal"] == "True" # using float because it appears as float in the data files

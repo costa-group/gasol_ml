@@ -61,7 +61,7 @@ class GraphBasedBasicBlocksDataset(InMemoryDataset):
                         block_id = block_info['block_id']
                         with open(f'{json_dir}/{csv_filename_noext}/{block_id}_input.json', 'r') as f:
                             block_sfs = json.load(f)
-                            if self.basic_block_filter.inlude(block_info,block_sfs):
+                            if self.basic_block_filter.include(block_info,block_sfs):
                                 data = self.graph_builder.build_graph(block_info,block_sfs)
                                 if data is not None:
                                     for d in data:

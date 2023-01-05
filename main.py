@@ -125,7 +125,10 @@ def train(args):
              balance_testset=False,
              epochs=args.epochs,
              precision_evals=precision_evals,
-             regression=args.learningtype == 'regression')
+             regression=args.learningtype == 'regression',
+             save_models = args.savemodels,
+             save_improved_only = args.saveimprovedonly, 
+             out_path = args.outputpath)
 
     # save the last model
     if dataset_id is not None and args.outfilename is not None:
@@ -141,7 +144,11 @@ def main():
     parser.add_argument('-e', '--epochs', type=int, default=1)
     parser.add_argument('-ds', '--dataset', type=int)
     parser.add_argument('-ts', '--testset', type=int)
-    parser.add_argument('-of', '--outfilename', type=str)
+    parser.add_argument('-of', '--outfilename', type=str) # kept for backwards comparability, should be remove at some point
+    parser.add_argument('-op', '--outputpath', type=str, default='/tmp')
+    parser.add_argument('-sm', '--savemodels', type=str, choices=['all','last'], default=None)
+    parser.add_argument('-sio', '--saveimprovedonly', action='store_true')
+    
     parser.add_argument('-lm', '--loadmodel', type=str)
     parser.add_argument('-lr', '--learningrate', type=float, default=1e-3)
     parser.add_argument('-lf', '--lossfunction', type=str, default='mse')

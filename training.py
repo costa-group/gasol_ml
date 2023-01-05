@@ -1,3 +1,4 @@
+import os
 import torch
 import numpy as np
 from torch_geometric.loader import DataLoader
@@ -87,7 +88,9 @@ def training(model = None, # a model that is suitable for the dataset provided, 
              batch_transformer=lambda d : d, # in case batches needed to be transformed a bit before sending to the model
              precision_evals=[CriterionLoss()], # a list of precision evaluators (see the module precision_eval)
              prec_cmp=train_first_elem_cmp, # a comparator of precision for each batch (see the module precision_cmp)
-             model_path = None): # where to save the optimal model
+             save_models = None, # can be 'all', 'last', or None
+             save_improved_only = False, # can be 'all', 'last', or None
+             out_path = '/tmp'): # where to save the optimal model
 
     # if there is a data set, then we are doing training 
     if dataset is not None:
@@ -123,6 +126,8 @@ def training(model = None, # a model that is suitable for the dataset provided, 
 
 
     print()
+
+    last_filename = None
     for epoch in range(1, epochs+1):
         print(f'Epoch {epoch:03d}', end="", flush=True)
 
@@ -146,8 +151,18 @@ def training(model = None, # a model that is suitable for the dataset provided, 
                 best_epoch_val_loss = curr_val_loss
                 best_epoch = epoch
                 improved=True
-                if model_path is not None: 
-                    torch.save(model.state_dict(), model_path)
+                
+            if save_models is not None:
+                filename = None
+                
+                if (save_improved_only and improved) or (not save_improved_only):
+                    filename = f'{out_path}/model_{"i_" if improved else ""}{epoch}.pyt'
+
+                if filename is not None:
+                    if save_models == 'last' and last_filename is not None:
+                        os.remove(last_filename) # remove last one saved
+                    torch.save(model, filename) # save the new one
+                    last_filename = filename
 
             mark = '*' if improved else ''
             print(f'{mark} \t ')

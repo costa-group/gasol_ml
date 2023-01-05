@@ -32,11 +32,12 @@ class ModelQuery:
 
             pred = self.model(data).argmax(dim=1).item()
 
+            # pred = 1 if self.model(data).argsmax(1)[1] > 0.5 else 0  # this can be used to select with probability threshold (here 0.5)
             return pred, bcs
 
 def example(model_filename):
     bc=  "PUSH 2 SSTORE PUSH 1 PUSH 1 PUSH A0 SHL SUB DUP3 AND PUSH 0 SWAP1 DUP2 MSTORE PUSH 20 DUP2 DUP2 MSTORE PUSH 40 SWAP1 SWAP2 KECCAK256 SLOAD PUSH [tag] 80 SWAP2 DUP4 SWAP1 PUSH [tag] 18446744073709551971 PUSH [tag] 79 DUP3 SHL OR SWAP1 SHR"
-    
+
     query = ModelQuery(model_filename)
     c = query.eval(bc)
     print(f'Class: {c}')
