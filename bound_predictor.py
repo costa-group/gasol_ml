@@ -27,7 +27,7 @@ class ModelQuery:
             data = ('pyg', {}, x, [], edge_index,torch.zeros(len(x),dtype=torch.int64))
             out = self.model(data)
             
-            bound = round(out.item()) + len(block_sfs["user_instrs"])
+            bound = round(out.item()) + block_sfs["min_length"]
 
             return bound
 

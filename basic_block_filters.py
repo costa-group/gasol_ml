@@ -11,7 +11,7 @@ class MinSizeOfInputBlockFilter:
     def __init__(self,min_size):
         self.min_size = min_size
 
-    def inlude(self,block_info, block_sfs):
+    def include(self,block_info, block_sfs):
         return float(block_info["initial_n_instrs"]) >= self.min_size # using float because it appears as float in the data files
 
 

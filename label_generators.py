@@ -12,7 +12,7 @@ def block_label_opt_ninstr(block_info, block_sfs):
 # The number of instructions in the optimized code -- for regression
 #
 def block_label_extra_instr(block_info, block_sfs):
-        d = float(block_info["optimized_n_instrs"])-float(len(block_sfs["user_instrs"]))
+        d = float(block_info["optimized_n_instrs"])-float(block_sfs["min_length"])
         assert( d>= 0 )
         return d
 
