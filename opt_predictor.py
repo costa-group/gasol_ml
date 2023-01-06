@@ -32,7 +32,7 @@ class ModelQuery:
             if p is None:
                 pred = pred_t.argmax(dim=1).item()
             else:
-                pred = 1 if self.model(data).softmax(1)[0][1] > p else 0  # this can be used to select with probability threshold (here 0.5)
+                pred = 0 if self.model(data).softmax(1)[0][0] > p else 1  # we answer 0, only if the probability is > p
 
                 
             return pred

@@ -6,7 +6,7 @@ import torch
 import sys
 import argparse
 from pathlib import Path
-
+import math
 
 
 
@@ -106,9 +106,16 @@ def train(args):
     print()
 
     if args.learningtype == 'regression':
-        precision_evals = [CriterionLoss(),CountEpsError(eps=1),SafeBound(), PreciseBound()]
+        if args.to_int == 'round':
+            to_int = round
+        elif arg.to_int == 'ceil':
+            to_int = math.ceil
+        else:
+            to_int = math.floor
+        precision_evals = [CriterionLoss(),CountEpsError(eps=1),SafeBound(to_int=to_int), PreciseBound(to_int=to_int)]
     else:
-        precision_evals = [CriterionLoss(),CorrectClass(), TimeGain_vs_OptLoss()]
+        p = args.prop_threshold
+        precision_evals = [CriterionLoss(),CorrectClass(p=p), TimeGain_vs_OptLoss(p=p)]
 
     label, label_b, batch_t = get_data_manipulators(dataset if dataset is not None else testset)
 
@@ -157,6 +164,8 @@ def main():
     parser.add_argument('-lt', '--learningtype', type=str, default='regression')
     parser.add_argument('-m', '--model', type=str, default='nn_models.Model_1')
     parser.add_argument('-ed', '--embeddingdim', type=int, default=64)
+    parser.add_argument('-to_int', '--to_int', type=str, choices=['round','ceil','floor'], default='round')
+    parser.add_argument('-pt', '--prop_threshold', type=float, default=None)
 
 
     args = parser.parse_args()

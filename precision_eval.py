@@ -1,4 +1,5 @@
 import random
+import torch
 
 # This module includes classes that are used as precision
 # evaluators. Each such class should provide methods
@@ -12,8 +13,18 @@ import random
 
 # counts number of instances that where classified correctly
 #
+
+def to_labels(model_out,p):
+    if p is None:
+        pred = model_out.argmax(dim=1)
+    else:
+        pred = torch.tensor(list(map(lambda o: 0 if o[0] > p else 1,model_out.softmax(dim=1))))
+
+    return pred
+
 class CorrectClass():
-    def __init__(self):
+    def __init__(self,p=None):
+        self.p = p
         self.correct = 0
         self.total = 0
 
@@ -22,8 +33,7 @@ class CorrectClass():
         self.total = 0
 
     def eval(self,model_out,labels,data,loss_criterion):
-        pred = model_out.argmax(dim=1)
-        #labels = labels.argmax(dim=1)
+        pred = to_labels(model_out,self.p)
         self.correct += int((pred == labels).sum())
         self.total += len(labels)
     
@@ -113,7 +123,8 @@ class CountEpsError():
 # gas/size we lose and how much time we gain
 #
 class SafeBound():
-    def __init__(self):
+    def __init__(self,to_int=round):
+        self.to_int = to_int
         self.total = 0
         self.hit = 0
         self.lt = 0
@@ -135,7 +146,7 @@ class SafeBound():
 
         # traverse all answers and collect some stats
         for i in range(len(pred)):
-            p = int(round(pred[i].item()))
+            p = int(self.to_int(pred[i].item()))
             l = int(labels[i].item())
             if p<0:
                 self.neg += 1
@@ -160,7 +171,8 @@ class SafeBound():
 # gas/size we lose and how much time we gain
 #
 class PreciseBound():
-    def __init__(self):
+    def __init__(self,to_int=round):
+        self.to_int = to_int
         self.canbeimprove = 0
         self.hit = 0
         self.imp = 0
@@ -188,7 +200,7 @@ class PreciseBound():
 
         # traverse all answers and collect some stats
         for i in range(len(pred)):
-            p = round(pred[i].item())
+            p = self.to_int(pred[i].item())
             if init_n[i]>sfs_size[i]+labels[i]: # can be improved
                 self.canbeimprove += 1
                 if p+sfs_size[i] == labels[i]+sfs_size[i]:
@@ -221,7 +233,8 @@ class PreciseBound():
 # gas/size we lose and how much time we gain
 #
 class TimeGain_vs_OptLoss():
-    def __init__(self,opt_key='size_saved',time_key='time'):
+    def __init__(self,opt_key='size_saved',time_key='time',p=None):
+        self.p = p
         self.opt_key = opt_key
         self.time_key = time_key
 
@@ -257,7 +270,8 @@ class TimeGain_vs_OptLoss():
         time = data[1][self.time_key]
 
         # calculate the predicted values
-        pred = model_out.argmax(dim=1)
+        pred = to_labels(model_out,self.p)
+#        pred = model_out.argmax(dim=1)
 #        labels = labels.argmax(dim=1)
 
         # total correct predictions
@@ -306,7 +320,8 @@ class TimeGain_vs_OptLoss():
 # gas/size we lose and how much time we gain
 #
 class TimeGain_vs_OptLossRand():
-    def __init__(self,opt_key='size_saved',time_key='time'):
+    def __init__(self,opt_key='size_saved',time_key='time',p=None):
+        self.p = p
         self.opt_key = opt_key
         self.time_key = time_key
 
@@ -336,7 +351,8 @@ class TimeGain_vs_OptLossRand():
         time = data[1][self.time_key]
 
         # calculate the predicted values
-        pred = model_out.argmax(dim=1)
+        pred = to_labels(model_out,self.p)
+#        pred = model_out.argmax(dim=1)
 #        labels = labels.argmax(dim=1)
 
         # total correct predictions

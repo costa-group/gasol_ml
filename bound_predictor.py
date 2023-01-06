@@ -14,7 +14,8 @@ import Pyro4
 
 @Pyro4.expose
 class ModelQuery:
-    def __init__(self,model_filename):
+    def __init__(self,model_filename,to_int=round):
+        self.to_int = to_int
         self.model = torch.load(Path(__file__).parent.joinpath(Path(model_filename)).resolve())
         self.model.eval()
         self.sfs_builder = SFSGraph(node_features='multi_push',regression=True)
@@ -30,7 +31,7 @@ class ModelQuery:
             data = ('pyg', {}, x, [], edge_index,torch.zeros(len(x),dtype=torch.int64))
             out = self.model(data)
             
-            bound = round(out.item()) + block_sfs["min_length"]
+            bound = self.to_int(out.item()) + block_sfs["min_length"]
 
             return bound
 
