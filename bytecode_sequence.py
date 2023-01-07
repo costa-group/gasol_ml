@@ -194,7 +194,7 @@ class BytecodeSequence:
         else:
             y = torch.tensor(label).to(torch.long)            
 
-        d = {"data": x, "label": y, "info": { "idx": self.idx, "size_saved": torch.tensor(float(block_info["saved_size"])), "gas_saved": torch.tensor(float(block_info["saved_gas"])), "time": torch.tensor(float(block_info["solver_time_in_sec"])), "initial_n_instrs": torch.tensor(int(block_info["initial_n_instrs"]))}}
+        d = {"data": x, "label": y, "info": { "idx": self.idx, "saved_size": torch.tensor(float(block_info["saved_size"])), "saved_gas": torch.tensor(float(block_info["saved_gas"])), "time": torch.tensor(float(block_info["solver_time_in_sec"])), "initial_n_instrs": torch.tensor(int(block_info["initial_n_instrs"]))}}
 
         self.idx += 1
         

@@ -6,8 +6,7 @@ from torch.utils.data import WeightedRandomSampler
 from misc import print_dataset_stats
 from precision_eval import CriterionLoss, CorrectClass
 from precision_cmp import train_first_elem_cmp, val_first_elem_cmp
-
-
+import time
     
 # Training a model on a given data, it returns the accumulated loss
 #
@@ -33,8 +32,7 @@ def test_c(model,criterion,loader,get_label_f=None, batch_transformer=lambda d :
         # reset all precision evaluators
         for peval in precision_evals:
             peval.reset()
-
-        for data in loader:       
+        for data in loader:
             data = batch_transformer(data) # trasfrom the batch if needed
             out = model(data) # apply model
             labels = get_label_f(data) # get labels from data
@@ -42,8 +40,8 @@ def test_c(model,criterion,loader,get_label_f=None, batch_transformer=lambda d :
             # evaluate all precision criteria
             for peval in precision_evals:
                 peval.eval(out,labels,data,criterion)
-                
-    return [ (peval.tag(), peval.loss(), peval.report())  for peval in precision_evals ]
+        
+        return [ (peval.tag(), peval.loss(), peval.report())  for peval in precision_evals ]
 
 
 # creates a loader, and balance the set (only in case of classification for now) if needed
@@ -127,6 +125,8 @@ def training(model = None, # a model that is suitable for the dataset provided, 
 
     print()
 
+    t1=t2=t3=t4=t5=t6=t7=t8=0
+
     last_filename = None
     for epoch in range(1, epochs+1):
         print(f'Epoch {epoch:03d}', end="", flush=True)
@@ -137,10 +137,13 @@ def training(model = None, # a model that is suitable for the dataset provided, 
 
             # train
             #
+            t1 = time.time()
             train(model,criterion,optimizer,train_loader,get_label_f=get_label_f,batch_transformer=batch_transformer)
-            
+            t2 = time.time()
             train_precision = test_c(model,criterion,train_loader,get_label_f=get_label_f,batch_transformer=batch_transformer, precision_evals=precision_evals)
+            t3 = time.time()
             val_precision = test_c(model,criterion,val_loader,get_label_f=get_label_f,batch_transformer=batch_transformer, precision_evals=precision_evals)
+            t4 = time.time()
 
             # check if there is an improvement wrt. the best epoch
             curr_train_loss = [ loss for (_,loss,_) in train_precision]
@@ -151,6 +154,8 @@ def training(model = None, # a model that is suitable for the dataset provided, 
                 best_epoch_val_loss = curr_val_loss
                 best_epoch = epoch
                 improved=True
+
+            t5 = time.time()            
                 
             if save_models is not None:
                 filename = None
@@ -163,6 +168,8 @@ def training(model = None, # a model that is suitable for the dataset provided, 
                         os.remove(last_filename) # remove last one saved
                     torch.save(model, filename) # save the new one
                     last_filename = filename
+
+            t6 = time.time()            
 
             mark = '*' if improved else ''
             print(f'{mark} \t ')
@@ -177,13 +184,16 @@ def training(model = None, # a model that is suitable for the dataset provided, 
                 print("\t", end="")
             print(flush=True)
 
+            t8 = t7 = time.time()
+
         if testset is not None:
             test_precision = test_c(model,criterion,test_loader,get_label_f=get_label_f,batch_transformer=batch_transformer, precision_evals=precision_evals)
-
+            t8 = time.time()            
+            
             print(f'\tTest: ', end="")
             for (tag,loss,prec_info) in test_precision:
                 print(f'{tag}={loss:.4f} ({prec_info})', end="")
                 print("\t", end="")
+                print(flush=True)
 
-            print(flush=True)
-
+        print(f'\tTimes: {(t2-t1):.2f} {(t3-t2):.2f} {(t4-t3):.2f} {(t5-t4):.2f} {(t6-t5):.2f} {(t7-t6):.2f} {(t8-t7):.2f}')

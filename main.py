@@ -1,4 +1,4 @@
-from precision_eval import CriterionLoss, CorrectClass, TimeGain_vs_OptLoss, CountEpsError, SafeBound, PreciseBound, TimeGain_vs_OptLossRand
+from precision_eval import CriterionLoss, CorrectClass, TimeGain_vs_OptLoss, CountEpsError, SafeBound, PreciseBound
 from training import training
 from datasets_db import load_dataset, get_data_manipulators
 from misc import calc_dist, import_string
@@ -66,6 +66,11 @@ def save_model(model,filename):
 #
 def train(args):
 
+    # for some reason multithreading slows down everything
+    if args.numthreads is not None:
+        torch.set_num_threads(args.numthreads)
+        torch.set_num_interop_threads(args.numthreads)
+
     # data set and test set, they should be defined in dataset_db.py
     dataset_id=args.dataset
     testset_id=args.testset
@@ -115,7 +120,7 @@ def train(args):
         precision_evals = [CriterionLoss(),CountEpsError(eps=1),SafeBound(to_int=to_int), PreciseBound(to_int=to_int)]
     else:
         p = args.prop_threshold
-        precision_evals = [CriterionLoss(),CorrectClass(p=p), TimeGain_vs_OptLoss(p=p)]
+        precision_evals = [CriterionLoss(),CorrectClass(p=p), TimeGain_vs_OptLoss(opt_key=args.opt_keyword,p=p)]
 
     label, label_b, batch_t = get_data_manipulators(dataset if dataset is not None else testset)
 
@@ -166,6 +171,9 @@ def main():
     parser.add_argument('-ed', '--embeddingdim', type=int, default=64)
     parser.add_argument('-to_int', '--to_int', type=str, choices=['round','ceil','floor'], default='round')
     parser.add_argument('-pt', '--prop_threshold', type=float, default=None)
+    parser.add_argument('-rnn', '--rnn_class', type=str, choices=['lstm','gru'], default='lstm')
+    parser.add_argument('-nt', '--numthreads', type=int, default=None)
+    parser.add_argument('-opt_key', '--opt_keyword', type=str, choices=['saved_size','saved_gas'], default='saved_size')
 
 
     args = parser.parse_args()
