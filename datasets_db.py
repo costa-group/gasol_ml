@@ -280,13 +280,13 @@ dataset_db[236] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
 dataset_db[241] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
                                                               zips=['block_jan_23_8_17_gas','block_jul_22_8_17_gas','block_march_23_8_17_gas'],
                                                               tag=tag,
-                                                              sequence_builder=BytecodeSequence(label_f=block_label_size_saved,encoding='multi_push'),
+                                                              sequence_builder=BytecodeSequence(label_f=block_label_gas_saved,encoding='multi_push'),
                                                               basic_block_filter=MinSizeOfInputBlockFilter(1)
                                                               )
 dataset_db[242] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
                                                               zips=['block_jan_23_8_17_gas','block_jul_22_8_17_gas','block_march_23_8_17_gas'],
                                                               tag=tag,
-                                                              sequence_builder=BytecodeSequence(label_f=block_label_size_saved,encode_consts=False,encoding='multi_push'),
+                                                              sequence_builder=BytecodeSequence(label_f=block_label_gas_saved,encode_consts=False,encoding='multi_push'),
                                                               basic_block_filter=MinSizeOfInputBlockFilter(1)
                                                               )
 
