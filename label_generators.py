@@ -13,6 +13,7 @@ def block_label_opt_ninstr(block_info, block_sfs):
 #
 def block_label_extra_instr(block_info, block_sfs):
         d = float(block_info["optimized_n_instrs"])-float(block_sfs["min_length"])
+        #d = float(block_info["optimized_n_instrs"])-float(len(block_sfs["user_instrs"]))
         assert( d>= 0 )
         return d
 

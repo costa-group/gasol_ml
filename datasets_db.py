@@ -159,6 +159,10 @@ dataset_db[106] = lambda tag: GraphBasedBasicBlocksDataset(root='data/gasol',
                                                            )
 
 
+
+
+
+
 #
 dataset_db[201] = lambda tag: GraphBasedBasicBlocksDataset(root='data/gasol',
                                                            zips=['contract-jul22-subset1-size'],
@@ -180,24 +184,118 @@ dataset_db[203] = lambda tag: GraphBasedBasicBlocksDataset(root='data/gasol',
                                                            )
 
 
+#
 dataset_db[211] = lambda tag: GraphBasedBasicBlocksDataset(root='data/gasol',
-                                                           zips=['contract-jul22-subset1-size'],
+                                                           zips=['block_jan_23_8_17_size','block_jul_22_8_17_size','block_march_23_8_17_size'],
                                                            tag=tag,
-                                                           graph_builder=SFSGraph(label_f=block_label_extra_instr,node_features='multi_push',in_stk_order=True,out_stk_order=True,regression=True),
-                                                           basic_block_filter=OptimalModelFound() #MinSizeOfInputBlockFilter(1)
+                                                           graph_builder=SFSGraph(label_f=block_label_extra_instr,node_features='multi_push',regression=True),
+                                                           basic_block_filter=MinSizeOfInputBlockFilter(1)
                                                            )
 dataset_db[212] = lambda tag: GraphBasedBasicBlocksDataset(root='data/gasol',
-                                                           zips=['contract-jul22-subset2-size'],
+                                                           zips=['block_jan_23_8_17_size','block_jul_22_8_17_size','block_march_23_8_17_size'],
                                                            tag=tag,
                                                            graph_builder=SFSGraph(label_f=block_label_extra_instr,node_features='multi_push',in_stk_order=True,out_stk_order=True,regression=True),
-                                                           basic_block_filter=OptimalModelFound() #MinSizeOfInputBlockFilter(1)
+                                                           basic_block_filter=MinSizeOfInputBlockFilter(1)
                                                            )
 dataset_db[213] = lambda tag: GraphBasedBasicBlocksDataset(root='data/gasol',
-                                                           zips=['contract100-size'],
+                                                           zips=['block_jan_23_8_17_size','block_jul_22_8_17_size','block_march_23_8_17_size'],
+                                                           tag=tag,
+                                                           graph_builder=SFSGraph(label_f=block_label_extra_instr,node_features='multi_push',edges='forward',in_stk_order=True,out_stk_order=True,regression=True),
+                                                           basic_block_filter=MinSizeOfInputBlockFilter(1)
+                                                           )
+dataset_db[214] = lambda tag: GraphBasedBasicBlocksDataset(root='data/gasol',
+                                                           zips=['block_jan_23_8_17_size','block_jul_22_8_17_size','block_march_23_8_17_size'],
+                                                           tag=tag,
+                                                           graph_builder=SFSGraph(label_f=block_label_extra_instr,node_features='multi_push',edges='backwards',in_stk_order=True,out_stk_order=True,regression=True),
+                                                           basic_block_filter=MinSizeOfInputBlockFilter(1)
+                                                           )
+dataset_db[215] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
+                                                              zips=['block_jan_23_8_17_size','block_jul_22_8_17_size','block_march_23_8_17_size'],
+                                                              tag=tag,
+                                                              sequence_builder=BytecodeSequence(label_f=block_label_extra_instr,encoding='multi_push',regression=True),
+                                                              basic_block_filter=MinSizeOfInputBlockFilter(1)
+                                                              )
+dataset_db[216] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
+                                                              zips=['block_jan_23_8_17_size','block_jul_22_8_17_size','block_march_23_8_17_size'],
+                                                              tag=tag,
+                                                              sequence_builder=BytecodeSequence(label_f=block_label_extra_instr,encoding='multi_push',encode_consts=False,regression=True),
+                                                              basic_block_filter=MinSizeOfInputBlockFilter(1)
+                                                              )
+
+
+#
+dataset_db[221] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
+                                                              zips=['block_jan_23_8_17_size','block_jul_22_8_17_size','block_march_23_8_17_size'],
+                                                              tag=tag,
+                                                              sequence_builder=BytecodeSequence(label_f=block_label_size_saved,encoding='multi_push'),
+                                                              basic_block_filter=MinSizeOfInputBlockFilter(1)
+                                                              )
+dataset_db[222] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
+                                                              zips=['block_jan_23_8_17_size','block_jul_22_8_17_size','block_march_23_8_17_size'],
+                                                              tag=tag,
+                                                              sequence_builder=BytecodeSequence(label_f=block_label_size_saved,encode_consts=False,encoding='multi_push'),
+                                                              basic_block_filter=MinSizeOfInputBlockFilter(1)
+                                                              )
+
+#
+dataset_db[231] = lambda tag: GraphBasedBasicBlocksDataset(root='data/gasol',
+                                                           zips=['block_jan_23_8_17_gas','block_jul_22_8_17_gas','block_march_23_8_17_gas'],
+                                                           tag=tag,
+                                                           graph_builder=SFSGraph(label_f=block_label_extra_instr,node_features='multi_push',regression=True),
+                                                           basic_block_filter=MinSizeOfInputBlockFilter(1)
+                                                           )
+dataset_db[232] = lambda tag: GraphBasedBasicBlocksDataset(root='data/gasol',
+                                                           zips=['block_jan_23_8_17_gas','block_jul_22_8_17_gas','block_march_23_8_17_gas'],
                                                            tag=tag,
                                                            graph_builder=SFSGraph(label_f=block_label_extra_instr,node_features='multi_push',in_stk_order=True,out_stk_order=True,regression=True),
-                                                           basic_block_filter=OptimalModelFound() #MinSizeOfInputBlockFilter(1)
+                                                           basic_block_filter=MinSizeOfInputBlockFilter(1)
                                                            )
+dataset_db[233] = lambda tag: GraphBasedBasicBlocksDataset(root='data/gasol',
+                                                           zips=['block_jan_23_8_17_gas','block_jul_22_8_17_gas','block_march_23_8_17_gas'],
+                                                           tag=tag,
+                                                           graph_builder=SFSGraph(label_f=block_label_extra_instr,node_features='multi_push',edges='forward',in_stk_order=True,out_stk_order=True,regression=True),
+                                                           basic_block_filter=MinSizeOfInputBlockFilter(1)
+                                                           )
+dataset_db[234] = lambda tag: GraphBasedBasicBlocksDataset(root='data/gasol',
+                                                           zips=['block_jan_23_8_17_gas','block_jul_22_8_17_gas','block_march_23_8_17_gas'],
+                                                           tag=tag,
+                                                           graph_builder=SFSGraph(label_f=block_label_extra_instr,node_features='multi_push',edges='backwards',in_stk_order=True,out_stk_order=True,regression=True),
+                                                           basic_block_filter=MinSizeOfInputBlockFilter(1)
+                                                           )
+dataset_db[235] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
+                                                              zips=['block_jan_23_8_17_gas','block_jul_22_8_17_gas','block_march_23_8_17_gas'],
+                                                              tag=tag,
+                                                              sequence_builder=BytecodeSequence(label_f=block_label_extra_instr,encoding='multi_push',regression=True),
+                                                              basic_block_filter=MinSizeOfInputBlockFilter(1)
+                                                              )
+dataset_db[236] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
+                                                              zips=['block_jan_23_8_17_gas','block_jul_22_8_17_gas','block_march_23_8_17_gas'],
+                                                              tag=tag,
+                                                              sequence_builder=BytecodeSequence(label_f=block_label_extra_instr,encoding='multi_push',encode_consts=False,regression=True),
+                                                              basic_block_filter=MinSizeOfInputBlockFilter(1)
+                                                              )
+
+
+#
+dataset_db[241] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
+                                                              zips=['block_jan_23_8_17_gas','block_jul_22_8_17_gas','block_march_23_8_17_gas'],
+                                                              tag=tag,
+                                                              sequence_builder=BytecodeSequence(label_f=block_label_size_saved,encoding='multi_push'),
+                                                              basic_block_filter=MinSizeOfInputBlockFilter(1)
+                                                              )
+dataset_db[242] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
+                                                              zips=['block_jan_23_8_17_gas','block_jul_22_8_17_gas','block_march_23_8_17_gas'],
+                                                              tag=tag,
+                                                              sequence_builder=BytecodeSequence(label_f=block_label_size_saved,encode_consts=False,encoding='multi_push'),
+                                                              basic_block_filter=MinSizeOfInputBlockFilter(1)
+                                                              )
+
+
+
+
+
+
+
 
 #
 dataset_db[301] = lambda tag: GraphBasedBasicBlocksDataset(root='data/gasol',
@@ -231,6 +329,18 @@ dataset_db[312] = lambda tag: GraphBasedBasicBlocksDataset(root='data/gasol',
                                                            graph_builder=SFSGraph(label_f=block_label_extra_instr,node_features='multi_push',in_stk_order=True,out_stk_order=True,regression=True),
                                                            basic_block_filter=OptimalModelFound() #MinSizeOfInputBlockFilter(1)
                                                            )
+dataset_db[3120] = lambda tag: GraphBasedBasicBlocksDataset(root='data/gasol',
+                                                           zips=['contract-jul22-subset2-gas-no_rep'],
+                                                           tag=tag,
+                                                           graph_builder=SFSGraph(label_f=block_label_extra_instr,node_features='multi_push',in_stk_order=True,out_stk_order=True,regression=True),
+                                                           basic_block_filter=OptimalModelFound() #MinSizeOfInputBlockFilter(1)
+                                                           )
+dataset_db[3121] = lambda tag: GraphBasedBasicBlocksDataset(root='data/gasol',
+                                                           zips=['contract-jul22-subset2-gas-no_rep_2'],
+                                                           tag=tag,
+                                                           graph_builder=SFSGraph(label_f=block_label_extra_instr,node_features='multi_push',in_stk_order=True,out_stk_order=True,regression=True),
+                                                           basic_block_filter=OptimalModelFound() #MinSizeOfInputBlockFilter(1)
+                                                           )
 dataset_db[313] = lambda tag: GraphBasedBasicBlocksDataset(root='data/gasol',
                                                            zips=['contract100-gas'],
                                                            tag=tag,
@@ -249,6 +359,18 @@ dataset_db[401] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
 
 dataset_db[402] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
                                                               zips=['contract-jul22-subset2-size'],
+                                                              tag=tag,
+                                                              sequence_builder=BytecodeSequence(label_f=block_label_size_saved,encoding='multi_push'),
+                                                              basic_block_filter=MinSizeOfInputBlockFilter(1)
+                                                              )
+dataset_db[4020] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
+                                                              zips=['contract-jul22-subset2-size-no_rep'],
+                                                              tag=tag,
+                                                              sequence_builder=BytecodeSequence(label_f=block_label_size_saved,encoding='multi_push'),
+                                                              basic_block_filter=MinSizeOfInputBlockFilter(1)
+                                                              )
+dataset_db[4021] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
+                                                              zips=['contract-jul22-subset2-size-no_rep_2'],
                                                               tag=tag,
                                                               sequence_builder=BytecodeSequence(label_f=block_label_size_saved,encoding='multi_push'),
                                                               basic_block_filter=MinSizeOfInputBlockFilter(1)
@@ -275,6 +397,18 @@ dataset_db[502] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
                                                               sequence_builder=BytecodeSequence(label_f=block_label_gas_saved,encoding='multi_push'),
                                                               basic_block_filter=MinSizeOfInputBlockFilter(1)
                                                               )
+dataset_db[5020] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
+                                                              zips=['contract-jul22-subset2-gas-no_rep'],
+                                                              tag=tag,
+                                                              sequence_builder=BytecodeSequence(label_f=block_label_gas_saved,encoding='multi_push'),
+                                                              basic_block_filter=MinSizeOfInputBlockFilter(1)
+                                                              )
+dataset_db[5021] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
+                                                              zips=['contract-jul22-subset2-gas-no_rep_2'],
+                                                              tag=tag,
+                                                              sequence_builder=BytecodeSequence(label_f=block_label_gas_saved,encoding='multi_push'),
+                                                              basic_block_filter=MinSizeOfInputBlockFilter(1)
+                                                              )
 
 dataset_db[503] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
                                                               zips=['contract100-gas'],
@@ -282,6 +416,11 @@ dataset_db[503] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
                                                               sequence_builder=BytecodeSequence(label_f=block_label_gas_saved,encoding='multi_push'),
                                                               basic_block_filter=MinSizeOfInputBlockFilter(1)
                                                               )
+
+
+
+
+
 
 #
 dataset_db[1000] = lambda tag: SequenceBasedBasicSplitDataset(root='data/gasol',

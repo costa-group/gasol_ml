@@ -194,7 +194,14 @@ class BytecodeSequence:
         else:
             y = torch.tensor(label).to(torch.long)            
 
-        d = {"data": x, "label": y, "info": { "idx": self.idx, "saved_size": torch.tensor(float(block_info["saved_size"])), "saved_gas": torch.tensor(float(block_info["saved_gas"])), "time": torch.tensor(float(block_info["solver_time_in_sec"])), "initial_n_instrs": torch.tensor(int(block_info["initial_n_instrs"]))}}
+        d = {"data": x, "label": y, "info": { "idx": self.idx, "saved_size": torch.tensor(float(block_info["saved_size"])), "saved_gas": torch.tensor(float(block_info["saved_gas"])), "time": torch.tensor(float(block_info["solver_time_in_sec"])), "initial_n_instrs": torch.tensor(int(block_info["initial_n_instrs"])), "sfs_size": torch.tensor(len(block_sfs["user_instrs"])), "min_length": torch.tensor(block_sfs["min_length"])}}
+
+        # d.initial_n_instrs = torch.tensor(int(block_info["initial_n_instrs"]))
+        # d.sfs_size = torch.tensor(len(block_sfs["user_instrs"]))
+        # d.min_length = torch.tensor(block_sfs["min_length"])
+        # d.size_saved = torch.tensor(float(block_info["saved_size"]))
+        # d.time = torch.tensor(float(block_info["solver_time_in_sec"]))
+        # d.gas_saved = torch.tensor(float(block_info["saved_gas"]))
 
         self.idx += 1
         

@@ -182,6 +182,11 @@ class BytecodeBlockGraph:
 
         # fill in extra information in Data (to be used in precision evaluators)
         d.initial_n_instrs = torch.tensor(int(block_info["initial_n_instrs"]))
+        d.sfs_size = torch.tensor(len(block_sfs["user_instrs"]))
+        d.min_length = torch.tensor(block_sfs["min_length"])
+        d.size_saved = torch.tensor(float(block_info["saved_size"]))
+        d.time = torch.tensor(float(block_info["solver_time_in_sec"]))
+        d.gas_saved = torch.tensor(float(block_info["saved_gas"]))
 
-        return d
+        return [d]
 

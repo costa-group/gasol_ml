@@ -98,6 +98,7 @@ def train(args):
     else:
         print(f'Creating model: {args.model}')
         model_class = import_string(args.model)
+        print(args)
         model = model_class(dataset,args)
         criterion = create_loss_function(dataset,args)
         optimizer = create_optimizer(model, args)
@@ -113,7 +114,7 @@ def train(args):
     if args.learningtype == 'regression':
         if args.to_int == 'round':
             to_int = round
-        elif arg.to_int == 'ceil':
+        elif args.to_int == 'ceil':
             to_int = math.ceil
         else:
             to_int = math.floor

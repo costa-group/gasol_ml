@@ -154,15 +154,15 @@ class SFSGraph:
 
 
         # node 0/1 is an auxiliary node connected to all input/output
-        node_features_list.append(self.node_features_f("empty"))
-        node_features_list.append(self.node_features_f("empty"))
-        number_of_nodes += 2
+        #node_features_list.append(self.node_features_f("empty"))
+        #node_features_list.append(self.node_features_f("empty"))
+        #number_of_nodes += 2
         
         # create the the input variable nodes 
         for node_id in block_sfs["src_ws"]:
             if not node_id in nodes_map:  # this check is because the data might have some duplicates
                 nodes_map[node_id] = number_of_nodes
-                edges_list.append( [0, number_of_nodes] )
+                #edges_list.append( [0, number_of_nodes] )
                 number_of_nodes = number_of_nodes + 1
                 node_features_list.append(self.node_features_f("in_var"))
             else:
@@ -176,7 +176,7 @@ class SFSGraph:
         # create output variable nodes (one for each position in the output stack)
         for i in range(len(block_sfs["tgt_ws"])):
             nodes_map[f"o({i})"] = number_of_nodes
-            edges_list.append( [number_of_nodes,1] )
+            #edges_list.append( [number_of_nodes,1] )
             number_of_nodes = number_of_nodes + 1
             node_features_list.append(self.node_features_f("out_var"))
 
@@ -243,7 +243,7 @@ class SFSGraph:
                 node_features_list.append(features)
                 this_node_id = number_of_nodes
                 number_of_nodes = number_of_nodes + 1
-                edges_list.append([0,this_node_id])
+                #edges_list.append([0,this_node_id])
                 for k in nums[n]:
                     edges_list.append([this_node_id,k])
 

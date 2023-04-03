@@ -4,7 +4,7 @@ from torch.nn import Linear, RNN, ReLU, LSTM, Embedding, LayerNorm, Dropout, GRU
 import torch.nn.functional as F
 from torch_geometric.nn import global_mean_pool, global_max_pool, global_add_pool
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
-
+import math
 
 
 # This model receives pyg graphs as input, can be used for regression
@@ -19,7 +19,7 @@ class Model_1(torch.nn.Module):
         out_channels = 1 if args.learningtype == 'regression' else dataset.num_classes
         
         
-        gnn = GraphConv  #SGConv #GraphConv #SAGEConv #SGConv #GCNConv 
+        gnn = GraphConv #GraphConv  #SGConv #GraphConv #SAGEConv #SGConv #GCNConv 
         self.conv1 = gnn(in_channels, hidden_channels,  aggr='mean')
         self.conv2 = gnn(hidden_channels, hidden_channels,  aggr='mean')
         self.conv3 = gnn(hidden_channels, hidden_channels,  aggr='mean')
@@ -45,7 +45,7 @@ class Model_1(torch.nn.Module):
         # 2. Whole graph embedding
         x = global_mean_pool(x, batch)  # [batch_size, hidden_channels]
 
-        x = F.dropout(x, p=0.5, training=self.training)
+        x = F.dropout(x, p=0.1, training=self.training)
 
         # 3. Apply a final classifier
         x = self.lin1(x)
@@ -92,7 +92,7 @@ class Model_2(torch.nn.Module):
 
         # apply rnn 
         output, (x, cn) = self.rnn(x) # for LSTM
-#        output, x = self.rnn(x) # gor GRU
+#        output, x = self.rnn(x) # for GRU
 
         # take the last output 
         x = x[0]
@@ -122,7 +122,7 @@ class Model_3(torch.nn.Module):
         embed_dim=args.embeddingdim
          
         self.emb = Embedding(vocab_size, embed_dim, padding_idx=0) # we assume 0 was used for padding sequences
-        self.rnn = LSTM(embed_dim, hidden_channels, 1)
+        self.rnn = GRU(embed_dim, hidden_channels, 1)
         self.lin = Linear(hidden_channels, out_channels)
         self.lin1 = Linear(hidden_channels, hidden_channels)
         self.lin2 = Linear(hidden_channels, hidden_channels)
@@ -138,8 +138,8 @@ class Model_3(torch.nn.Module):
         x = torch.nn.utils.rnn.pack_padded_sequence(x, lengths=lengths, batch_first=True)
 
         # 1. Obtain node embeddings 
-        output, (x, cn) = self.rnn(x)
-#        output, x = self.rnn(x)
+#        output, (x, cn) = self.rnn(x) # for LSTM
+        output, x = self.rnn(x) # for GRU
 
         # take the last output 
         x = x[0]
@@ -156,3 +156,77 @@ class Model_3(torch.nn.Module):
 
         return x
 
+
+class PositionalEncoding(torch.nn.Module):
+    """
+    https://pytorch.org/tutorials/beginner/transformer_tutorial.html
+    """
+
+    def __init__(self, d_model, vocab_size=5000, dropout=0.1):
+        super().__init__()
+        self.dropout = torch.nn.Dropout(p=dropout)
+
+        pe = torch.zeros(vocab_size, d_model)
+        position = torch.arange(0, vocab_size, dtype=torch.float).unsqueeze(1)
+        div_term = torch.exp(
+            torch.arange(0, d_model, 2).float()
+            * (-math.log(10000.0) / d_model)
+        )
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
+        pe = pe.unsqueeze(0)
+        self.register_buffer("pe", pe)
+
+    def forward(self, x):
+        x = x + self.pe[:, : x.size(1), :]
+        return self.dropout(x)
+
+
+class Model_4(torch.nn.Module):
+    def __init__(self, dataset, args):
+        super(Model_4, self).__init__()
+
+        vocab_size = dataset.vocab_size
+        embed_dim=args.embeddingdim
+
+        nhead=8
+        dim_feedforward=2048
+        num_layers=6
+        dropout=0.1
+        activation="relu"
+        classifier_dropout=0.1
+
+        self.emb = Embedding(vocab_size, embed_dim, padding_idx=0) # we assume 0 was used for padding sequences
+        d_model = embed_dim
+        assert d_model % nhead == 0, "nheads must divide evenly into d_model"
+
+        self.pos_encoder = PositionalEncoding(
+            d_model=d_model,
+            dropout=dropout,
+            vocab_size=vocab_size,
+        )
+
+        encoder_layer = torch.nn.TransformerEncoderLayer(
+            d_model=d_model,
+            nhead=nhead,
+            dim_feedforward=dim_feedforward,
+            dropout=dropout,
+        )
+        self.transformer_encoder = torch.nn.TransformerEncoder(
+            encoder_layer,
+            num_layers=num_layers,
+        )
+        self.classifier = torch.nn.Linear(d_model, 2)
+        self.d_model = d_model
+
+    def forward(self, data):
+        x, lengths = data[2], data[4]
+        x = self.emb(x) * math.sqrt(self.d_model)
+
+        x = self.pos_encoder(x)
+        x = torch.nn.utils.rnn.pack_padded_sequence(x, lengths=lengths, batch_first=True)
+        x = self.transformer_encoder(x)
+        x = x.mean(dim=1)
+        x = self.classifier(x)
+
+        return x

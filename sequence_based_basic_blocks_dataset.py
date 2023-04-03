@@ -52,7 +52,7 @@ class SequenceBasedBasicBlocksDataset(SequenceDataset):
         labels_list = []
         info_list = []
         csv_dir = f'{self.raw_dir}/csv'
-        i=0
+        i=j=k=0
         for d in self.zips:
             csv_dir = f'{self.raw_dir}/{d}/csv'
             json_dir = f'{self.raw_dir}/{d}/jsons'
@@ -62,18 +62,25 @@ class SequenceBasedBasicBlocksDataset(SequenceDataset):
                     csv_reader = csv.DictReader(csvfile)
                     for block_info in csv_reader:
                         block_id = block_info['block_id']
-                        with open(f'{json_dir}/{csv_filename_noext}/{block_id}_input.json', 'r') as f:
-                            block_sfs = json.load(f)
-                            if self.basic_block_filter.include(block_info,block_sfs):
-                                out = self.sequence_builder.build_seq(block_info,block_sfs)
-                                if out != None:
-                                    for o in out:
-                                        data_list.append(o["data"])
-                                        labels_list.append(o["label"])
-                                        info_list.append(o["info"])
-
+                        try:
+                            with open(f'{json_dir}/{csv_filename_noext}/{block_id}_input.json', 'r') as f:
+                                i += 1
+                                if not block_info["model_found"]=="True":
+                                    k += 1
+                                block_sfs = json.load(f)
+                                if self.basic_block_filter.include(block_info,block_sfs):
+                                    out = self.sequence_builder.build_seq(block_info,block_sfs)
+                                    if out != None:
+                                        j += 1
+                                        for o in out:
+                                            data_list.append(o["data"])
+                                            labels_list.append(o["label"])
+                                            info_list.append(o["info"])
+                        except Exception as e:
+                            print(block_id)
+                                            
         torch.save((data_list, labels_list, info_list, self.sequence_builder.vocab_size()), self.processed_paths[0])
-
+        print(i,":",j,":",k)
     def extract_label(d):
         return d[2]
         
