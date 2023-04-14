@@ -11,9 +11,9 @@ import Pyro4
 
 builders = {}
 # for models in 221, 241
-builders[0] = 'seq', BytecodeSequence(encoding='multi_push',regression=True)
+builders[0] = 'seq', BytecodeSequence(encoding='multi_push')
 # for models in 222, 242
-builders[1] = 'seq', BytecodeSequence(encoding='multi_push',encode_consts=False,regression=True)
+builders[1] = 'seq', BytecodeSequence(encoding='multi_push',encode_consts=False)
 
 
 @Pyro4.expose
