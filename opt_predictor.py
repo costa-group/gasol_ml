@@ -58,7 +58,53 @@ def example(model_filename,builder_id):
     print(f'Class: {c}')
 
 
+def stats(model_filename,builder_id,raw_dir,time_key,opt_key):
+    query = ModelQuery(model_filename,builder_id=builder_id)
+    i=0
+    total_time = saved_time = 0
+    total_opt = lost_opt = 0
+    total = total_model_found = total0 = total1 = wrong0 = wrong1 = 0
 
+    for d in raw_dir:
+        rd = f'{d}'
+        csv_dir = f'{rd}/csv'
+        for csv_filename in os.listdir(csv_dir):
+            csv_filename_noext = os.path.splitext(csv_filename)[0]
+            with open(f'{csv_dir}/{csv_filename}', newline='') as csvfile:
+                csv_reader = csv.DictReader(csvfile)
+                for block_info in csv_reader:
+
+                    total += 1
+            
+                    bc = block_info['previous_solution']
+
+                    c = query.eval(bc) # ,p=0.75
+
+                    time = float(block_info[time_key])
+                    opt = max(0,float(block_info[opt_key]))
+                    
+                    total_time += time
+                    total_opt += opt
+                    
+                    if c == 0:
+                        saved_time += time
+                        lost_opt += opt
+                        total0 += 1
+                    else:
+                        total1 += 1
+
+                    if block_info["model_found"]=="True":
+                        total_model_found += 1
+                        if c == 0 and opt > 0:
+                            wrong0 += 1
+                        elif c == 1 and opt == 0:
+                            wrong1 += 1
+
+    print(f'saved_time={saved_time:.2f}/{total_time:.2f} lost_opt={lost_opt:.2f}/{total_opt:.2f}')
+    print(f'total={total}, total_mf={total_model_found}, total0={total0}, total1={total1}, wrong0={wrong0}, wrong1={wrong1}')
+ 
+
+    
 def testall(model_filename,builder_id,raw_dir):
     #raw_dir = 'data/jul22-0xa-8-17/raw'
 
@@ -132,12 +178,17 @@ if __name__ == "__main__":
     parser.add_argument('-b', '--builder', type=int, default=0)
     parser.add_argument('-s', '--server', action='store_true')
     parser.add_argument('-c', '--client', action='store_true')
+    parser.add_argument('-stats', '--statistics', action='store_true')
     parser.add_argument('-rd', '--raw_dir', type=str, default=None,nargs='+')
+    parser.add_argument('-tk', '--time_key', type=str, default="solver_time_in_sec")
+    parser.add_argument('-ok', '--opt_key', type=str, default="saved_size")
     args = parser.parse_args()
 
     if args.server:
         start_server(args.model,args.builder)
     elif args.client:
         client_example()
+    elif args.statistics:
+        stats(args.model,args.builder,args.raw_dir,time_key=args.time_key,opt_key=args.opt_key)
     else:
         testall(args.model,args.builder,args.raw_dir)
