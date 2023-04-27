@@ -18,7 +18,8 @@ class Model_1(torch.nn.Module):
         in_channels = dataset.num_node_features
         out_channels = 1 if args.learningtype == 'regression' else dataset.num_classes
         
-        
+        self.drop_out_p = args.drop_out_p
+
         gnn = GraphConv #GraphConv  #SGConv #GraphConv #SAGEConv #SGConv #GCNConv 
         self.conv1 = gnn(in_channels, hidden_channels,  aggr='mean')
         self.conv2 = gnn(hidden_channels, hidden_channels,  aggr='mean')
@@ -45,7 +46,7 @@ class Model_1(torch.nn.Module):
         # 2. Whole graph embedding
         x = global_mean_pool(x, batch)  # [batch_size, hidden_channels]
 
-        x = F.dropout(x, p=0.1, training=self.training)
+        x = F.dropout(x, p=self.drop_out_p, training=self.training)
 
         # 3. Apply a final classifier
         x = self.lin1(x)
@@ -69,12 +70,28 @@ class Model_2(torch.nn.Module):
         hidden_channels = args.hiddenchannels
         vocab_size = dataset.vocab_size
         out_channels = 1 if args.learningtype == 'regression' else dataset.num_classes
+        embed_dim=args.embeddingdim
 
         self.vocab_size = vocab_size
-        self.rnn = LSTM(vocab_size, hidden_channels, 1)
+        self.drop_out_p = args.drop_out_p
+        if embed_dim is not None:
+            self.emb = Embedding(vocab_size, embed_dim, padding_idx=0) # we assume 0 was used for padding sequences
+        else:
+            self.emb = None
+
+        if args.rnn_class == 'lstm':
+            self.rnn = LSTM(vocab_size if self.emb is None else embed_dim, hidden_channels, 1)
+            self.rnn_type = 'lstm'
+        elif args.rnn_class == 'gru':
+            self.rnn = GRU(vocab_size if self.emb is None else embed_dim, hidden_channels, 1)
+            self.rnn_type = 'gru'
+        else:
+            raise Exception(f'Unknown RNN: {args.rnn_class}')
+
         self.lin = Linear(hidden_channels, out_channels)
         self.lin1 = Linear(hidden_channels, hidden_channels)
         self.lin2 = Linear(hidden_channels, hidden_channels)
+
 
     def __build_features_vec(self,token):
         features = [0]*self.vocab_size
@@ -84,29 +101,37 @@ class Model_2(torch.nn.Module):
     def forward(self, data):
         x, lengths = data[2], data[4]
 
-        # change every token by a corresponding one-hot vector
-        x = torch.tensor([ [ self.__build_features_vec(i) for i in j ] for j in x.tolist() ]).to(torch.float)
+        if self.emb is None:
+            # change every token by a corresponding one-hot vector
+            x = torch.tensor([ [ self.__build_features_vec(i) for i in j ] for j in x.tolist() ]).to(torch.float)
+        else:
+            # embedding of the tokens into a relatively small dimensional space
+            x = self.emb(x)
 
         # pack all sequences (they are assumed to be padded and sorted by length)
         x = torch.nn.utils.rnn.pack_padded_sequence(x, lengths=lengths, batch_first=True)
 
-        # apply rnn 
-        output, (x, cn) = self.rnn(x) # for LSTM
-#        output, x = self.rnn(x) # for GRU
+        # apply rnn
+        if self.rnn_type == 'lstm':
+            output, (x, cn) = self.rnn(x) # for LSTM
+            x = x[0]
+        elif self.rnn_type == 'gru':
+            output, x = self.rnn(x) # for GRU
+            x = x[0]
+        else:
+            raise Exception(f'Unknown RNN: {self.rnn_type}')
 
-        # take the last output 
-        x = x[0]
-
-        x = F.dropout(x, p=0.5, training=self.training)
+        # drop out layer
+        x = F.dropout(x, p=self.drop_out_p, training=self.training)
 
         # final linear layer
         x = self.lin1(x)
         x = x.relu()
+
         x = self.lin2(x)
         x = x.relu()
 
         x = self.lin(x)
-
         
         return x
 
@@ -157,6 +182,100 @@ class Model_3(torch.nn.Module):
         return x
 
 
+
+
+# This model receives pyg graphs as input, and each graph should have
+# an attibute corresponding to the encoding of teh sequence of bytecode
+#
+class Model_4(torch.nn.Module):
+    def __init__(self, dataset, args):
+        super(Model_4, self).__init__()
+
+        hidden_channels = args.hiddenchannels
+        in_channels = dataset.num_node_features
+        out_channels = 1 if args.learningtype == 'regression' else dataset.num_classes
+        
+        # the GNN
+        gnn = GraphConv #GraphConv  #SGConv #GraphConv #SAGEConv #SGConv #GCNConv 
+        self.conv1 = gnn(in_channels, hidden_channels,  aggr='mean')
+        self.conv2 = gnn(hidden_channels, hidden_channels,  aggr='mean')
+        self.conv3 = gnn(hidden_channels, hidden_channels,  aggr='mean')
+
+
+        # the LSTM/GRU
+        vocab_size = dataset.vocab_size
+        embed_dim=args.embeddingdim
+
+        self.emb = Embedding(vocab_size, embed_dim, padding_idx=0) # we assume 0 was used for padding sequences
+        self.rnn = GRU(embed_dim, hidden_channels, 1)
+
+        # this linear layer will recieve as input both the GNN and LSTM/GRU output
+        self.lin1 = Linear(2*hidden_channels, hidden_channels)
+        
+        self.lin2 = Linear(hidden_channels, hidden_channels)
+        self.lin = Linear(hidden_channels, out_channels)
+
+
+         
+
+
+    def forward(self, data):
+
+        ### GNN
+        x, edge_index, batch = data[2], data[4], data[5]
+
+        # 1. Obtain node embeddings 
+        x = self.conv1(x, edge_index)
+        x = x.relu()
+
+        x = self.conv2(x, edge_index)
+        x = x.relu()
+
+        x = self.conv3(x, edge_index)
+
+        # 2. Whole graph embedding
+        x = global_mean_pool(x, batch)  # [batch_size, hidden_channels]
+
+
+        ### RNN
+
+        # take the sequences and pad them to be of equal length
+        y = [torch.tensor(l) for l in data[1]["seq"]]
+        lengths = [ len(l) for l in y ]
+        y = torch.nn.utils.rnn.pad_sequence(y, batch_first=True)
+
+        # embedding of the tokens into a relatively small dimensional space
+        y = self.emb(y)
+
+        # pack the sequences
+        y = torch.nn.utils.rnn.pack_padded_sequence(y, lengths=lengths, enforce_sorted=False, batch_first=True)
+
+        # 1. Obtain node embeddings 
+#        output, (x, cn) = self.rnn(x) # for LSTM
+        output, y = self.rnn(y) # for GRU
+
+        # take the last output 
+        y = y[0]
+
+
+
+        # join the results of teh GNN and RNN into a single tensor (each of the batch)
+        z = torch.cat((x,y), -1)
+        z = F.dropout(z, p=0.5, training=self.training)
+
+        # 3. Apply a final classifier
+        z = self.lin1(z)
+        z = z.relu()
+
+        z = self.lin2(z)
+        z = z.relu()
+
+        z = self.lin(z)
+
+        return z
+
+
+    
 class PositionalEncoding(torch.nn.Module):
     """
     https://pytorch.org/tutorials/beginner/transformer_tutorial.html
@@ -181,8 +300,8 @@ class PositionalEncoding(torch.nn.Module):
         x = x + self.pe[:, : x.size(1), :]
         return self.dropout(x)
 
-
-class Model_4(torch.nn.Module):
+    
+class Model_tr(torch.nn.Module):
     def __init__(self, dataset, args):
         super(Model_4, self).__init__()
 
@@ -194,7 +313,7 @@ class Model_4(torch.nn.Module):
         num_layers=6
         dropout=0.1
         activation="relu"
-        classifier_dropout=0.1
+        classifier_dropout=0.5
 
         self.emb = Embedding(vocab_size, embed_dim, padding_idx=0) # we assume 0 was used for padding sequences
         d_model = embed_dim
@@ -224,7 +343,7 @@ class Model_4(torch.nn.Module):
         x = self.emb(x) * math.sqrt(self.d_model)
 
         x = self.pos_encoder(x)
-        x = torch.nn.utils.rnn.pack_padded_sequence(x, lengths=lengths, batch_first=True)
+        #x = torch.nn.utils.rnn.pack_padded_sequence(x, lengths=lengths, batch_first=True)
         x = self.transformer_encoder(x)
         x = x.mean(dim=1)
         x = self.classifier(x)

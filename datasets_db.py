@@ -3,6 +3,7 @@
 # from datasets import GasolBytecodeSeq, SequenceBuilder_1, class_generator_11
 
 from graph_based_basic_blocks_dataset import GraphBasedBasicBlocksDataset
+from graph_based_basic_blocks_ws_dataset import GraphBasedBasicBlocksWSDataset
 from sfs_graph import SFSGraph
 from bytecode_block_graph import BytecodeBlockGraph
 
@@ -222,7 +223,6 @@ dataset_db[216] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
                                                               basic_block_filter=MinSizeOfInputBlockFilter(1)
                                                               )
 
-
 #
 dataset_db[221] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
                                                               zips=['block_jan_23_8_17_size','block_jul_22_8_17_size','block_march_23_8_17_size'],
@@ -289,10 +289,6 @@ dataset_db[242] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
                                                               sequence_builder=BytecodeSequence(label_f=block_label_gas_saved,encode_consts=False,encoding='multi_push'),
                                                               basic_block_filter=MinSizeOfInputBlockFilter(1)
                                                               )
-
-
-
-
 
 
 
@@ -451,7 +447,11 @@ def label_of_pyg_graph_for_balancing(d):
 
 def batch_transformer_for_pyg_graph(d):
     # TODO: remove size_save, it is not used anywhere
-    return 'pyg', { 'initial_n_instrs' : d.initial_n_instrs, 'sfs_size': d.sfs_size, 'size_saved' : d.size_saved, 'min_length': d.min_length, "time": d.time }, d.x, d.y, d.edge_index, d.batch
+    return 'pyg', { 'initial_n_instrs' : d.initial_n_instrs, 'sfs_size': d.sfs_size, 'size_saved' : d.size_saved, 'min_length': d.min_length, "time": d.time}, d.x, d.y, d.edge_index, d.batch
+
+def batch_transformer_for_pyg_ws_graph(d):
+    # TODO: remove size_save, it is not used anywhere
+    return 'pyg', { 'initial_n_instrs' : d.initial_n_instrs, 'sfs_size': d.sfs_size, 'size_saved' : d.size_saved, 'min_length': d.min_length, "time": d.time, "seq": d.seq if d.seq is not None else None}, d.x, d.y, d.edge_index, d.batch
 
 
 # sequence of type 1
@@ -493,6 +493,10 @@ def get_data_manipulators(dataset):
         label = label_of_sequence_1
         label_b = label_of_sequence_1_for_balancing
         batch_t = batch_transformer_for_sequence_1
+    elif isinstance(dataset,GraphBasedBasicBlocksWSDataset):
+        label = label_of_pyg_graph
+        label_b = label_of_pyg_graph_for_balancing
+        batch_t = batch_transformer_for_pyg_ws_graph
     else:
         raise Exception(f'Unknown datset type: {type(dataset)}')
 

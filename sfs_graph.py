@@ -123,7 +123,8 @@ class SFSGraph:
                  add_dep_edges=True,   # add egdes between instruction that are declared dependent in the sfs
                  node_features='category', #  node features builder (single_push, multi_push, category)
                  label_f=None,         # function for calculating the label
-                 edges='both',      # can be 'forward', 'backwards' or 'both'                 
+                 edges='both',      # can be 'forward', 'backwards' or 'both'
+                 sequence_builder=None, #
                  regression=False):    # if it is a regression problem (should be eliminated at some point, it is ugly)
 
         if node_features == 'single_push':
@@ -142,6 +143,7 @@ class SFSGraph:
         self.label_f = label_f
         self.edges = edges
         self.regression = regression
+        self.sequence_builder = sequence_builder
 
 
     def build_graph_from_sfs(self, block_sfs):
@@ -287,7 +289,7 @@ class SFSGraph:
             return None
 
         # ignore those with empty sfs -- should have been eliminated earlier
-        if len(block_sfs["user_instrs"])==0:
+        if self.sequence_builder is None and len(block_sfs["user_instrs"])==0:
             return None
 
         x, edge_index = self.build_graph_from_sfs(block_sfs)
@@ -299,6 +301,8 @@ class SFSGraph:
         else:
             y = torch.tensor(label).to(torch.long)            
 
+        
+           
         # construct pyg Data object 
         d = Data(x=x, edge_index=edge_index, y=y)
 
@@ -309,6 +313,9 @@ class SFSGraph:
         d.size_saved = torch.tensor(float(block_info["saved_size"]))
         d.time = torch.tensor(float(block_info["solver_time_in_sec"]))
         d.gas_saved = torch.tensor(float(block_info["saved_gas"]))
+        if self.sequence_builder:
+            d.seq = self.sequence_builder.build_seq(block_info,block_sfs)[0]["data"].tolist()
+            d.vocab_size = self.sequence_builder.vocab_size()
 
         return [d]
 

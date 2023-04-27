@@ -33,10 +33,11 @@ def create_loss_function(dataset,args):
     elif tag == 'l1':
         loss_f = torch.nn.L1Loss(reduction='mean')
     elif tag == 'cross_entropy':
+        loss_f =torch.nn.CrossEntropyLoss()
+    elif tag == 'cross_entropy_w':
         weight = calculate_class_weight(dataset)
         print(f'Cross entropy weights: {weight}')
         loss_f =torch.nn.CrossEntropyLoss(weight=weight)
-        #criterion = torch.nn.CrossEntropyLoss(weight=torch.tensor([0.3,0.7]),reduction='mean')
     else:
         raise Exception(f'Invalid loss function: {tag}')
 
@@ -164,14 +165,15 @@ def main():
     
     parser.add_argument('-lm', '--loadmodel', type=str)
     parser.add_argument('-lr', '--learningrate', type=float, default=1e-3)
-    parser.add_argument('-lf', '--lossfunction', type=str, default='mse')
+    parser.add_argument('-lf', '--lossfunction', type=str, choices=['mse','cross_entropy','cross_entropy_w'], default='mse')
     parser.add_argument('-opt', '--optimizer', type=str, default='adam')
     parser.add_argument('-hc', '--hiddenchannels', type=int, default=128)
     parser.add_argument('-lt', '--learningtype', type=str, default='regression')
     parser.add_argument('-m', '--model', type=str, default='nn_models.Model_1')
-    parser.add_argument('-ed', '--embeddingdim', type=int, default=64)
+    parser.add_argument('-ed', '--embeddingdim', type=int, default=None)
     parser.add_argument('-to_int', '--to_int', type=str, choices=['round','ceil','floor'], default='round')
     parser.add_argument('-pt', '--prop_threshold', type=float, default=None)
+    parser.add_argument('-dop', '--drop_out_p', type=float, default=0.5)
     parser.add_argument('-rnn', '--rnn_class', type=str, choices=['lstm','gru'], default='lstm')
     parser.add_argument('-nt', '--numthreads', type=int, default=None)
     parser.add_argument('-opt_key', '--opt_keyword', type=str, choices=['saved_size','saved_gas'], default='saved_size')
