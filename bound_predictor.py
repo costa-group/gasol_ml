@@ -29,8 +29,8 @@ builders[5] = 'seq', BytecodeSequence(encoding='multi_push',encode_consts=False,
 @Pyro4.expose
 class ModelQuery:
     def __init__(self,model_filename,builder_id=0,to_int=round):
-        torch.set_num_threads(1)
-        torch.set_num_interop_threads(1)
+        # torch.set_num_threads(1)
+        # torch.set_num_interop_threads(1)
         self.to_int = to_int
         self.model = torch.load(Path(__file__).parent.joinpath(Path(model_filename)).resolve())
         self.model.eval()
