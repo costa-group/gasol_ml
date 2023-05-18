@@ -12,7 +12,10 @@ import time
 #
 def train(model, criterion, optimizer, loader, get_label_f=None, batch_transformer=lambda d : d):
     model.train()
+    i=0
     for data in loader:
+        i += 1
+#        print(i)
         data = batch_transformer(data)  # trasfom the batch if needed
         out = model(data)
         labels = get_label_f(data) # get the label (class for classification and value for regression)
@@ -24,14 +27,14 @@ def train(model, criterion, optimizer, loader, get_label_f=None, batch_transform
 
 # Test a model on a given data. 
 #
-def test_c(model,criterion,loader,get_label_f=None, batch_transformer=lambda d : d, precision_evals=[]):
+def test_c(model,criterion,loader, out_suffix='', epoch=None, out_path='/tmp', get_label_f=None, batch_transformer=lambda d : d, precision_evals=[]):
     model.eval()
 
     with torch.no_grad():
 
         # reset all precision evaluators
         for peval in precision_evals:
-            peval.reset()
+            peval.reset(epoch=epoch,out_suffix=out_suffix,out_path=out_path)
         for data in loader:
             data = batch_transformer(data) # trasfrom the batch if needed
             out = model(data) # apply model
@@ -41,7 +44,7 @@ def test_c(model,criterion,loader,get_label_f=None, batch_transformer=lambda d :
             for peval in precision_evals:
                 peval.eval(out,labels,data,criterion)
         
-        return [ (peval.tag(), peval.loss(), peval.report())  for peval in precision_evals ]
+        return [ (peval.tag(), peval.loss(), peval.report()) for peval in precision_evals ]
 
 
 # creates a loader, and balance the set (only in case of classification for now) if needed
@@ -88,6 +91,7 @@ def training(model = None, # a model that is suitable for the dataset provided, 
              prec_cmp=train_first_elem_cmp, # a comparator of precision for each batch (see the module precision_cmp)
              save_models = None, # can be 'all', 'last', or None
              save_improved_only = False, # can be 'all', 'last', or None
+             sim_train = False, # We use this to print statistics of a model that we have already trained (splitting into training and validation set)
              out_path = '/tmp'): # where to save the optimal model
 
     # if there is a data set, then we are doing training 
@@ -96,12 +100,34 @@ def training(model = None, # a model that is suitable for the dataset provided, 
         print(f'** The training set ({train_set_size_percentage*100:.2f}% for training and {(1-train_set_size_percentage)*100:.2f}% for validation)')
         print_dataset_stats(dataset, regression=regression)
 
-        # split the dataset into training and validation
-        #
-        dataset = dataset.shuffle()
-        train_set_size = int(len(dataset)*train_set_size_percentage)
-        train_set = dataset[:train_set_size]
-        validation_set = dataset[train_set_size:]
+        if not sim_train:
+            # split the dataset into training and validation
+            #
+            dataset = dataset.shuffle()
+            train_set_size = int(len(dataset)*train_set_size_percentage)
+            train_set = dataset[:train_set_size]
+            validation_set = dataset[train_set_size:]
+
+            outfile = open(f'{out_path}/train_set_idx.txt', "w")
+            for t in train_set:
+                outfile.write(f"{t[3]['idx']}")
+                outfile.write('\n')
+            outfile.close()
+
+            outfile = open(f'{out_path}/val_set_idx.txt', "w")
+            for t in validation_set:
+                outfile.write(f"{t[3]['idx']}")
+                outfile.write('\n')
+            outfile.close()
+        else:
+            infile = open(f'{out_path}/train_set_idx.txt', "r")
+            data = infile.read()
+            train_set = [ dataset[int(idx)] for idx in data.split() ]
+            infile.close()
+            infile = open(f'{out_path}/val_set_idx.txt', "r")
+            data = infile.read()
+            validation_set = [ dataset[int(idx)] for idx in data.split() ]
+            infile.close()
 
         # Create the loaders. In case of classification we might be balancing
         train_loader = create_loader(train_set, name="training set", regression=regression, balance=balance_train_set, get_class_f_for_balancing=get_class_f_for_balancing, batch_size=batch_size)
@@ -138,11 +164,12 @@ def training(model = None, # a model that is suitable for the dataset provided, 
             # train
             #
             t1 = time.time()
-            train(model,criterion,optimizer,train_loader,get_label_f=get_label_f,batch_transformer=batch_transformer)
+            if not sim_train:
+                train(model,criterion,optimizer,train_loader,get_label_f=get_label_f,batch_transformer=batch_transformer)
             t2 = time.time()
-            train_precision = test_c(model,criterion,train_loader,get_label_f=get_label_f,batch_transformer=batch_transformer, precision_evals=precision_evals)
+            train_precision = test_c(model,criterion,train_loader,get_label_f=get_label_f,batch_transformer=batch_transformer, precision_evals=precision_evals, epoch=epoch, out_suffix=f'train',out_path=out_path)
             t3 = time.time()
-            val_precision = test_c(model,criterion,val_loader,get_label_f=get_label_f,batch_transformer=batch_transformer, precision_evals=precision_evals)
+            val_precision = test_c(model,criterion,val_loader,get_label_f=get_label_f,batch_transformer=batch_transformer, precision_evals=precision_evals, epoch=epoch, out_suffix=f'val',out_path=out_path)
             t4 = time.time()
 
             # check if there is an improvement wrt. the best epoch
@@ -187,7 +214,7 @@ def training(model = None, # a model that is suitable for the dataset provided, 
             t8 = t7 = time.time()
 
         if testset is not None:
-            test_precision = test_c(model,criterion,test_loader,get_label_f=get_label_f,batch_transformer=batch_transformer, precision_evals=precision_evals)
+            test_precision = test_c(model,criterion,test_loader,get_label_f=get_label_f,batch_transformer=batch_transformer, precision_evals=precision_evals,epoch=epoch, out_suffix=f'test',out_path=out_path)
             t8 = time.time()            
             
             print(f'\tTest: ', end="")

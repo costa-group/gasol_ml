@@ -22,6 +22,11 @@ def block_label_opt_n_instr(block_info, block_sfs):
         assert( d>= 0 )
         return d
 
+# 1 if minlength is the optimal
+def block_opt_minlen(block_info, block_sfs):
+        d = float(block_info["optimized_n_instrs"])-float(block_sfs["min_length"])
+        assert( d>=0 )
+        return 1 if d==0 else 0
 
 # 1 if gas was saved, and 0 otherwise -- for classification
 #

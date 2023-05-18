@@ -78,6 +78,7 @@ class SequenceBasedBasicBlocksDataset(SequenceDataset):
                                             info_list.append(o["info"])
                         except Exception as e:
                             print(block_id)
+                            print(e)
 
         torch.save((data_list, labels_list, info_list, self.sequence_builder.vocab_size()), self.processed_paths[0])
         print(i,":",j,":",k)

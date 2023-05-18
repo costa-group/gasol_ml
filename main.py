@@ -1,4 +1,4 @@
-from precision_eval import CriterionLoss, CorrectClass, TimeGain_vs_OptLoss, CountEpsError, SafeBound, PreciseBound
+from precision_eval import CriterionLoss, CorrectClass, TimeGain_vs_OptLoss, CountEpsError, SafeBound, PreciseBound, RegInfo, ROC
 from training import training
 from datasets_db import load_dataset, get_data_manipulators
 from misc import calc_dist, import_string
@@ -122,7 +122,7 @@ def train(args):
         precision_evals = [CriterionLoss(),CountEpsError(eps=1),SafeBound(to_int=to_int), PreciseBound(to_int=to_int)]
     else:
         p = args.prop_threshold
-        precision_evals = [CriterionLoss(),CorrectClass(p=p), TimeGain_vs_OptLoss(opt_key=args.opt_keyword,p=p)]
+        precision_evals = [CriterionLoss(),CorrectClass(p=p), TimeGain_vs_OptLoss(opt_key=args.opt_keyword,p=p),ROC(opt_key=args.opt_keyword)]
 
     label, label_b, batch_t = get_data_manipulators(dataset if dataset is not None else testset)
 
@@ -141,7 +141,8 @@ def train(args):
              precision_evals=precision_evals,
              regression=args.learningtype == 'regression',
              save_models = args.savemodels,
-             save_improved_only = args.saveimprovedonly, 
+             save_improved_only = args.saveimprovedonly,
+             sim_train=args.sim_train,
              out_path = args.outputpath)
 
     # save the last model
@@ -177,6 +178,8 @@ def main():
     parser.add_argument('-rnn', '--rnn_class', type=str, choices=['lstm','gru'], default='lstm')
     parser.add_argument('-nt', '--numthreads', type=int, default=None)
     parser.add_argument('-opt_key', '--opt_keyword', type=str, choices=['saved_size','saved_gas'], default='saved_size')
+    parser.add_argument('-sim_t', '--sim_train', action='store_true')
+    parser.add_argument('-nl', '--layers', type=int, default=1)
 
 
     args = parser.parse_args()
@@ -212,4 +215,5 @@ def main():
         
 if __name__ == "__main__":
     torch.manual_seed(56783)
+#    torch.manual_seed(12930873561324785612)
     main()
