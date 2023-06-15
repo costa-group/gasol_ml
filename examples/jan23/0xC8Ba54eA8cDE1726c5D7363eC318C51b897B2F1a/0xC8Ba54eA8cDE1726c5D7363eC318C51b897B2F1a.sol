@@ -1,0 +1,21 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.8.0;
+
+import "vesper-commons/contracts/interfaces/vesper/IStrategy.sol";
+import "vesper-pools/contracts/dependencies/openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "vesper-pools/contracts/dependencies/openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import "vesper-pools/contracts/dependencies/openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "vesper-pools/contracts/dependencies/openzeppelin/contracts/utils/Address.sol";
+import "vesper-pools/contracts/dependencies/openzeppelin/contracts/utils/Context.sol";
+import "vesper-pools/contracts/dependencies/openzeppelin/contracts/utils/math/Math.sol";
+import "vesper-pools/contracts/dependencies/openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import "vesper-pools/contracts/interfaces/vesper/IGovernable.sol";
+import "vesper-pools/contracts/interfaces/vesper/IPausable.sol";
+import "vesper-pools/contracts/interfaces/vesper/IPoolRewards.sol";
+import "vesper-pools/contracts/interfaces/vesper/IVesperPool.sol";
+import "vesper-strategies/contracts/interfaces/compound/ICompoundV3.sol";
+import "vesper-strategies/contracts/interfaces/swapper/IRoutedSwapper.sol";
+import "vesper-strategies/contracts/strategies/Strategy.sol";
+import "vesper-strategies/contracts/strategies/compound/v3/CompoundV3VesperXy.sol";
+import "vesper-strategies/contracts/strategies/compound/v3/CompoundV3Xy.sol";
