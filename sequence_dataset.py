@@ -17,7 +17,7 @@ from torch_geometric.data.makedirs import makedirs
 def files_exist(files):
     return len(files) != 0 and all([osp.exists(f) for f in files])
 
-class SeqDataSet(torch.utils.data.Dataset):
+class SequenceDataset(torch.utils.data.Dataset):
     
     # all should get values ... 
     _data = []
@@ -33,20 +33,20 @@ class SeqDataSet(torch.utils.data.Dataset):
 
         self._download()
         self._process()
-
         self._data, self._labels, self._info, self.vocab_size = torch.load(self.processed_paths[0])
         self._indices =  [ idx for idx in range(len(self._data)) ]
 
         # pad sequences
         self._lengths = [ len(l) for l in self._data ]
         self._data = torch.nn.utils.rnn.pad_sequence(self._data, batch_first=True)
+        
         self.num_classes = max(self._labels)+1
 
-    def to_list(self):
-         l = []
-         for i in range(len(self._data)):
-             l.append( (self._data[i],self._labels[i],self._lengths[i]) )
-         return l
+    # def to_list(self):
+    #      l = []
+    #      for i in range(len(self._data)):
+    #          l.append( (self._data[i],self._labels[i],self._lengths[i]) )
+    #      return l
 #        return [ (data,label,length) for (data,label,length) in (self._data,self.labels,self.lengths) ]
         
     def _download(self):

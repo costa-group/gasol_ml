@@ -74,6 +74,15 @@ def test_6():
 
     training_s_reg(model,criterion,optimizer,dataset,balance_train_set=False,balance_test_set=False)
 
+
+def test_11():
+    dataset = GasolBasicBlocks(root='data', name='rl_size_opt', tag='bla', graph_builder=GraphBuilder_2(class_gen=class_generator_4))
+    model = Model_1(hidden_channels=64,in_channels=dataset.num_node_features, out_channels=dataset.num_classes)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+    criterion = torch.nn.CrossEntropyLoss()
+    
+    training_g(model,criterion,optimizer,dataset,balance_train_set=True,balance_test_set=True)
+
 if __name__ == "__main__":
     torch.manual_seed(56783)
-    test_1_size()
+    test_11()
