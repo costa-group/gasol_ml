@@ -335,8 +335,12 @@ def split_bytecode(raw_instruction_str: str) -> List[str]:
         elif not op.startswith("PUSH"):
             opcodes.append(op)
         else:
+            # PUSH0 instructions are treated as PUSH0
+            if op == "PUSH0":
+                final_op = "PUSH 0"
+
             # PUSHDEPLOYADDRESS and PUSHSIZE has no value associated
-            if op.find("DEPLOYADDRESS") != -1 or op.find("SIZE") != -1:
+            elif op.find("DEPLOYADDRESS") != -1 or op.find("SIZE") != -1:
                 final_op = op
 
             # Just in case PUSHx instructions are included, we assign to them PUSH name instead
@@ -378,8 +382,14 @@ def split_bytecode_(raw_instruction_str: str) -> List[str]:
         elif not op.startswith("PUSH"):
             opcodes.append(op)
         else:
+            # PUSH0 instructions are treated as PUSH0
+            # TODO: alternative representation depending on whether PUSH0 is considered as an opcode or not
+            if op == "PUSH0":
+                final_op = "PUSH1"
+                operand = f'#0'
+
             # PUSHDEPLOYADDRESS and PUSHSIZE has no value associated
-            if op.find("DEPLOYADDRESS") != -1 or op.find("SIZE") != -1:
+            elif op.find("DEPLOYADDRESS") != -1 or op.find("SIZE") != -1:
                 final_op = op
 
             # Just in case PUSHx instructions are included, we assign to them PUSH name instead
