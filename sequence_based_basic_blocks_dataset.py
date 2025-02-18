@@ -12,7 +12,7 @@ from basic_block_filters import AlwaysTrueFilter
 
 class SequenceBasedBasicBlocksDataset(SequenceDataset):
     
-    url = 'https://samir.fdi.ucm.es/download/costa_ml'
+    url = 'https://costa.fdi.ucm.es/download/gasol_ml/dataset'
     
     def __init__(self, root, zips, tag, sequence_builder, basic_block_filter=AlwaysTrueFilter()):
         self.root = root
