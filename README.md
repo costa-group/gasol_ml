@@ -30,7 +30,7 @@ options:
 
 *  `-ds DATASET, --dataset DATASET`: The index of the dataset to be used for training, as it appears in [datasets_db.py](./datasets_db.py). It will be divided into `80%` for training and `20%` for validation. Note that the type of the data set affects which models can be selected in the option `-m` -- it must be one that receives the corresponding encoding used in the dataset.
 
-* `-ts DATASET, --dataset DATASET`: The index of the dataset to be used for testing, as it appears in [datasets_db.py](./datasets_db.py). It is divided into `80%` for training and `20%` for validation. Note that the type of the dataset affects which models can be selected in the `-m` option -- it must be one that matches the encoding used in the dataset.
+* `-ts DATASET, --dataset DATASET`: The index of the dataset to be used for testing, as it appears in [datasets_db.py](./datasets_db.py). After each epoch the current model will be tested on this set.
 
 *  `-op OUTPUTPATH, --outputpath OUTPUTPATH`: The path where models are saved.
 
@@ -40,15 +40,15 @@ options:
 
 *  `-lr LEARNINGRATE, --learningrate LEARNINGRATE`: The learning rate to be used during training, with `1e-3` being the default value.
 
-*  `-lf {mse,cross_entropy,cross_entropy_w}, --lossfunction {mse,cross_entropy,cross_entropy_w}`: The loss function to use during training. 
+*  `-lf {mse,cross_entropy,cross_entropy_w}, --lossfunction {mse,cross_entropy,cross_entropy_w}`: The loss function to use during training, with `mse` being the default value.
 
 *  `-opt {adam,sgd}, --optimizer {adam,sgd}`: The optimizer to use during training, by default it is `adam` (for `torch.optim.Adam`), and it can also be `sgd` for (`torch.optim.SGD`).
 
 *  `-hc HIDDENCHANNELS, --hiddenchannels HIDDENCHANNELS`: The models in [nn_models.py](./nn_models.py) typically end with a standard feed-forward deep neural network. This parameter controls the number of channels, with `128` being the default value.
 
-*  `-lt {regression,classification}, --learningtype {regression,classification}`: Specify if we are modeling a `regression` or a `classification` problem.
+*  `-lt {regression,classification}, --learningtype {regression,classification}`: Specify if we are modeling a `regression` or a `classification` problem, with `regression` being the default value.
 
-* `-m MODEL, --model MODEL`: The model to use, using the name as it appears in `nn_models.py` (see the comments in that file for more information on each). Note that you should use a model that accepts the encoding of the selected dataset.
+* `-m MODEL, --model MODEL`: The model to use for training, using the name as it appears in `nn_models.py` (see the comments in that file for more information on each). Note that you should use a model that accepts the encoding of the selected dataset.
 
 *  `-ed EMBEDDINGDIM, --embeddingdim EMBEDDINGDIM`: The dimension of the space used for embedding, when not specified the models use one-hot encoding.
 
@@ -68,33 +68,33 @@ options:
 
 *  `-bs BATCH_SIZE, --batch_size BATCH_SIZE`: The size of the batch during training, with `64` being the default value.
 
-* `-nl LAYERS, --layers LAYERS`: The models in [nn_models.py](./nn_models.py) typically end with a standard feed-forward deep neural network. This parameter controls the number of layers, which is `1` by default.
+* `-nl LAYERS, --layers LAYERS`: The models in [nn_models.py](./nn_models.py) typically end with a standard feed-forward deep neural network. This parameter controls the number of layers, with `1` being the default value.
 
 
 # Training 
 
-The file `train.sh` contains several command lines to train on different sets and configurations. The ones selected in the experiments of the paper can be generated with the following commands:
+The file `train.sh` contains several command lines to train on different datasets and configurations. The ones selected in the experiments of the paper can be generated with the following commands:
 
 * Predicting a bound on the size of the optimal block (optimality wrt. to the block size): 
 
-`python3 main.py -ds 215 -e 47 -nt 1 -m nn_models.Model_2 -ed 64 -rnn gru -sm last -op /tmp/reg_ds_gru_ed64_215`
+`python3 main.py -ds 215 -e 47 -nt 1 -m nn_models.Model_2 -ed 64 -rnn gru -sm last -op /tmp`
 
 * Predicting if a given block is already optimal (optimality wrt. to the block size): 
 
-`python3 main.py -ds 221 -e 50 -nt 1 -m nn_models.Model_2 -rnn lstm -lt classification -lf cross_entropy -sm last -opt_key saved_size -op /tmp/cl_ds_lstm_221`
+`python3 main.py -ds 221 -e 50 -nt 1 -m nn_models.Model_2 -rnn lstm -lt classification -lf cross_entropy -sm last -opt_key saved_size -op /tmp`
 
 * Predicting a bound on the size of the optimal block (optimality wrt. to the gas consumption): 
 
-`python3 main.py -ds 255 -e 49 -nt 1 -m nn_models.Model_2 -ed 64 -rnn gru -sm last -op /tmp/reg_ds_gru_ed64_255`
+`python3 main.py -ds 255 -e 49 -nt 1 -m nn_models.Model_2 -ed 64 -rnn gru -sm last -op /tmp`
 
 * Predicting if a given block is already optimal (optimality wrt. to the gas consumption): 
 
-`python3 main.py -ds 261 -e 47 -nt 1 -m nn_models.Model_2 -rnn lstm -lt classification -lf cross_entropy -sm last -opt_key saved_size -op /tmp/cl_ds_lstm_261`
+`python3 main.py -ds 261 -e 47 -nt 1 -m nn_models.Model_2 -rnn lstm -lt classification -lf cross_entropy -sm last -opt_key saved_size -op /tmp`
 
 
 # Testing models
 
-First, note that during training, we can provide a test dataset using the `-ts` parameter and it will evaluate the model of each epoch on that test set and print the corresponding statistics. In what follows we describe how to test an existing model on a given set.
+First, note that during training, we can provide a test dataset using the `-ts` parameter and the model of each epoch is evaluated on that test set. In what follows we describe how to test an existing model on a given set.
 
 
 ## Classification problem
@@ -111,7 +111,7 @@ we can test it on a set with identifier `X` using the following:
 python3 main.py -ts X -lm model.pyt -lt classification -lf cross_entropy -opt_key saved_gas
 ```
 
-Note that we have to use the same values for options `-lf` and `-opt_key`.
+Note that we have to use the same values for options `-lt`, `-lf` and `-opt_key`.
 
 
 ## Regression problem
@@ -131,4 +131,4 @@ python3 main.py -ts X -lm model.pyt
 
 # Using a model within another Python program
 
-The modules [opt_predictor.py](./opt_predictor.py) and [bound_predictor.py](./bound_predictor.py) can be used to use an existing model in another Python program (they use information as comments). Within the GASOL optimizer they are used on the different models available in the directory [models](./models).
+The modules [opt_predictor.py](./opt_predictor.py) and [bound_predictor.py](./bound_predictor.py) can be used to use an existing model in another Python program (these files inlucde usage information as comments). Within the GASOL optimizer they are used on the different models available in the directory [models](./models).
