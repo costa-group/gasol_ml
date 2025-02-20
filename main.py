@@ -175,6 +175,7 @@ def main():
     parser.add_argument('-to_int', '--to_int', type=str, choices=['round','ceil','floor'], default='round')
     parser.add_argument('-pt', '--prop_threshold', type=float, default=None)
     parser.add_argument('-dop', '--drop_out_p', type=float, default=0.5)
+    parser.add_argument('-rnndop', '--rnn_drop_out_p', type=float, default=0)
     parser.add_argument('-rnn', '--rnn_class', type=str, choices=['lstm','gru'], default='lstm')
     parser.add_argument('-nt', '--numthreads', type=int, default=None)
     parser.add_argument('-opt_key', '--opt_keyword', type=str, choices=['saved_size','saved_gas'], default='saved_size')

@@ -6,13 +6,13 @@ Install a recent version of [PyTorch](https://pytorch.org/) and [PyTorch Geometr
 
 # Data sets
 
-The first time you run the program, the datasets are automatically downloaded from the following link: `https://costa.fdi.ucm.es/download/gasol_ml/dataset/`. Note that the first time you use these sets, it will take some time to build the processed data from the raw data.
+The file [datasets_db.py](./datasets_db.py) includes a list of all available datasets. From this list it is possible to understand which encoding is used for each case (using GNNs or sequences of tokens).
 
-The file [datasets_db.py](./datasets_db.py) includes a list of all available datasets.
+The first time you run `main.py` in training mode, the datasets are automatically downloaded from: [https://costa.fdi.ucm.es/download/gasol_ml/dataset/](https://costa.fdi.ucm.es/download/gasol_ml/dataset/) and the processed data is created from the raw data for the particular dataset used, which takes time.
 
-# The Main module
+# The Main module `main.py`
 
-This is the main program that can be use for training and testing, it has several parameters that allows controlling the kind of neural network to be used, its parameters, etc. Next we overview these parameters
+This is the main program that can be used for training (and possibly testing). It has several parameters that allow you to control the type of neural network to be used, its parameters, etc. Here is brief explanation of each parameter:
 
 ```
 $ python3 main.py --help
@@ -26,47 +26,73 @@ options:
 ```
 
 
-*  `-h, --help show this help message and exit`: shows usage information.
-*  `-e EPOCHS, --epochs EPOCHS`: the number of epochs during training, with `1` as default value.
-*  `-ds DATASET, --dataset DATASET`: the index of the data set to be used, as it appears in [datasets_db.py](./datasets_db.py). It will be divided into `80%` for training and `20%` for validation.
-*  `-ts TESTSET, --testset TESTSET`: the index of the data set to be used for testing, after each EPOCH, as it appears in [datasets_db.py](./datasets_db.py). If not available no testing is performed (only validation).
-*  `-op OUTPUTPATH, --outputpath OUTPUTPATH`: the path where models are saved.
-*  `-sm {all,last}, --savemodels {all,last}`: control which models are saved, `all` models (at each epoch) or the `last` one.
-*  `-sio, --saveimprovedonly`: save only models that improve on previous ones.
-*  `-lm LOADMODEL, --loadmodel LOADMODEL`: start from a model that has been saved before. It is used to test models on new data sets.
-*  `-lr LEARNINGRATE, --learningrate LEARNINGRATE`: the learning rate to be used during training, with `1e-3` as default value.
-*  `-lf {mse,cross_entropy,cross_entropy_w}, --lossfunction {mse,cross_entropy,cross_entropy_w}`: the loss function to use during training. 
-*  `-opt {adam,sgd}, --optimizer {adam,sgd}`: the optimizer to use during training, by default it is `adam` (for `torch.optim.Adam`), and it can be `sgd` for (`torch.optim.SGD`)
-*  `-hc HIDDENCHANNELS, --hiddenchannels HIDDENCHANNELS`: the models in [nn_models.py](./nn_models.py) typically end with a standard feed-forward deep neural network. This parameter control the number of hidden channels which is `128` by default.
-*  `-lt {regression,classification}, --learningtype {regression,classification}`: specify if we are model a regression or a classification problem.
-*  `-m MODEL, --model MODEL`: the mode to be used, should be one of those in `nn_models.py`.
-*  `-ed EMBEDDINGDIM, --embeddingdim EMBEDDINGDIM`: some dimension of the embedding, when not specified the models use one-hot encoding.
-*  `-to_int {round,ceil,floor}, --to_int {round,ceil,floor}`: how to convert real numbers to integers, with default value `round`. This is needed since the output of the regression problems in our case is integer, and thus we need to convert the output of the model to an integer.
-*  `-pt PROP_THRESHOLD, --prop_threshold PROP_THRESHOLD`: this is used in classification problems to decide the class.
-*  `-dop DROP_OUT_P, --drop_out_p DROP_OUT_P`: the probability for the drop out layer, with `0.5` as default value.
-*  `-rnndop RNN_DROP_OUT_P, --rnn_drop_out_p RNN_DROP_OUT_P`: the drop out probability passed to lstm and gru.
-*  `-rnn {lstm,gru}, --rnn_class {lstm,gru}`: the type of RNN to be used.
-*  `-nt NUMTHREADS, --numthreads NUMTHREADS`: number of thread for `PyTorch`.
-*  `-opt_key {saved_size,saved_gas}, --opt_keyword {saved_size,saved_gas}`: This is very specific to the data set, which indicates the key (in the corresponding JSON) to be used to obtain the saving. This is mainly used for printing some statistics.
-*  `-sim_t, --sim_train`:  This simulates a previous training, by forcing using the same splitting of train and validation sets as before (taking the information from intermediate files that were generated). It is used to print statistics of a model that we have already trained (splitting into training and validation set.
-*  `-bs BATCH_SIZE, --batch_size BATCH_SIZE`: The size of the batch, with `64` as default value.
-*  `-nl LAYERS, --layers LAYERS`: the models in [nn_models.py](./nn_models.py) typically end with a standard feed-forward deep neural network. This parameter control the number of layers which is `1` by default.
+*  `-h, --help show this help message and exit`: Shows usage information.
 
-# Training and building modules
+*  `-e EPOCHS, --epochs EPOCHS`: The number of epochs during training, with `1` being default value.
+
+*  `-ds DATASET, --dataset DATASET`: The index of the data set to be used, as it appears in [datasets_db.py](./datasets_db.py). It will be divided into `80%` for training and `20%` for validation. Note that the type of the data set affects whih models can be selected in the option `-m` -- it must be once that recieve the corresponding encoding used in the dataset.
+
+* `-ds DATASET, --dataset DATASET`: The index of the dataset to be used, as it appears in [datasets_db.py](./datasets_db.py). It is divided into `80%` for training and `20%` for validation. Note that the type of dataset affects which models can be selected in the `-m` option -- it must be one that matches the encoding used in the dataset.
+
+*  `-op OUTPUTPATH, --outputpath OUTPUTPATH`: The path where models are saved.
+
+* `-sm {all,last}, --savemodels {all,last}`: Control which models to save, `all` models (at each epoch) or the `last` model. Each model is named `model_n.pyt` or `model_i_n.pyt`, where `n` is the number of the epoch in which it was generated, and `i` indicates that it is an improvement over the previous one, according to the precision measure used.
+
+*  `-lm LOADMODEL, --loadmodel LOADMODEL`: Start from a model that has been saved before. It is mainly used to test existing models on new datasets.
+
+*  `-lr LEARNINGRATE, --learningrate LEARNINGRATE`: The learning rate to be used during training, with `1e-3` being the default value.
+
+*  `-lf {mse,cross_entropy,cross_entropy_w}, --lossfunction {mse,cross_entropy,cross_entropy_w}`: The loss function to use during training. 
+
+*  `-opt {adam,sgd}, --optimizer {adam,sgd}`: The optimizer to use during training, by default it is `adam` (for `torch.optim.Adam`), and it can also be `sgd` for (`torch.optim.SGD`).
+
+*  `-hc HIDDENCHANNELS, --hiddenchannels HIDDENCHANNELS`: The models in [nn_models.py](./nn_models.py) typically end with a standard feed-forward deep neural network. This parameter control the number of channels, with `128` being the default value.
+
+*  `-lt {regression,classification}, --learningtype {regression,classification}`: Specify if we are modeling a `regression` or a `classification` problem.
+
+* `-m MODEL, --model MODEL`: The model to use, using the name as it appears in `nn_models.py` (see the comments in that file for more information on each). Note that you should use a model that accepts the encoding of the selected dataset.
+
+*  `-ed EMBEDDINGDIM, --embeddingdim EMBEDDINGDIM`: The dimension of the spaced use for embedding, when not specified the models use one-hot encoding.
+
+* `-to_int {round,ceil,floor}, --to_int {round,ceil,floor}`: How to convert a real number to and integer, where `round` is the default. This is needed when predicting the size of the optimal block (using regression), since the size is an integer but the models output a real number.
+
+*  `-pt PROP_THRESHOLD, --prop_threshold PROP_THRESHOLD`: The probability threshold to be used in binary classification problems.
+
+*  `-dop DROP_OUT_P, --drop_out_p DROP_OUT_P`: The probability to be used in the dropout layer, with `0.5` being the default value.
+
+*  `-rnndop RNN_DROP_OUT_P, --rnn_drop_out_p RNN_DROP_OUT_P`: The probability to be used in the dropout of the corresponding RNN, with `0` being the default value.
+
+*  `-rnn {lstm,gru}, --rnn_class {lstm,gru}`: The type of RNN to be used.
+
+*  `-nt NUMTHREADS, --numthreads NUMTHREADS`: Number of thread to be used by `PyTorch`.
+
+*  `-opt_key {saved_size,saved_gas}, --opt_keyword {saved_size,saved_gas}`: This is very specific to the dataset and classification problems, which indicates the key (in the corresponding dataset) to be used to obtain the saving (in gas consumption or in block size).
+
+*  `-bs BATCH_SIZE, --batch_size BATCH_SIZE`: The size of the batch during training, with `64` being the default value.
+
+* `-nl LAYERS, --layers LAYERS`: The models in [nn_models.py](./nn_models.py) typically end with a standard feed-forward deep neural network. This parameter controls the number of layers, which is `1` by default.
 
 
-The file `train.sh` includes several command lines to train on different sets with different configurations. The ones that were selected in the experiments of the paper can be generated using following commands:
+# Training 
 
-* Bound (Size): 
+
+The file `train.sh` contains several command lines to train on different sets and configurations. The ones selected in the experiments of the paper can be generated with the following commands:
+
+
+* Predicting a bound on the size of the optimal block (optimality wrt. to the block size): 
+
 `python3 main.py -ds 215 -e 47 -nt 1 -m nn_models.Model_2 -ed 64 -rnn gru -sm last -op /tmp/reg_ds_gru_ed64_215`
 
-* Opt (Size): 
+* Predicting if a given block is already optimal (optimality wrt. to the block size): 
+
 `python3 main.py -ds 221 -e 50 -nt 1 -m nn_models.Model_2 -rnn lstm -lt classification -lf cross_entropy -sm last -opt_key saved_size -op /tmp/cl_ds_lstm_221`
 
-* Bound (Gas):
+* Predicting a bound on the size of the optimal block (optimality wrt. to the gas consumption): 
+
 `python3 main.py -ds 255 -e 49 -nt 1 -m nn_models.Model_2 -ed 64 -rnn gru -sm last -op /tmp/reg_ds_gru_ed64_255`
 
-* Opt (Gas): 
+* Predicting if a given block is already optimal (optimality wrt. to the gas consumption): 
+
 `python3 main.py -ds 261 -e 47 -nt 1 -m nn_models.Model_2 -rnn lstm -lt classification -lf cross_entropy -sm last -opt_key saved_size -op /tmp/cl_ds_lstm_261`
 
 
