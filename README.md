@@ -1,18 +1,16 @@
-*** This REDAME.md is still under construction ***
-
 # Requirements
 
 Install a recent version of [PyTorch](https://pytorch.org/) and [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/).
 
-# Data sets
+# Datasets
 
-The file [datasets_db.py](./datasets_db.py) includes a list of all available datasets. From this list it is possible to understand which encoding is used for each case (using GNNs or sequences of tokens).
+The file [datasets_db.py](./datasets_db.py) includes a list of all available datasets. From this list, you can understand which encoding is used for each case (using GNNs or sequences of tokens).
 
-The first time you run `main.py` in training mode, the datasets are automatically downloaded from: [https://costa.fdi.ucm.es/download/gasol_ml/dataset/](https://costa.fdi.ucm.es/download/gasol_ml/dataset/) and the processed data is created from the raw data for the particular dataset used, which takes time.
+The first time you run `main.py` in training mode, the datasets are automatically downloaded from [https://costa.fdi.ucm.es/download/gasol_ml/dataset/](https://costa.fdi.ucm.es/download/gasol_ml/dataset/) and the processed data is created from the raw data for the particular dataset used, which might take some time.
 
 # The Main module `main.py`
 
-This is the main program that can be used for training (and possibly testing). It has several parameters that allow you to control the type of neural network to be used, its parameters, etc. Here is brief explanation of each parameter:
+This is the main program that can be used for training (and possibly testing). It has several parameters that allow you to control the type of neural network to be used, its parameters, etc. Here is a brief explanation of each parameter:
 
 ```
 $ python3 main.py --help
@@ -28,11 +26,11 @@ options:
 
 *  `-h, --help show this help message and exit`: Shows usage information.
 
-*  `-e EPOCHS, --epochs EPOCHS`: The number of epochs during training, with `1` being default value.
+*  `-e EPOCHS, --epochs EPOCHS`: The number of epochs during training, with `1` being the default value.
 
-*  `-ds DATASET, --dataset DATASET`: The index of the data set to be used, as it appears in [datasets_db.py](./datasets_db.py). It will be divided into `80%` for training and `20%` for validation. Note that the type of the data set affects whih models can be selected in the option `-m` -- it must be once that recieve the corresponding encoding used in the dataset.
+*  `-ds DATASET, --dataset DATASET`: The index of the dataset to be used for training, as it appears in [datasets_db.py](./datasets_db.py). It will be divided into `80%` for training and `20%` for validation. Note that the type of the data set affects which models can be selected in the option `-m` -- it must be one that receives the corresponding encoding used in the dataset.
 
-* `-ds DATASET, --dataset DATASET`: The index of the dataset to be used, as it appears in [datasets_db.py](./datasets_db.py). It is divided into `80%` for training and `20%` for validation. Note that the type of dataset affects which models can be selected in the `-m` option -- it must be one that matches the encoding used in the dataset.
+* `-ts DATASET, --dataset DATASET`: The index of the dataset to be used for testing, as it appears in [datasets_db.py](./datasets_db.py). It is divided into `80%` for training and `20%` for validation. Note that the type of the dataset affects which models can be selected in the `-m` option -- it must be one that matches the encoding used in the dataset.
 
 *  `-op OUTPUTPATH, --outputpath OUTPUTPATH`: The path where models are saved.
 
@@ -46,15 +44,15 @@ options:
 
 *  `-opt {adam,sgd}, --optimizer {adam,sgd}`: The optimizer to use during training, by default it is `adam` (for `torch.optim.Adam`), and it can also be `sgd` for (`torch.optim.SGD`).
 
-*  `-hc HIDDENCHANNELS, --hiddenchannels HIDDENCHANNELS`: The models in [nn_models.py](./nn_models.py) typically end with a standard feed-forward deep neural network. This parameter control the number of channels, with `128` being the default value.
+*  `-hc HIDDENCHANNELS, --hiddenchannels HIDDENCHANNELS`: The models in [nn_models.py](./nn_models.py) typically end with a standard feed-forward deep neural network. This parameter controls the number of channels, with `128` being the default value.
 
 *  `-lt {regression,classification}, --learningtype {regression,classification}`: Specify if we are modeling a `regression` or a `classification` problem.
 
 * `-m MODEL, --model MODEL`: The model to use, using the name as it appears in `nn_models.py` (see the comments in that file for more information on each). Note that you should use a model that accepts the encoding of the selected dataset.
 
-*  `-ed EMBEDDINGDIM, --embeddingdim EMBEDDINGDIM`: The dimension of the spaced use for embedding, when not specified the models use one-hot encoding.
+*  `-ed EMBEDDINGDIM, --embeddingdim EMBEDDINGDIM`: The dimension of the space used for embedding, when not specified the models use one-hot encoding.
 
-* `-to_int {round,ceil,floor}, --to_int {round,ceil,floor}`: How to convert a real number to and integer, where `round` is the default. This is needed when predicting the size of the optimal block (using regression), since the size is an integer but the models output a real number.
+* `-to_int {round,ceil,floor}, --to_int {round,ceil,floor}`: How to convert a real number to an integer, where `round` is the default. This is needed when predicting the size of the optimal block (using regression), since the size is an integer but the models output a real number.
 
 *  `-pt PROP_THRESHOLD, --prop_threshold PROP_THRESHOLD`: The probability threshold to be used in binary classification problems.
 
@@ -64,7 +62,7 @@ options:
 
 *  `-rnn {lstm,gru}, --rnn_class {lstm,gru}`: The type of RNN to be used.
 
-*  `-nt NUMTHREADS, --numthreads NUMTHREADS`: Number of thread to be used by `PyTorch`.
+*  `-nt NUMTHREADS, --numthreads NUMTHREADS`: Number of threads to be used by `PyTorch`.
 
 *  `-opt_key {saved_size,saved_gas}, --opt_keyword {saved_size,saved_gas}`: This is very specific to the dataset and classification problems, which indicates the key (in the corresponding dataset) to be used to obtain the saving (in gas consumption or in block size).
 
@@ -75,9 +73,7 @@ options:
 
 # Training 
 
-
 The file `train.sh` contains several command lines to train on different sets and configurations. The ones selected in the experiments of the paper can be generated with the following commands:
-
 
 * Predicting a bound on the size of the optimal block (optimality wrt. to the block size): 
 
@@ -96,6 +92,43 @@ The file `train.sh` contains several command lines to train on different sets an
 `python3 main.py -ds 261 -e 47 -nt 1 -m nn_models.Model_2 -rnn lstm -lt classification -lf cross_entropy -sm last -opt_key saved_size -op /tmp/cl_ds_lstm_261`
 
 
-# Testing modules
+# Testing models
+
+First, note that during training, we can provide a test dataset using the `-ts` parameter and it will evaluate the model of each epoch on that test set and print the corresponding statistics. In what follows we describe how to test an existing model on a given set.
 
 
+## Classification problem
+
+If we have generated a model `model.pyt` using:
+
+```
+python3 main.py -ds 242 -e 50 -nt 1 -m nn_models.Model_2 -rnn lstm -lt classification -lf cross_entropy -sm all -opt_key saved_gas
+```
+
+we can test it on a set with identifier `X` using the following:
+
+```
+python3 main.py -ts X -lm model.pyt -lt classification -lf cross_entropy -opt_key saved_gas
+```
+
+Note that we have to use the same values for options `-lf` and `-opt_key`.
+
+
+## Regression problem
+
+If we have generated a model `model.pyt` using:
+
+```
+python3 main.py -ds 215 -e 47 -nt 1 -m nn_models.Model_2 -ed 64 -rnn gru -sm all 
+```
+
+We can test it on a set with identifier `X` using the following:
+
+```
+python3 main.py -ts X -lm model.pyt
+```
+
+
+# Using a model within another Python program
+
+The modules [opt_predictor.py](./opt_predictor.py) and [bound_predictor.py](./bound_predictor.py) can be used to use an existing model in another Python program (they use information as comments). Within the GASOL optimizer they are used on the different models available in the directory [models](./models).
