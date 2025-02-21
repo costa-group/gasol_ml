@@ -21,7 +21,7 @@ import torch
 dataset_db={};
 
 
-# SIZE - Bound
+# Datasets to be used for predicting a bound on the size of the optimal block (optimality wrt. to the block size).
 #
 dataset_db[211] = lambda tag: GraphBasedBasicBlocksDataset(root='data/gasol',
                                                            zips=['block_jan_23_8_17_size','block_jul_22_8_17_size','block_march_23_8_17_size'],
@@ -80,7 +80,7 @@ dataset_db[217] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
                                                               )
 
 
-# SIZE - OPT
+# Datasets to be used for predicting if a given block is already optimal (optimality wrt. to the block size)
 #
 dataset_db[221] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
                                                               zips=['block_jan_23_8_17_size','block_jul_22_8_17_size','block_march_23_8_17_size'],
@@ -108,7 +108,7 @@ dataset_db[222] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
                                                               basic_block_filter=MinSizeOfInputBlockFilter(1)
                                                               )
 
-# GAS - Bound
+# Datasets to be used for predicting a bound on the size of the optimal block (optimality wrt. to the gas consumption)
 #
 dataset_db[231] = lambda tag: GraphBasedBasicBlocksDataset(root='data/gasol',
                                                            zips=['block_jan_23_8_17_gas','block_jul_22_8_17_gas','block_march_23_8_17_gas'],
@@ -148,7 +148,7 @@ dataset_db[236] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
                                                               )
 
 
-# GAS - Opt
+# Datasets to be used for predicting if a given block is already optimal (optimality wrt. to the gas consumption)
 #
 dataset_db[241] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
                                                               zips=['block_jan_23_8_17_gas','block_jul_22_8_17_gas','block_march_23_8_17_gas'],
@@ -165,7 +165,7 @@ dataset_db[242] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
 
 
 
-# AGAS - Bound
+# Datasets to be used for predicting a bound on the size of the optimal block (optimality wrt. to the gas consumption)
 #
 dataset_db[251] = lambda tag: GraphBasedBasicBlocksDataset(root='data/gasol',
                                                            zips=['blocks_alternative_gas'],
@@ -211,7 +211,7 @@ dataset_db[256] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
                                                               )
 
 
-# GAS - Opt
+# Datasets to be used for predicting if a given block is already optimal (optimality wrt. to the gas consumption)
 #
 dataset_db[261] = lambda tag: SequenceBasedBasicBlocksDataset(root='data/gasol',
                                                               zips=['blocks_alternative_gas'],
