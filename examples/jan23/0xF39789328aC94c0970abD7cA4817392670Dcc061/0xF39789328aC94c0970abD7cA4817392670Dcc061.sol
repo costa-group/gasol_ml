@@ -1,7 +1,0 @@
-// SPDX-License-Identifier: MIT
-
-pragma solidity ^0.8.0;
-
-import "contracts/SweepersSeeder.sol";
-import "contracts/interfaces/ISweepersDescriptor.sol";
-import "contracts/interfaces/ISweepersSeeder.sol";
