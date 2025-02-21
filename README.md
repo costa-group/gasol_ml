@@ -131,6 +131,6 @@ python3 main.py -ts X -lm model.pyt
 ```
 
 
-# Using a model within another Python program
+# Using a model within GASOL
 
-The modules [opt_predictor.py](./opt_predictor.py) and [bound_predictor.py](./bound_predictor.py) can be used to use an existing model in another Python program (these files inlucde usage information as comments). Within the GASOL optimizer they are used on the different models available in the directory [models](./models).
+The modules [opt_predictor.py](./opt_predictor.py) and [bound_predictor.py](./bound_predictor.py) can be used to use an existing model within GASOL (these files inlucde usage information as comments). They are mainly used with the models available in the directory [models](./models).

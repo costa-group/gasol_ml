@@ -11,6 +11,10 @@ import json
 import time
 import Pyro4
 
+
+# The ModelQuery class can be used to query the learned model (for bounding the size of the optimal block) from GASOL. This is done by creating an instance and pass it the model filename, an index to the array builder below which indicates how to encode a block, and how to convert a real number to an integer. The `eval` method can then be used to predict a bound for the block `block_sfs` (given in the same form as the raw data).
+#
+
 builders = {}
 # for models in 211, 231
 builders[0] = 'pyg', SFSGraph(node_features='multi_push',regression=True)

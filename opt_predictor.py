@@ -9,6 +9,10 @@ import time
 import argparse
 import Pyro4
 
+
+# The ModelQuery class can be used to query the learned model (for predicting if a block is already optimal) from GASOL. This is done by creating an instance and pass it the model filename and an index to the array builder below which indicates how to encode a block. The `eval` method can then be used to predict if a `block_sfs` (given in the same form as the raw data) is already optimal.
+#
+
 builders = {}
 # for models in 221, 241
 builders[0] = 'seq', BytecodeSequence(encoding='multi_push')
