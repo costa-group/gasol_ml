@@ -91,7 +91,6 @@ def training(model = None, # a model that is suitable for the dataset provided, 
              prec_cmp=train_first_elem_cmp, # a comparator of precision for each batch (see the module precision_cmp)
              save_models = None, # can be 'all', 'last', or None
              save_improved_only = False, # can be 'all', 'last', or None
-             sim_train = False, # We use this to print statistics of a model that we have already trained (splitting into training and validation set)
              out_path = '/tmp'): # where to save the optimal model
 
     # if there is a data set, then we are doing training 
@@ -100,34 +99,12 @@ def training(model = None, # a model that is suitable for the dataset provided, 
         print(f'** The training set ({train_set_size_percentage*100:.2f}% for training and {(1-train_set_size_percentage)*100:.2f}% for validation)')
         print_dataset_stats(dataset, regression=regression)
 
-        if not sim_train:
-            # split the dataset into training and validation
-            #
-            dataset = dataset.shuffle()
-            train_set_size = int(len(dataset)*train_set_size_percentage)
-            train_set = dataset[:train_set_size]
-            validation_set = dataset[train_set_size:]
-
-            outfile = open(f'{out_path}/train_set_idx.txt', "w")
-            for t in train_set:
-                outfile.write(f"{t[3]['idx']}")
-                outfile.write('\n')
-            outfile.close()
-
-            outfile = open(f'{out_path}/val_set_idx.txt', "w")
-            for t in validation_set:
-                outfile.write(f"{t[3]['idx']}")
-                outfile.write('\n')
-            outfile.close()
-        else:
-            infile = open(f'{out_path}/train_set_idx.txt', "r")
-            data = infile.read()
-            train_set = [ dataset[int(idx)] for idx in data.split() ]
-            infile.close()
-            infile = open(f'{out_path}/val_set_idx.txt', "r")
-            data = infile.read()
-            validation_set = [ dataset[int(idx)] for idx in data.split() ]
-            infile.close()
+        # split the dataset into training and validation
+        #
+        dataset = dataset.shuffle()
+        train_set_size = int(len(dataset)*train_set_size_percentage)
+        train_set = dataset[:train_set_size]
+        validation_set = dataset[train_set_size:]
 
         # Create the loaders. In case of classification we might be balancing
         train_loader = create_loader(train_set, name="training set", regression=regression, balance=balance_train_set, get_class_f_for_balancing=get_class_f_for_balancing, batch_size=batch_size)

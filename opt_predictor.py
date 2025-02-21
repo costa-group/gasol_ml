@@ -114,6 +114,8 @@ def testall(model_filename,builder_id,raw_dir):
 
     i=0
     total = total0 = total1 = wrong0 = wrong1 = 0
+    wrong0_bc = []
+    wrong1_bc = []
     for d in raw_dir:
         rd = f'data/gasol/raw/{d}'
         csv_dir = f'{rd}/csv'
@@ -134,10 +136,12 @@ def testall(model_filename,builder_id,raw_dir):
                             total1 += 1
                             if c == 0:
                                 wrong1 += 1
+                                wrong1_bc.append(bc)
                         else:
                             total0 += 1
                             if c == 1:
                                 wrong0 += 1
+                                wrong0_bc.append(bc)
 
                         total += 1
 
@@ -146,6 +150,13 @@ def testall(model_filename,builder_id,raw_dir):
                         print(f'stats {i}: {total} {total0} ({wrong0}) {total1} ({wrong1})')
  
     print(f'stats {i}: {total} {total0} ({wrong0}) {total1} ({wrong1})')
+
+    print('Wrong 1 answer:\n')
+    for bc in  wrong1_bc:
+        print(bc)
+    print('\n\nWrong 0 answer:\n')
+    for bc in  wrong0_bc:
+        print(bc)
 
 #
 def client_example():

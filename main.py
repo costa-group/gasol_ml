@@ -142,7 +142,6 @@ def train(args):
              regression=args.learningtype == 'regression',
              save_models = args.savemodels,
              save_improved_only = args.saveimprovedonly,
-             sim_train=args.sim_train,
              out_path = args.outputpath)
 
     # save the last model
@@ -159,7 +158,7 @@ def main():
     parser.add_argument('-e', '--epochs', type=int, default=1)
     parser.add_argument('-ds', '--dataset', type=int)
     parser.add_argument('-ts', '--testset', type=int)
-    parser.add_argument('-of', '--outfilename', type=str) # kept for backwards comparability, should be remove at some point
+    parser.add_argument('-of', '--outfilename', type=str) 
     parser.add_argument('-op', '--outputpath', type=str, default='/tmp')
     parser.add_argument('-sm', '--savemodels', type=str, choices=['all','last'], default=None)
     parser.add_argument('-sio', '--saveimprovedonly', action='store_true')
@@ -179,7 +178,6 @@ def main():
     parser.add_argument('-rnn', '--rnn_class', type=str, choices=['lstm','gru'], default='lstm')
     parser.add_argument('-nt', '--numthreads', type=int, default=None)
     parser.add_argument('-opt_key', '--opt_keyword', type=str, choices=['saved_size','saved_gas'], default='saved_size')
-    parser.add_argument('-sim_t', '--sim_train', action='store_true')
     parser.add_argument('-nl', '--layers', type=int, default=1)
 
 
@@ -187,33 +185,6 @@ def main():
 
     train(args)
     
-    # if args.datatype == 'pyg':
-    #     if args.learningtype == 'reg':
-    #         train_f = train_g_reg
-    #     elif args.learningtype == 'cl':
-    #         train_f = train_g
-    #     else:
-    #         raise Exception(f'Invalid value for learningtype: {args.learningtype}')
-    # elif args.datatype == 'seq':
-    #     if args.learningtype == 'reg':
-    #         train_f = train_s_reg
-    #     elif args.learningtype == 'cl':
-    #         train_f = train_s
-    #     else:
-    #         raise Exception(f'Invalid value for learningtype: {args.learningtype}')
-    # else:
-    #     raise Exception(f'Invalid value for datatype: {args.datatype}')
-
-    # train_f(epochs=args.epochs,
-    #         dataset_id=args.dataset,
-    #         testset_id=args.testset,
-    #         loadmodel=args.loadmodel,
-    #         loss_f_tag=args.lossfunction,
-    #         optimizer_tag=args.optimizer,
-    #         lr=args.learningrate,
-    #         outfilename=args.outfilename)
-
-        
 if __name__ == "__main__":
     torch.manual_seed(56783)
 #    torch.manual_seed(12930873561324785612)

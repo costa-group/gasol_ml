@@ -114,7 +114,10 @@ class BytecodeSequence:
                  label_f=None,         # function for calculating the label
                  encoding = 'single_push', # can be 'single_push', 'multi_push', or 'category'
                  encode_consts = True,
+                 encode_consts_type = 'digits', # 'digits' or 'nums'
                  regression = False):
+
+        self.encode_consts_type = encode_consts_type
 
         if encoding == 'single_push':
             self.encoding_f = node_features_com_single_push
@@ -136,8 +139,12 @@ class BytecodeSequence:
         self.encode_consts = encode_consts
 
         if encode_consts:
-            self.vocab_consts_shift = 10
-            self.vocab_consts =['0','1','2','3','4','5','6','7','8','9']
+            if encode_consts_type == 'digits':
+                self.vocab_consts_shift = 10
+                self.vocab_consts =['0','1','2','3','4','5','6','7','8','9']
+            else:
+                self.vocab_consts = [f'#{i}' for i in range(100)]
+                self.vocab_consts_shift = len(self.vocab_consts)
         else:
             self.vocab_consts_shift = 0
             self.vocab_consts =[]
@@ -158,8 +165,11 @@ class BytecodeSequence:
             for t in bytecode_sequence_orig:
                 if t.startswith("#"):
                     t = f'{consts.index(t)}' # repetitions are kept, but with smaller number of digits, we also add ! at the end
-                    for c in t:
-                        bytecode_sequence.append(c.upper()) # upper used when we had hex, i keep it for now
+                    if self.encode_consts_type == 'digits':
+                        for c in t:
+                            bytecode_sequence.append(c.upper()) # upper used when we had hex, i keep it for now
+                    else:
+                        bytecode_sequence.append(f'#{t}')
                 else:
                     bytecode_sequence.append(t)
         else:

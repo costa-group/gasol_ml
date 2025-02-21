@@ -32,6 +32,8 @@ options:
 
 * `-ts DATASET, --dataset DATASET`: The index of the dataset to be used for testing, as it appears in [datasets_db.py](./datasets_db.py). After each epoch the current model will be tested on this set.
 
+* `-of FILENAME, --outputfile FILENAME`: If provided, the model of the last epoch is save into `FILENAME`.
+
 *  `-op OUTPUTPATH, --outputpath OUTPUTPATH`: The path where models are saved.
 
 * `-sm {all,last}, --savemodels {all,last}`: Control which models to save, `all` models (at each epoch) or the `last` model. Each model is named `model_n.pyt` or `model_i_n.pyt`, where `n` is the number of the epoch in which it was generated, and `i` indicates that it is an improvement over the previous one, according to the precision measure used.
