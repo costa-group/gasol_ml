@@ -14,7 +14,7 @@ def abstract_constants(bytecode_sequence_orig):
             bytecode_sequence.append(t)
 
     return bytecode_sequence
-                
+
 def load_blocks(dirs,base_list={}, raw_dir='data/gasol/raw',threshold=1, include_no_model=True, remove_dup=False, remove_base_dup=False, remove_consts=False, abstract_consts=False):
     blocks = {}
     rep = 0
@@ -40,7 +40,7 @@ def load_blocks(dirs,base_list={}, raw_dir='data/gasol/raw',threshold=1, include
                                 rep_bl += 1
                                 if remove_base_dup:
                                     try:
-                                        os.remove(f'{json_dir}/{csv_filename_noext}/{block_id}_input.json')
+                                        os.remove(f'{json_dir}/{csv_filename_noext}/{block_id}_extended_input.json')
                                     except Exception as e:
                                         pass
                             elif blocks.get(bc) is None:
@@ -50,8 +50,7 @@ def load_blocks(dirs,base_list={}, raw_dir='data/gasol/raw',threshold=1, include
                                 blocks[bc] += 1
                                 if remove_dup:
                                     try:
-                                        print('hello')
-                                        os.remove(f'{json_dir}/{csv_filename_noext}/{block_id}_input.json')
+                                        os.remove(f'{json_dir}/{csv_filename_noext}/{block_id}_extended_input.json')
                                     except Exception as e:
                                         pass
 
@@ -85,5 +84,8 @@ def conflict(dirs,raw_dir='data/gasol/raw', remove_consts=False, abstract_consts
                                 print('conflict')
     print(total)
 if __name__ == "__main__":
-    conflict(['block_jan_23_8_17_size','block_jul_22_8_17_size','block_march_23_8_17_size'],abstract_consts=True)
-
+#    conflict(['block_jan_23_8_17_size','block_jul_22_8_17_size','block_march_23_8_17_size'],abstract_consts=True)
+    _, b, c, d = load_blocks(['ordered_1000_gas'],abstract_consts=True, remove_dup=True)
+    print(f'{b} : {c} : {d}\n')
+    _, b, c, d = load_blocks(['ordered_1000_size'],abstract_consts=True, remove_dup=True)
+    print(f'{b} : {c} : {d}\n')

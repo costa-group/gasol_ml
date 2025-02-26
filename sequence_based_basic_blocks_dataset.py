@@ -63,7 +63,10 @@ class SequenceBasedBasicBlocksDataset(SequenceDataset):
                     for block_info in csv_reader:
                         block_id = block_info['block_id']
                         try:
-                            with open(f'{json_dir}/{csv_filename_noext}/{block_id}_input.json', 'r') as f:
+                            json_file=f'{json_dir}/{csv_filename_noext}/{block_id}_input.json'
+                            if not os.path.isfile(json_file):
+                                json_file=f'{json_dir}/{csv_filename_noext}/{block_id}_extended_input.json'
+                            with open(json_file, 'r') as f:
                                 i += 1
                                 if not block_info["model_found"]=="True":
                                     k += 1

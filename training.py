@@ -141,8 +141,7 @@ def training(model = None, # a model that is suitable for the dataset provided, 
             # train
             #
             t1 = time.time()
-            if not sim_train:
-                train(model,criterion,optimizer,train_loader,get_label_f=get_label_f,batch_transformer=batch_transformer)
+            train(model,criterion,optimizer,train_loader,get_label_f=get_label_f,batch_transformer=batch_transformer)
             t2 = time.time()
             train_precision = test_c(model,criterion,train_loader,get_label_f=get_label_f,batch_transformer=batch_transformer, precision_evals=precision_evals, epoch=epoch, out_suffix=f'train',out_path=out_path)
             t3 = time.time()
