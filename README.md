@@ -91,7 +91,7 @@ The file `train.sh` contains several command lines to train on different dataset
 
 * Predicting if a given block is already optimal (optimality wrt. to the gas consumption): 
 
-`python3 main.py -ds 261 -e 47 -nt 1 -m nn_models.Model_2 -rnn lstm -lt classification -lf cross_entropy -sm last -opt_key saved_size -op /tmp`
+`python3 main.py -ds 261 -e 47 -nt 1 -m nn_models.Model_2 -rnn lstm -lt classification -lf cross_entropy -sm last -opt_key saved_gas -op /tmp`
 
 
 # Testing models
