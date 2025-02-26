@@ -91,7 +91,7 @@ The file `train.sh` contains several command lines to train on different dataset
 
 * Predicting if a given block is already optimal (optimality wrt. to the gas consumption): 
 
-`python3 main.py -ds 261 -e 47 -nt 1 -m nn_models.Model_2 -rnn lstm -lt classification -lf cross_entropy -sm last -opt_key saved_size -op /tmp`
+`python3 main.py -ds 261 -e 47 -nt 1 -m nn_models.Model_2 -rnn lstm -lt classification -lf cross_entropy -sm last -opt_key saved_gas -op /tmp`
 
 
 # Testing models
@@ -131,6 +131,6 @@ python3 main.py -ts X -lm model.pyt
 ```
 
 
-# Using a model within another Python program
+# Using a model within GASOL
 
-The modules [opt_predictor.py](./opt_predictor.py) and [bound_predictor.py](./bound_predictor.py) can be used to use an existing model in another Python program (these files inlucde usage information as comments). Within the GASOL optimizer they are used on the different models available in the directory [models](./models).
+The modules [opt_predictor.py](./opt_predictor.py) and [bound_predictor.py](./bound_predictor.py) can be used to use an existing model within GASOL (these files inlucde usage information as comments). They are mainly used with the models available in the directory [models](./models).

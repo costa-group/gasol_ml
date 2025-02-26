@@ -8,8 +8,8 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 import math
 
 
-# This model receives pyg graphs as input, can be used for regression
-# or classification
+# This model receives pyg graphs (GNNs) as input.  It can be used for
+# regression or classification.
 #
 class Model_1(torch.nn.Module):
     def __init__(self, dataset, args):
@@ -62,7 +62,8 @@ class Model_1(torch.nn.Module):
 
 
 
-# This model is supposed to receives sequences as input
+# This model is supposed to receives sequences as input. It can be
+# used for regression or classification
 #
 class Model_2(torch.nn.Module):
     def __init__(self, dataset, args):
@@ -137,7 +138,8 @@ class Model_2(torch.nn.Module):
         return x
 
     
-# This model is supposed to receives sequences as input
+# This model is supposed to receives sequences as input. It can be
+# used for regression or classification
 #
 class Model_3(torch.nn.Module):
     def __init__(self, dataset, args):
@@ -228,7 +230,8 @@ class Model_3(torch.nn.Module):
 
 
 # This model receives pyg graphs as input, and each graph should have
-# an attibute corresponding to the encoding of teh sequence of bytecode
+# an attibute corresponding to the encoding of the sequence of
+# bytecode. It can be used for regression or classification.
 #
 class Model_4(torch.nn.Module):
     def __init__(self, dataset, args):
@@ -318,7 +321,10 @@ class Model_4(torch.nn.Module):
         return z
 
 
-    
+# In this model we experiment with Transfroms, it is supposed to
+# receive a sequence of bytecode as input. Should be used carefully,
+# it is just experimental.
+#
 class PositionalEncoding(torch.nn.Module):
     """
     https://pytorch.org/tutorials/beginner/transformer_tutorial.html
