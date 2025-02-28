@@ -150,15 +150,15 @@ The following command lines can be used to test the models we have generated on 
 
 * Predicting a bound on the size of the optimal block (optimality wrt. to the gas consumption): 
 
-   `python3 main.py -ds 3550 -nt 1 -lm models/bound_gas.pyt -op /tmp`
+   `python3 main.py -ts 3550 -nt 1 -lm models/bound_gas.pyt -op /tmp`
 
-   `python3 main.py -ds 3551 -nt 1 -lm models/bound_gas.pyt -op /tmp`
+   `python3 main.py -ts 3551 -nt 1 -lm models/bound_gas.pyt -op /tmp`
 
 * Predicting if a given block is already optimal (optimality wrt. to the gas consumption): 
 
-   `python3 main.py -ds 3610 -nt 1 -lt classification -lf cross_entropy -opt_key saved_gas  -lm models/opt_gas.pyt -op /tmp`
+   `python3 main.py -ts 3610 -nt 1 -lt classification -lf cross_entropy -opt_key saved_gas  -lm models/opt_gas.pyt -op /tmp`
 
-   `python3 main.py -ds 3611 -nt 1 -lt classification -lf cross_entropy -opt_key saved_gas  -lm models/opt_gas.pyt -op /tmp`
+   `python3 main.py -ts 3611 -nt 1 -lt classification -lf cross_entropy -opt_key saved_gas  -lm models/opt_gas.pyt -op /tmp`
 
 ### Test set 2 (1000 contracts)
 
