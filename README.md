@@ -101,13 +101,13 @@ First, note that during training, we can provide a test dataset using the `-ts` 
 
 ## Classification problem
 
-If we have generated a model `model.pyt` using:
+Supposes we have generated a model `model.pyt` using:
 
 ```
 python3 main.py -ds 242 -e 50 -nt 1 -m nn_models.Model_2 -rnn lstm -lt classification -lf cross_entropy -sm all -opt_key saved_gas
 ```
 
-we can test it on a set with identifier `X` using the following:
+then we can test it on a set with identifier `X` using the following:
 
 ```
 python3 main.py -ts X -lm model.pyt -lt classification -lf cross_entropy -opt_key saved_gas
@@ -118,7 +118,7 @@ Note that we have to use the same values for options `-lt`, `-lf` and `-opt_key`
 
 ## Regression problem
 
-If we have generated a model `model.pyt` using:
+Supposes we have generated a model `model.pyt` using:
 
 ```
 python3 main.py -ds 215 -e 47 -nt 1 -m nn_models.Model_2 -ed 64 -rnn gru -sm all 
@@ -130,6 +130,53 @@ We can test it on a set with identifier `X` using the following:
 python3 main.py -ts X -lm model.pyt
 ```
 
+## Example
+
+The following command lines can be used to test the models we have generated on the test sets used in the experimental evaluation section. Each case has two command lines, the first using all blocks without eliminating repetitions and the second with repetitions eliminated.
+
+### Test set 1 (100 contracts)
+
+* Predicting a bound on the size of the optimal block (optimality wrt. to the block size): 
+
+`python3 main.py -ts 3150 -nt 1 -lm models/bound_size.pyt -op /tmp`
+`python3 main.py -ts 3151 -nt 1 -lm models/bound_size.pyt -op /tmp`
+
+* Predicting if a given block is already optimal (optimality wrt. to the block size): 
+
+`python3 main.py -ts 3210 -nt 1 -lt classification -lf cross_entropy -opt_key saved_size -lm models/opt_size.pyt -op /tmp`
+`python3 main.py -ts 3211 -nt 1 -lt classification -lf cross_entropy -opt_key saved_size -lm models/opt_size.pyt -op /tmp`
+
+* Predicting a bound on the size of the optimal block (optimality wrt. to the gas consumption): 
+
+`python3 main.py -ds 3550 -nt 1 -lm models/bound_gas.pyt -op /tmp`
+`python3 main.py -ds 3551 -nt 1 -lm models/bound_gas.pyt -op /tmp`
+
+* Predicting if a given block is already optimal (optimality wrt. to the gas consumption): 
+
+`python3 main.py -ds 3610 -nt 1 -lt classification -lf cross_entropy -opt_key saved_gas  -lm models/opt_gas.pyt -op /tmp`
+`python3 main.py -ds 3611 -nt 1 -lt classification -lf cross_entropy -opt_key saved_gas  -lm models/opt_gas.pyt -op /tmp`
+
+### Test set 2 (1000 contracts)
+
+* Predicting a bound on the size of the optimal block (optimality wrt. to the block size): 
+
+`python3 main.py -ts 4150 -nt 1 -lm models/bound_size.pyt -op /tmp`
+`python3 main.py -ts 4151 -nt 1 -lm models/bound_size.pyt -op /tmp`
+
+* Predicting if a given block is already optimal (optimality wrt. to the block size): 
+
+`python3 main.py -ts 4210 -nt 1 -lt classification -lf cross_entropy -opt_key saved_size -lm models/opt_size.pyt -op /tmp`
+`python3 main.py -ts 4211 -nt 1 -lt classification -lf cross_entropy -opt_key saved_size -lm models/opt_size.pyt -op /tmp`
+
+* Predicting a bound on the size of the optimal block (optimality wrt. to the gas consumption): 
+
+`python3 main.py -ds 4550 -nt 1 -lm models/bound_gas.pyt -op /tmp`
+`python3 main.py -ds 4551 -nt 1 -lm models/bound_gas.pyt -op /tmp`
+
+* Predicting if a given block is already optimal (optimality wrt. to the gas consumption): 
+
+`python3 main.py -ds 4610 -nt 1 -lt classification -lf cross_entropy -opt_key saved_gas  -lm models/opt_gas.pyt -op /tmp`
+`python3 main.py -ds 4611 -nt 1 -lt classification -lf cross_entropy -opt_key saved_gas  -lm models/opt_gas.pyt -op /tmp`
 
 # Using a model within GASOL
 
