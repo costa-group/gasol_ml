@@ -79,19 +79,19 @@ The file `train.sh` contains several command lines to train on different dataset
 
 * Predicting a bound on the size of the optimal block (optimality wrt. to the block size): 
 
-`python3 main.py -ds 215 -e 47 -nt 1 -m nn_models.Model_2 -ed 64 -rnn gru -sm last -op /tmp`
+   `python3 main.py -ds 215 -e 47 -nt 1 -m nn_models.Model_2 -ed 64 -rnn gru -sm last -op /tmp`
 
 * Predicting if a given block is already optimal (optimality wrt. to the block size): 
 
-`python3 main.py -ds 221 -e 50 -nt 1 -m nn_models.Model_2 -rnn lstm -lt classification -lf cross_entropy -sm last -opt_key saved_size -op /tmp`
+   `python3 main.py -ds 221 -e 50 -nt 1 -m nn_models.Model_2 -rnn lstm -lt classification -lf cross_entropy -sm last -opt_key saved_size -op /tmp`
 
 * Predicting a bound on the size of the optimal block (optimality wrt. to the gas consumption): 
 
-`python3 main.py -ds 255 -e 49 -nt 1 -m nn_models.Model_2 -ed 64 -rnn gru -sm last -op /tmp`
+   `python3 main.py -ds 255 -e 49 -nt 1 -m nn_models.Model_2 -ed 64 -rnn gru -sm last -op /tmp`
 
 * Predicting if a given block is already optimal (optimality wrt. to the gas consumption): 
 
-`python3 main.py -ds 261 -e 47 -nt 1 -m nn_models.Model_2 -rnn lstm -lt classification -lf cross_entropy -sm last -opt_key saved_gas -op /tmp`
+   `python3 main.py -ds 261 -e 47 -nt 1 -m nn_models.Model_2 -rnn lstm -lt classification -lf cross_entropy -sm last -opt_key saved_gas -op /tmp`
 
 
 # Testing models
@@ -138,45 +138,53 @@ The following command lines can be used to test the models we have generated on 
 
 * Predicting a bound on the size of the optimal block (optimality wrt. to the block size): 
 
-`python3 main.py -ts 3150 -nt 1 -lm models/bound_size.pyt -op /tmp`
-`python3 main.py -ts 3151 -nt 1 -lm models/bound_size.pyt -op /tmp`
+   `python3 main.py -ts 3150 -nt 1 -lm models/bound_size.pyt -op /tmp`
+
+   `python3 main.py -ts 3151 -nt 1 -lm models/bound_size.pyt -op /tmp`
 
 * Predicting if a given block is already optimal (optimality wrt. to the block size): 
 
-`python3 main.py -ts 3210 -nt 1 -lt classification -lf cross_entropy -opt_key saved_size -lm models/opt_size.pyt -op /tmp`
-`python3 main.py -ts 3211 -nt 1 -lt classification -lf cross_entropy -opt_key saved_size -lm models/opt_size.pyt -op /tmp`
+   `python3 main.py -ts 3210 -nt 1 -lt classification -lf cross_entropy -opt_key saved_size -lm models/opt_size.pyt -op /tmp`
+
+   `python3 main.py -ts 3211 -nt 1 -lt classification -lf cross_entropy -opt_key saved_size -lm models/opt_size.pyt -op /tmp`
 
 * Predicting a bound on the size of the optimal block (optimality wrt. to the gas consumption): 
 
-`python3 main.py -ds 3550 -nt 1 -lm models/bound_gas.pyt -op /tmp`
-`python3 main.py -ds 3551 -nt 1 -lm models/bound_gas.pyt -op /tmp`
+   `python3 main.py -ds 3550 -nt 1 -lm models/bound_gas.pyt -op /tmp`
+
+   `python3 main.py -ds 3551 -nt 1 -lm models/bound_gas.pyt -op /tmp`
 
 * Predicting if a given block is already optimal (optimality wrt. to the gas consumption): 
 
-`python3 main.py -ds 3610 -nt 1 -lt classification -lf cross_entropy -opt_key saved_gas  -lm models/opt_gas.pyt -op /tmp`
-`python3 main.py -ds 3611 -nt 1 -lt classification -lf cross_entropy -opt_key saved_gas  -lm models/opt_gas.pyt -op /tmp`
+   `python3 main.py -ds 3610 -nt 1 -lt classification -lf cross_entropy -opt_key saved_gas  -lm models/opt_gas.pyt -op /tmp`
+
+   `python3 main.py -ds 3611 -nt 1 -lt classification -lf cross_entropy -opt_key saved_gas  -lm models/opt_gas.pyt -op /tmp`
 
 ### Test set 2 (1000 contracts)
 
 * Predicting a bound on the size of the optimal block (optimality wrt. to the block size): 
 
-`python3 main.py -ts 4150 -nt 1 -lm models/bound_size.pyt -op /tmp`
-`python3 main.py -ts 4151 -nt 1 -lm models/bound_size.pyt -op /tmp`
+   `python3 main.py -ts 4150 -nt 1 -lm models/bound_size.pyt -op /tmp`
+
+   `python3 main.py -ts 4151 -nt 1 -lm models/bound_size.pyt -op /tmp`
 
 * Predicting if a given block is already optimal (optimality wrt. to the block size): 
 
-`python3 main.py -ts 4210 -nt 1 -lt classification -lf cross_entropy -opt_key saved_size -lm models/opt_size.pyt -op /tmp`
-`python3 main.py -ts 4211 -nt 1 -lt classification -lf cross_entropy -opt_key saved_size -lm models/opt_size.pyt -op /tmp`
+   `python3 main.py -ts 4210 -nt 1 -lt classification -lf cross_entropy -opt_key saved_size -lm models/opt_size.pyt -op /tmp`
+
+   `python3 main.py -ts 4211 -nt 1 -lt classification -lf cross_entropy -opt_key saved_size -lm models/opt_size.pyt -op /tmp`
 
 * Predicting a bound on the size of the optimal block (optimality wrt. to the gas consumption): 
 
-`python3 main.py -ds 4550 -nt 1 -lm models/bound_gas.pyt -op /tmp`
-`python3 main.py -ds 4551 -nt 1 -lm models/bound_gas.pyt -op /tmp`
+   `python3 main.py -ds 4550 -nt 1 -lm models/bound_gas.pyt -op /tmp`
+
+   `python3 main.py -ds 4551 -nt 1 -lm models/bound_gas.pyt -op /tmp`
 
 * Predicting if a given block is already optimal (optimality wrt. to the gas consumption): 
 
-`python3 main.py -ds 4610 -nt 1 -lt classification -lf cross_entropy -opt_key saved_gas  -lm models/opt_gas.pyt -op /tmp`
-`python3 main.py -ds 4611 -nt 1 -lt classification -lf cross_entropy -opt_key saved_gas  -lm models/opt_gas.pyt -op /tmp`
+   `python3 main.py -ds 4610 -nt 1 -lt classification -lf cross_entropy -opt_key saved_gas  -lm models/opt_gas.pyt -op /tmp`
+
+   `python3 main.py -ds 4611 -nt 1 -lt classification -lf cross_entropy -opt_key saved_gas  -lm models/opt_gas.pyt -op /tmp`
 
 # Using a model within GASOL
 
