@@ -18,7 +18,7 @@ $ python3 main.py --help
 usage: main.py [-h] [-e EPOCHS] [-ds DATASET] [-ts TESTSET] [-op OUTPUTPATH] [-sm {all,last}] [-sio] [-lm LOADMODEL] [-lr LEARNINGRATE]
                [-lf {mse,cross_entropy,cross_entropy_w}] [-opt OPTIMIZER] [-hc HIDDENCHANNELS] [-lt LEARNINGTYPE] [-m MODEL] [-ed EMBEDDINGDIM]
                [-to_int {round,ceil,floor}] [-pt PROP_THRESHOLD] [-dop DROP_OUT_P] [-rnndop RNN_DROP_OUT_P] [-rnn {lstm,gru}] [-nt NUMTHREADS]
-               [-opt_key {saved_size,saved_gas}] [-sim_t] [-bs BATCH_SIZE] [-nl LAYERS]
+               [-opt_key {saved_size,saved_gas}] [-bs BATCH_SIZE] [-nl LAYERS]
 
 options:
 ```
